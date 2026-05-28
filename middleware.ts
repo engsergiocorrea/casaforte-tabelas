@@ -1,4 +1,3 @@
-// middleware.ts
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
@@ -13,24 +12,22 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: { name: string; value: string; options?: object }[]) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options ?? {})
           )
         },
       },
     }
   )
 
-  // Refresh da sessão
   const { data: { user } } = await supabase.auth.getUser()
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isLoginPage = request.nextUrl.pathname === '/admin/login'
 
-  // Redirecionar para login se tentar acessar /admin sem autenticação
   if (isAdminRoute && !isLoginPage && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/admin/login'
@@ -38,7 +35,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Redirecionar para dashboard se já logado tentar acessar login
   if (isLoginPage && user) {
     const url = request.nextUrl.clone()
     url.pathname = '/admin/dashboard'
