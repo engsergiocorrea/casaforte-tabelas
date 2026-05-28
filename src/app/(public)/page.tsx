@@ -29,9 +29,7 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-navy-900 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-sm">CF</span>
-              </div>
+              <img src="https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png" alt="Casa Forte" style={{width:'36px',height:'36px',objectFit:'contain'}} />
               <div>
                 <div className="font-semibold text-gray-900 text-sm leading-tight">
                   Casa Forte
