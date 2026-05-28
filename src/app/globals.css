@@ -1,5 +1,7 @@
 /* src/app/globals.css */
-
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* ══════════════════════════════════════════════════════════
    CASA FORTE — Design Tokens
