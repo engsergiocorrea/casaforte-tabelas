@@ -1,6 +1,6 @@
 'use client'
 // src/components/public/TabelaPublica.tsx
-
+ 
 import { useState, useMemo } from 'react'
 import type {
   Empreendimento,
@@ -18,26 +18,26 @@ import {
   POSICAO_LABELS,
 } from '@/lib/utils'
 import { STATUS_LABELS } from '@/types'
-
+ 
 interface Props {
   empreendimento: Empreendimento
   unidades: Unidade[]
   configuracao: ConfiguracaoTabela | null
 }
-
+ 
 const DEFAULT_COLUNAS = [
   'unidade', 'bloco', 'pavimento', 'area_construida', 'area_total',
   'quartos', 'posicao', 'valor_imovel', 'valor_sinal',
   'quantidade_parcelas', 'valor_parcela', 'valor_intercalada',
   'valor_chaves', 'status',
 ]
-
+ 
 export function TabelaPublica({ empreendimento, unidades, configuracao }: Props) {
   const colunasVisiveis = configuracao?.colunas_visiveis ?? DEFAULT_COLUNAS
   const mostrarVendidas = configuracao?.mostrar_unidades_vendidas ?? true
   const mostrarValoresReservadas = configuracao?.mostrar_valores_reservadas ?? false
   const agruparPor = configuracao?.agrupar_por
-
+ 
   // Filtros
   const [filtroStatus, setFiltroStatus] = useState<UnidadeStatus | 'todos'>('todos')
   const [filtroPavimento, setFiltroPavimento] = useState('todos')
@@ -46,21 +46,21 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
   const [filtroValorMin, setFiltroValorMin] = useState('')
   const [filtroValorMax, setFiltroValorMax] = useState('')
   const [busca, setBusca] = useState('')
-
+ 
   // Opções de filtro
   const pavimentos = useMemo(() =>
-    [...new Set(unidades.map(u => u.pavimento).filter(Boolean))].sort(),
+    Array.from(new Set(unidades.map(u => u.pavimento).filter(Boolean))).sort(),
     [unidades]
   )
   const blocos = useMemo(() =>
-    [...new Set(unidades.map(u => u.bloco).filter(Boolean))].sort(),
+    Array.from(new Set(unidades.map(u => u.bloco).filter(Boolean))).sort(),
     [unidades]
   )
   const quartosList = useMemo(() =>
-    [...new Set(unidades.map(u => u.quartos).filter(v => v != null))].sort((a, b) => a! - b!),
+    Array.from(new Set(unidades.map(u => u.quartos).filter(v => v != null))).sort((a, b) => a! - b!),
     [unidades]
   )
-
+ 
   // Filtrar unidades
   const unidadesFiltradas = useMemo(() => {
     return unidades.filter(u => {
@@ -83,13 +83,13 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
       return true
     })
   }, [unidades, filtroStatus, filtroPavimento, filtroBloco, filtroQuartos, filtroValorMin, filtroValorMax, busca, mostrarVendidas])
-
+ 
   // Agrupar
   const grupos = useMemo(() => {
     if (!agruparPor) return { 'Unidades': unidadesFiltradas }
     return groupBy(unidadesFiltradas, agruparPor as keyof Unidade)
   }, [unidadesFiltradas, agruparPor])
-
+ 
   // Resumo de disponibilidade
   const resumo = useMemo(() => ({
     total: unidades.length,
@@ -97,7 +97,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
     reservadas: unidades.filter(u => u.status === 'reservada').length,
     vendidas: unidades.filter(u => u.status === 'vendida').length,
   }), [unidades])
-
+ 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
       {/* Header da tabela */}
@@ -124,7 +124,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
             {unidadesFiltradas.length} de {unidades.length} unidades
           </div>
         </div>
-
+ 
         {/* Filtros */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
           <input
@@ -182,7 +182,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
           )}
         </div>
       </div>
-
+ 
       {/* Tabela */}
       <div className="overflow-x-auto">
         {Object.entries(grupos).map(([grupo, items]) => (
@@ -272,7 +272,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                   const ocultarValores =
                     (isReservada && !mostrarValoresReservadas) ||
                     (isVendida && !configuracao?.mostrar_valores_vendidas)
-
+ 
                   return (
                     <tr
                       key={unidade.id}
@@ -390,7 +390,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
             </table>
           </div>
         ))}
-
+ 
         {unidadesFiltradas.length === 0 && (
           <div className="text-center py-12 text-gray-400">
             <div className="text-3xl mb-2">🔍</div>
@@ -412,7 +412,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
           </div>
         )}
       </div>
-
+ 
       {/* Observações da unidade */}
       {unidadesFiltradas.some(u => u.observacoes_publicas) && (
         <div className="px-6 py-4 border-t border-gray-100">
