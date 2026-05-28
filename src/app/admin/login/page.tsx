@@ -1,13 +1,9 @@
-// src/app/admin/login/page.tsx
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -25,119 +21,70 @@ export default function LoginPage() {
     })
 
     if (authError) {
-      setError('E-mail ou senha incorretos. Tente novamente.')
+      setError('E-mail ou senha incorretos.')
       setLoading(false)
       return
     }
 
-    const redirectTo = searchParams.get('redirectTo') ?? '/admin/dashboard'
-    router.push(redirectTo)
-    router.refresh()
+    window.location.href = '/admin/dashboard'
   }
 
   return (
-    <div className="min-h-screen bg-[#1E1E1E] flex items-center justify-center p-4">
-      {/* Decoração de fundo */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-[#E8390E]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#E8390E]/3 rounded-full blur-3xl" />
-      </div>
-
-      <div className="relative w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#E8390E] rounded-2xl mb-4 shadow-lg shadow-[#E8390E]/30">
-            <span className="text-white font-bold text-2xl tracking-tight">CF</span>
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white">Casa Forte</h1>
-            <p className="text-sm text-white/50 mt-0.5">Tabelas de Vendas — Área Interna</p>
-          </div>
+    <div style={{minHeight:'100vh',background:'#1E1E1E',display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}}>
+      <div style={{width:'100%',maxWidth:'24rem'}}>
+        <div style={{textAlign:'center',marginBottom:'2rem'}}>
+          <div style={{width:'64px',height:'64px',background:'#E8390E',borderRadius:'16px',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 1rem',fontSize:'24px',fontWeight:'bold',color:'white'}}>CF</div>
+          <h1 style={{color:'white',fontSize:'1.5rem',fontWeight:'bold'}}>Casa Forte</h1>
+          <p style={{color:'rgba(255,255,255,0.5)',fontSize:'0.875rem',marginTop:'0.25rem'}}>Tabelas de Vendas — Área Interna</p>
         </div>
 
-        {/* Card de login */}
-        <div className="bg-white/[0.06] backdrop-blur-sm border border-white/10 rounded-2xl p-8">
-          <h2 className="text-lg font-semibold text-white mb-6">Entrar no sistema</h2>
+        <div style={{background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'1rem',padding:'2rem'}}>
+          <h2 style={{color:'white',fontSize:'1.125rem',fontWeight:'600',marginBottom:'1.5rem'}}>Entrar no sistema</h2>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-              <p className="text-sm text-red-400">{error}</p>
+            <div style={{background:'rgba(220,38,38,0.1)',border:'1px solid rgba(220,38,38,0.3)',borderRadius:'8px',padding:'0.75rem',marginBottom:'1rem'}}>
+              <p style={{color:'#fca5a5',fontSize:'0.875rem'}}>{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-1.5">
-                E-mail
-              </label>
+          <form onSubmit={handleSubmit}>
+            <div style={{marginBottom:'1rem'}}>
+              <label style={{display:'block',color:'rgba(255,255,255,0.6)',fontSize:'0.75rem',fontWeight:'500',marginBottom:'0.375rem'}}>E-mail</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                autoComplete="email"
                 placeholder="seu@email.com"
-                className="w-full px-3.5 py-2.5 bg-white/[0.06] border border-white/10 rounded-lg
-                           text-sm text-white placeholder:text-white/30
-                           focus:outline-none focus:ring-2 focus:ring-[#E8390E]/40 focus:border-[#E8390E]/50
-                           transition-all"
+                style={{width:'100%',padding:'0.625rem 0.875rem',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'8px',color:'white',fontSize:'0.875rem',outline:'none'}}
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-white/60 mb-1.5">
-                Senha
-              </label>
+            <div style={{marginBottom:'1.5rem'}}>
+              <label style={{display:'block',color:'rgba(255,255,255,0.6)',fontSize:'0.75rem',fontWeight:'500',marginBottom:'0.375rem'}}>Senha</label>
               <input
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 bg-white/[0.06] border border-white/10 rounded-lg
-                           text-sm text-white placeholder:text-white/30
-                           focus:outline-none focus:ring-2 focus:ring-[#E8390E]/40 focus:border-[#E8390E]/50
-                           transition-all"
+                style={{width:'100%',padding:'0.625rem 0.875rem',background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'8px',color:'white',fontSize:'0.875rem',outline:'none'}}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-[#E8390E] text-white text-sm font-semibold rounded-lg
-                         hover:bg-[#B8290A] active:scale-[0.98] transition-all duration-150
-                         disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+              style={{width:'100%',padding:'0.625rem',background:'#E8390E',color:'white',border:'none',borderRadius:'8px',fontSize:'0.875rem',fontWeight:'600',cursor:'pointer'}}
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" strokeOpacity="0.3"/>
-                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/>
-                  </svg>
-                  Entrando...
-                </span>
-              ) : (
-                'Entrar'
-              )}
+              {loading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
         </div>
 
-        {/* Link público */}
-        <div className="text-center mt-6">
-          <a
-            href="/"
-            className="text-xs text-white/30 hover:text-white/60 transition-colors"
-          >
-            Ver tabelas públicas →
-          </a>
+        <div style={{textAlign:'center',marginTop:'1.5rem'}}>
+          <a href="/" style={{color:'rgba(255,255,255,0.3)',fontSize:'0.75rem'}}>Ver tabelas públicas →</a>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-xs text-white/20 mt-8">
-          © {new Date().getFullYear()} Casa Forte Construtora e Incorporadora
-        </p>
       </div>
     </div>
   )
