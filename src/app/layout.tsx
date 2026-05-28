@@ -16,9 +16,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <head>
-        <script src="https://cdn.tailwindcss.com"></script>
-      </head>
       <body>{children}</body>
     </html>
   )
