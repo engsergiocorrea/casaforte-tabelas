@@ -6,49 +6,72 @@ import { useRouter } from 'next/navigation'
 export default function ImportarUnidadesPage({ params }: { params: { id: string } }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [resultado, setResultado] = useState<{inseridas:number, erros:string[]} | null>(null)
+  const [resultado, setResultado] = useState<{ok:number,erros:string[]}>()
+  const [preview, setPreview] = useState<any[]>([])
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  function parseCSV(text: string) {
+    const lines = text.trim().split('\n')
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''))
+    return lines.slice(1).map(line => {
+      const values = line.split(',').map(v => v.trim().replace(/"/g,''))
+      const obj: any = {}
+      headers.forEach((h, i) => { obj[h] = values[i] ?? '' })
+      return obj
+    })
+  }
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const text = ev.target?.result as string
+      const rows = parseCSV(text)
+      setPreview(rows.slice(0, 5))
+    }
+    reader.readAsText(file, 'utf-8')
+  }
+
+  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setLoading(true)
-    setResultado(null)
-
     const text = await file.text()
-    const lines = text.trim().split('\n')
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g,''))
-    
-    const unidades = lines.slice(1).map(line => {
-      const vals = line.split(',').map(v => v.trim().replace(/"/g,''))
-      const obj: any = { empreendimento_id: params.id }
-      headers.forEach((h, i) => {
-        const v = vals[i] ?? ''
-        const numFields = ['area_construida','area_privativa_externa','area_total','area_terreno','quartos','suites','banheiros','vagas','valor_imovel','percentual_sinal','valor_sinal','quantidade_parcelas','valor_parcela','quantidade_intercaladas','valor_intercalada','percentual_chaves','valor_chaves']
-        if (numFields.includes(h)) {
-          obj[h] = v !== '' ? Number(v) : null
-        } else {
-          obj[h] = v !== '' ? v : null
-        }
-      })
-      return obj
-    }).filter(u => u.unidade)
-
+    const rows = parseCSV(text)
     const supabase = createClient()
+    let ok = 0
     const erros: string[] = []
-    let inseridas = 0
 
-    // Inserir em lotes de 10
-    for (let i = 0; i < unidades.length; i += 10) {
-      const lote = unidades.slice(i, i + 10)
-      const { error } = await supabase.from('unidades').insert(lote)
-      if (error) {
-        erros.push(`Lote ${i}-${i+10}: ${error.message}`)
-      } else {
-        inseridas += lote.length
+    for (const row of rows) {
+      const data = {
+        empreendimento_id: params.id,
+        unidade: row.unidade,
+        pavimento: row.pavimento || null,
+        posicao: row.posicao || null,
+        area_construida: row.area_construida ? Number(row.area_construida) : null,
+        area_privativa_externa: row.area_privativa_externa ? Number(row.area_privativa_externa) : null,
+        area_total: row.area_total ? Number(row.area_total) : null,
+        quartos: row.quartos ? Number(row.quartos) : null,
+        suites: row.suites ? Number(row.suites) : null,
+        valor_imovel: row.valor_imovel ? Number(row.valor_imovel) : null,
+        percentual_sinal: row.percentual_sinal ? Number(row.percentual_sinal) : null,
+        valor_sinal: row.valor_sinal ? Number(row.valor_sinal) : null,
+        quantidade_parcelas: row.quantidade_parcelas ? Number(row.quantidade_parcelas) : null,
+        valor_parcela: row.valor_parcela ? Number(row.valor_parcela) : null,
+        quantidade_intercaladas: row.quantidade_intercaladas ? Number(row.quantidade_intercaladas) : null,
+        periodicidade_intercaladas: row.periodicidade_intercaladas || null,
+        valor_intercalada: row.valor_intercalada ? Number(row.valor_intercalada) : null,
+        percentual_chaves: row.percentual_chaves ? Number(row.percentual_chaves) : null,
+        valor_chaves: row.valor_chaves ? Number(row.valor_chaves) : null,
+        status: row.status || 'disponivel',
+        observacoes_publicas: row.observacoes_publicas || null,
       }
+      const { error } = await supabase.from('unidades').insert([data])
+      if (error) erros.push(`${row.unidade}: ${error.message}`)
+      else ok++
     }
 
-    setResultado({ inseridas, erros })
+    setResultado({ ok, erros })
     setLoading(false)
   }
 
@@ -56,54 +79,52 @@ export default function ImportarUnidadesPage({ params }: { params: { id: string 
     <div>
       <div style={{marginBottom:'1.5rem'}}>
         <h1 style={{fontSize:'1.5rem',fontWeight:'700',color:'#111'}}>Importar Unidades via CSV</h1>
-        <p style={{fontSize:'0.875rem',color:'#6b7280',marginTop:'0.25rem'}}>Selecione o arquivo CSV para importar todas as unidades de uma vez</p>
+        <p style={{fontSize:'0.875rem',color:'#6b7280',marginTop:'0.25rem'}}>Faça upload do arquivo CSV com as unidades do empreendimento</p>
       </div>
 
-      <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'32px',maxWidth:'600px'}}>
-        <div style={{marginBottom:'24px',padding:'16px',background:'#f9fafb',borderRadius:'8px',border:'1px solid #e5e7eb'}}>
-          <p style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Formato esperado do CSV:</p>
-          <p style={{fontSize:'12px',color:'#6b7280',lineHeight:'1.6'}}>
-            unidade, pavimento, posicao, area_construida, area_privativa_externa, quartos, valor_imovel, percentual_sinal, valor_sinal, quantidade_parcelas, valor_parcela, quantidade_intercaladas, periodicidade_intercaladas, valor_intercalada, percentual_chaves, valor_chaves, status
-          </p>
-        </div>
-
-        <div style={{marginBottom:'24px'}}>
-          <label style={{display:'block',fontSize:'13px',fontWeight:'500',color:'#374151',marginBottom:'8px'}}>
-            Selecionar arquivo CSV
-          </label>
-          <input
-            type="file"
-            accept=".csv"
-            onChange={handleFile}
-            disabled={loading}
-            style={{width:'100%',padding:'8px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px'}}
-          />
+      <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
+        <h2 style={{fontSize:'15px',fontWeight:'600',marginBottom:'16px'}}>Upload do arquivo CSV</h2>
+        
+        <div style={{border:'2px dashed #DDD9D3',borderRadius:'10px',padding:'32px',textAlign:'center',marginBottom:'16px'}}>
+          <div style={{fontSize:'2rem',marginBottom:'8px'}}>📂</div>
+          <p style={{fontSize:'14px',color:'#6b7280',marginBottom:'12px'}}>Selecione o arquivo CSV com as unidades</p>
+          <input type="file" accept=".csv" onChange={handleImport} disabled={loading}
+            style={{display:'block',margin:'0 auto',fontSize:'14px'}} />
         </div>
 
         {loading && (
           <div style={{textAlign:'center',padding:'20px',color:'#6b7280'}}>
-            <p>Importando unidades...</p>
+            <div style={{fontSize:'1.5rem',marginBottom:'8px'}}>⏳</div>
+            Importando unidades... aguarde
           </div>
         )}
 
         {resultado && (
-          <div style={{padding:'16px',background: resultado.erros.length === 0 ? '#f0fdf4' : '#fef2f2',border:`1px solid ${resultado.erros.length === 0 ? '#bbf7d0' : '#fecaca'}`,borderRadius:'8px'}}>
-            <p style={{fontWeight:'600',color: resultado.erros.length === 0 ? '#15803d' : '#b91c1c',marginBottom:'8px'}}>
-              {resultado.inseridas} unidades importadas com sucesso!
-            </p>
-            {resultado.erros.map((e, i) => (
-              <p key={i} style={{fontSize:'12px',color:'#b91c1c'}}>{e}</p>
+          <div style={{marginTop:'16px'}}>
+            <div style={{background:resultado.erros.length===0?'#f0fdf4':'#fffbeb',border:`1px solid ${resultado.erros.length===0?'#bbf7d0':'#fde68a'}`,borderRadius:'8px',padding:'16px',marginBottom:'12px'}}>
+              <p style={{fontWeight:'600',color:resultado.erros.length===0?'#15803d':'#92400e',marginBottom:'4px'}}>
+                {resultado.erros.length===0 ? '✅' : '⚠️'} {resultado.ok} unidades importadas com sucesso!
+              </p>
+              {resultado.erros.length > 0 && (
+                <p style={{fontSize:'13px',color:'#92400e'}}>{resultado.erros.length} erros encontrados</p>
+              )}
+            </div>
+            {resultado.erros.length > 0 && resultado.erros.map((e,i) => (
+              <div key={i} style={{fontSize:'12px',color:'#b91c1c',padding:'4px 0'}}>{e}</div>
             ))}
-            {resultado.erros.length === 0 && (
-              <button
-                onClick={() => router.push(`/admin/empreendimentos/${params.id}/unidades`)}
-                style={{marginTop:'12px',padding:'8px 16px',background:'#15803d',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',cursor:'pointer'}}
-              >
-                Ver unidades →
-              </button>
-            )}
+            <button onClick={() => router.push(`/admin/empreendimentos/${params.id}/unidades`)}
+              style={{marginTop:'12px',padding:'8px 20px',background:'#E8390E',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',cursor:'pointer'}}>
+              Ver unidades importadas →
+            </button>
           </div>
         )}
+      </div>
+
+      <div style={{background:'#f8fafc',borderRadius:'12px',border:'1px solid #e2e8f0',padding:'16px'}}>
+        <p style={{fontSize:'13px',fontWeight:'600',marginBottom:'8px',color:'#374151'}}>Colunas esperadas no CSV:</p>
+        <p style={{fontSize:'12px',color:'#6b7280',fontFamily:'monospace',lineHeight:'1.8'}}>
+          unidade, pavimento, posicao, area_construida, area_privativa_externa, quartos, valor_imovel, percentual_sinal, valor_sinal, quantidade_parcelas, valor_parcela, quantidade_intercaladas, periodicidade_intercaladas, valor_intercalada, percentual_chaves, valor_chaves, status
+        </p>
       </div>
     </div>
   )
