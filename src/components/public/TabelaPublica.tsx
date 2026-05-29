@@ -283,16 +283,28 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                       )}
                       style={unidade.cor_destaque ? { backgroundColor: unidade.cor_destaque + '20' } : undefined}
                     >
-                      {colunasVisiveis.includes('unidade') && (
-                        <td className="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap">
-                          {unidade.unidade}
-                          {unidade.destaque && (
-                            <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-600">
-                              DESTAQUE
-                            </span>
-                          )}
-                        </td>
-                      )}
+{colunasVisiveis.includes('status') && (
+  <td className="px-4 py-3 text-center">
+    <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',flexWrap:'wrap'}}>
+      <span style={{
+        display:'inline-flex',alignItems:'center',padding:'2px 10px',
+        borderRadius:'20px',fontSize:'12px',fontWeight:'600',
+        background: unidade.status === 'disponivel' ? '#dcfce7' : unidade.status === 'reservada' ? '#fef3c7' : unidade.status === 'vendida' ? '#fee2e2' : '#f3f4f6',
+        color: unidade.status === 'disponivel' ? '#15803d' : unidade.status === 'reservada' ? '#92400e' : unidade.status === 'vendida' ? '#b91c1c' : '#6b7280',
+      }}>
+        {STATUS_LABELS[unidade.status]}
+      </span>
+      {unidade.status === 'disponivel' && (
+        
+          href={`/empreendimentos/${empreendimento.slug}/proposta/${unidade.id}`}
+          style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'3px 10px',background:'#E8390E',color:'white',borderRadius:'6px',fontSize:'11px',fontWeight:'600',textDecoration:'none',whiteSpace:'nowrap'}}
+        >
+          📋 Proposta
+        </a>
+      )}
+    </div>
+  </td>
+)}
                       {colunasVisiveis.includes('bloco') && blocos.length > 0 && (
                         <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
                           {unidade.bloco ?? '—'}
