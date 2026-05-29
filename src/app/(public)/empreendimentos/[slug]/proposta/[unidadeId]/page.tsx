@@ -90,11 +90,17 @@ export default function PropostaPage() {
     }
 
     const supabase = createClient()
+    const {
+      comprador1_nascimento,
+      conjuge_nascimento,
+      comprador2_nascimento,
+      ...restForm
+    } = form
     const data = {
       unidade_id: unidadeId,
       empreendimento_id: empreendimento.id,
-      ...form,
-      comprador1_nascimento: form.comprador1_nascimento || null,
+      ...restForm,
+      comprador1_nascimento: comprador1_nascimento || null,
       segue_tabela: segueTabela,
       valor_proposto: valorProposto,
       valor_sinal: Number(form.valor_sinal) || null,
@@ -110,7 +116,7 @@ export default function PropostaPage() {
       conjuge_profissao: temConjuge ? form.conjuge_profissao : null,
       conjuge_email: temConjuge ? form.conjuge_email : null,
       conjuge_telefone: temConjuge ? form.conjuge_telefone : null,
-      conjuge_nascimento: temConjuge && form.conjuge_nascimento ? form.conjuge_nascimento : null,
+      conjuge_nascimento: temConjuge ? form.conjuge_nascimento : null,
       comprador2_nome: temSegundoComprador ? form.comprador2_nome : null,
       comprador2_cpf: temSegundoComprador ? form.comprador2_cpf : null,
     }
@@ -317,4 +323,3 @@ export default function PropostaPage() {
     </div>
   )
 }
-
