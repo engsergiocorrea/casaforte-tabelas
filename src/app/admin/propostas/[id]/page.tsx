@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import PropostaAcoes from './PropostaAcoes'
 
 export default async function PropostaDetalhesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -18,6 +19,14 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
   const fmt = (v: any) => v ? `R$ ${Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2})}` : '—'
   const fmtDate = (v: any) => v ? new Date(v+'T00:00:00').toLocaleDateString('pt-BR') : '—'
 
+  const statusConfig: Record<string, {bg:string,color:string,label:string}> = {
+    pendente:  {bg:'#fef3c7',color:'#92400e',label:'⏳ Pendente'},
+    aprovada:  {bg:'#dcfce7',color:'#15803d',label:'✅ Aprovada'},
+    recusada:  {bg:'#fee2e2',color:'#b91c1c',label:'❌ Recusada'},
+    cancelada: {bg:'#f3f4f6',color:'#6b7280',label:'🚫 Cancelada'},
+  }
+  const sc = statusConfig[p.status_proposta ?? 'pendente'] ?? statusConfig.pendente
+
   const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
     <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
       <h2 style={{fontSize:'15px',fontWeight:'700',color:'#111',marginBottom:'16px'}}>{title}</h2>
@@ -32,6 +41,11 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
     </div>
   )
 
+  const somatorio = (Number(p.valor_sinal)||0) +
+    ((Number(p.quantidade_parcelas)||0)*(Number(p.valor_parcela)||0)) +
+    ((Number(p.quantidade_intercaladas)||0)*(Number(p.valor_intercalada)||0)) +
+    (Number(p.valor_chaves)||0)
+
   return (
     <div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1.5rem'}}>
@@ -44,8 +58,21 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
             Unidade {uni?.unidade} · {uni?.pavimento} · Recebida em {new Date(p.created_at).toLocaleDateString('pt-BR')}
           </p>
         </div>
+        <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
+          <span style={{padding:'6px 14px',borderRadius:'20px',fontSize:'13px',fontWeight:'600',background:sc.bg,color:sc.color}}>
+            {sc.label}
+          </span>
+          <a href={`/admin/propostas/${id}/pdf`} target="_blank"
+            style={{padding:'8px 16px',background:'#374151',color:'white',borderRadius:'8px',fontSize:'14px',fontWeight:'500',textDecoration:'none'}}>
+            📄 PDF
+          </a>
+        </div>
       </div>
 
+      {/* Botões de ação */}
+      <PropostaAcoes propostaId={id} statusAtual={p.status_proposta ?? 'pendente'} />
+
+      {/* Unidade */}
       <Section title="🏠 Unidade">
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',padding:'12px',background:'#f8fafc',borderRadius:'8px'}}>
           <div><div style={{fontSize:'11px',color:'#9ca3af',marginBottom:'2px'}}>Unidade</div><div style={{fontWeight:'700',fontSize:'16px'}}>{uni?.unidade}</div></div>
@@ -55,6 +82,7 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
         </div>
       </Section>
 
+      {/* Comprador */}
       <Section title="👤 Comprador">
         <Row label="Nome completo" value={p.comprador1_nome} />
         <Row label="CPF" value={p.comprador1_cpf} />
@@ -101,10 +129,8 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
       </Section>
 
       <Section title="💰 Condições de Pagamento">
-        <div style={{padding:'12px',background:p.segue_tabela?'#f0fdf4':'#fffbeb',borderRadius:'8px',marginBottom:'16px',border:`1px solid ${p.segue_tabela?'#bbf7d0':'#fde68a'}`}}>
-          <span style={{fontWeight:'600',color:p.segue_tabela?'#15803d':'#92400e'}}>
-            {p.segue_tabela ? '✅ Segue os valores da tabela' : '⚠️ Propõe condições diferentes da tabela'}
-          </span>
+        <div style={{padding:'10px 12px',background:p.segue_tabela?'#f0fdf4':'#fffbeb',borderRadius:'8px',marginBottom:'14px',border:`1px solid ${p.segue_tabela?'#bbf7d0':'#fde68a'}`,fontWeight:'600',fontSize:'13px',color:p.segue_tabela?'#15803d':'#92400e'}}>
+          {p.segue_tabela ? '✅ Segue os valores da tabela' : '⚠️ Propõe condições diferentes da tabela'}
         </div>
         <Row label="Valor proposto" value={<span style={{color:'#E8390E',fontWeight:'700',fontSize:'16px'}}>{fmt(p.valor_proposto)}</span>} />
         <Row label="Sinal" value={fmt(p.valor_sinal)} />
@@ -112,14 +138,12 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
         <Row label="Intercaladas" value={p.quantidade_intercaladas ? `${p.quantidade_intercaladas}x de ${fmt(p.valor_intercalada)} (${p.periodicidade_intercaladas})` : '—'} />
         <Row label="Chaves" value={fmt(p.valor_chaves)} />
         <div style={{marginTop:'12px',padding:'12px',background:'#f8fafc',borderRadius:'8px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-          <span style={{fontSize:'14px',color:'#374151',fontWeight:'500'}}>Somatório:</span>
-          <span style={{fontSize:'18px',fontWeight:'700',color:'#15803d'}}>
-            {fmt((Number(p.valor_sinal)||0) + ((Number(p.quantidade_parcelas)||0)*(Number(p.valor_parcela)||0)) + ((Number(p.quantidade_intercaladas)||0)*(Number(p.valor_intercalada)||0)) + (Number(p.valor_chaves)||0))}
-          </span>
+          <span style={{fontSize:'14px',fontWeight:'500'}}>Somatório:</span>
+          <span style={{fontSize:'18px',fontWeight:'700',color:'#15803d'}}>{fmt(somatorio)}</span>
         </div>
         {p.observacoes_pagamento && (
-          <div style={{marginTop:'12px',padding:'10px',background:'#fffbeb',borderRadius:'8px',fontSize:'13px',color:'#92400e'}}>
-            <strong>Obs. pagamento:</strong> {p.observacoes_pagamento}
+          <div style={{marginTop:'10px',padding:'10px',background:'#fffbeb',borderRadius:'8px',fontSize:'13px',color:'#92400e'}}>
+            <strong>Obs.:</strong> {p.observacoes_pagamento}
           </div>
         )}
       </Section>
@@ -132,4 +156,3 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
     </div>
   )
 }
-
