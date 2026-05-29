@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function PropostaPage({ params }: { params: { slug: string, unidadeId: string } }) {
+export default function PropostaPage({ params }: { params: Promise<{ slug: string, unidadeId: string }> }) {
+  const resolvedParams = use(params)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
