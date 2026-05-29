@@ -87,7 +87,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
     vendidas: unidades.filter(u => u.status === 'vendida').length,
   }), [unidades])
 
-  const fmtC = (v: any) => v ? Number(v).toLocaleString('pt-BR', {style:'currency',currency:'BRL',minimumFractionDigits:0,maximumFractionDigits:0}) : '—'
+  const fmtC = (v: any) => v ? Number(v).toLocaleString('pt-BR', {style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2}) : '—'
 
   const thStyle = (align: 'left'|'right'|'center' = 'left'): React.CSSProperties => ({
     padding:'9px 12px',
