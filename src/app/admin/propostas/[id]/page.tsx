@@ -2,12 +2,13 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-export default async function PropostaDetalhesPage({ params }: { params: { id: string } }) {
+export default async function PropostaDetalhesPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: p } = await supabase
     .from('propostas')
     .select('*, empreendimentos(nome,slug), unidades(unidade,pavimento,posicao,area_construida,quartos,valor_imovel)')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (!p) notFound()
@@ -43,15 +44,8 @@ export default async function PropostaDetalhesPage({ params }: { params: { id: s
             Unidade {uni?.unidade} · {uni?.pavimento} · Recebida em {new Date(p.created_at).toLocaleDateString('pt-BR')}
           </p>
         </div>
-        <div style={{display:'flex',gap:'10px'}}>
-          <a href={`/admin/propostas/${params.id}/pdf`} target="_blank"
-            style={{padding:'8px 16px',background:'#E8390E',color:'white',borderRadius:'8px',fontSize:'14px',fontWeight:'500',textDecoration:'none'}}>
-            📄 Baixar PDF
-          </a>
-        </div>
       </div>
 
-      {/* Unidade */}
       <Section title="🏠 Unidade">
         <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',padding:'12px',background:'#f8fafc',borderRadius:'8px'}}>
           <div><div style={{fontSize:'11px',color:'#9ca3af',marginBottom:'2px'}}>Unidade</div><div style={{fontWeight:'700',fontSize:'16px'}}>{uni?.unidade}</div></div>
@@ -61,7 +55,6 @@ export default async function PropostaDetalhesPage({ params }: { params: { id: s
         </div>
       </Section>
 
-      {/* Comprador 1 */}
       <Section title="👤 Comprador">
         <Row label="Nome completo" value={p.comprador1_nome} />
         <Row label="CPF" value={p.comprador1_cpf} />
@@ -73,7 +66,6 @@ export default async function PropostaDetalhesPage({ params }: { params: { id: s
         <Row label="Telefone" value={p.comprador1_telefone} />
       </Section>
 
-      {/* Cônjuge */}
       {p.conjuge_nome && (
         <Section title="💑 Cônjuge">
           <Row label="Nome completo" value={p.conjuge_nome} />
@@ -86,7 +78,6 @@ export default async function PropostaDetalhesPage({ params }: { params: { id: s
         </Section>
       )}
 
-      {/* Comprador 2 */}
       {p.comprador2_nome && (
         <Section title="👤 Segundo Comprador">
           <Row label="Nome completo" value={p.comprador2_nome} />
@@ -100,7 +91,6 @@ export default async function PropostaDetalhesPage({ params }: { params: { id: s
         </Section>
       )}
 
-      {/* Corretor */}
       <Section title="🏢 Corretor / Imobiliária">
         <Row label="Nome" value={p.corretor_nome} />
         <Row label="CPF/CNPJ" value={p.corretor_cpf_cnpj} />
@@ -110,7 +100,6 @@ export default async function PropostaDetalhesPage({ params }: { params: { id: s
         <Row label="Imobiliária" value={p.imobiliaria_nome} />
       </Section>
 
-      {/* Pagamento */}
       <Section title="💰 Condições de Pagamento">
         <div style={{padding:'12px',background:p.segue_tabela?'#f0fdf4':'#fffbeb',borderRadius:'8px',marginBottom:'16px',border:`1px solid ${p.segue_tabela?'#bbf7d0':'#fde68a'}`}}>
           <span style={{fontWeight:'600',color:p.segue_tabela?'#15803d':'#92400e'}}>
@@ -143,3 +132,4 @@ export default async function PropostaDetalhesPage({ params }: { params: { id: s
     </div>
   )
 }
+
