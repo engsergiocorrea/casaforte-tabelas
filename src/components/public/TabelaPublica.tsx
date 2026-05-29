@@ -75,9 +75,30 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
     })
   }, [unidades, filtroStatus, filtroPavimento, filtroBloco, filtroQuartos, busca, mostrarVendidas])
 
+  const ORDEM_PAVIMENTOS = [
+    'Térreo',
+    '1º Pavimento',
+    '2º Pavimento',
+    'Frente Mar - Térreo',
+    'Frente Mar - 1º Pavimento',
+    'Frente Mar - 2º Pavimento',
+  ]
+
   const grupos = useMemo(() => {
     if (!agruparPor) return { 'Unidades': unidadesFiltradas }
-    return groupBy(unidadesFiltradas, agruparPor as keyof Unidade)
+    const agrupado = groupBy(unidadesFiltradas, agruparPor as keyof Unidade)
+    const ordenado: Record<string, typeof unidadesFiltradas> = {}
+    const chaves = Object.keys(agrupado)
+    const ordenadas = chaves.sort((a, b) => {
+      const ia = ORDEM_PAVIMENTOS.indexOf(a)
+      const ib = ORDEM_PAVIMENTOS.indexOf(b)
+      if (ia === -1 && ib === -1) return a.localeCompare(b)
+      if (ia === -1) return 1
+      if (ib === -1) return -1
+      return ia - ib
+    })
+    ordenadas.forEach(k => { ordenado[k] = agrupado[k] })
+    return ordenado
   }, [unidadesFiltradas, agruparPor])
 
   const resumo = useMemo(() => ({
