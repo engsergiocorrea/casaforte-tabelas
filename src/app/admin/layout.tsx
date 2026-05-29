@@ -10,8 +10,8 @@ const NAV = [
   { href: '/admin/unidades', label: 'Unidades', icon: '🏠' },
   { href: '/admin/vendas', label: 'Vendas', icon: '💼' },
   { href: '/admin/relatorios', label: 'Relatórios', icon: '📈' },
-  { href: '/admin/usuarios', label: 'Usuários', icon: '👥' },
-]
+{ href: '/admin/propostas', label: 'Propostas', icon: '📋' },
+{ href: '/admin/usuarios', label: 'Usuários', icon: '👥' },]
 
 function Sidebar({ onSignOut }: { onSignOut: () => void }) {
   const pathname = usePathname()
