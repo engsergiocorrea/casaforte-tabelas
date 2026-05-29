@@ -17,6 +17,8 @@ export default function PropostaPage() {
   const [segueTabela, setSegueTabela] = useState(true)
   const [temConjuge, setTemConjuge] = useState(false)
   const [temSegundoComprador, setTemSegundoComprador] = useState(false)
+  const [whatsappLink, setWhatsappLink] = useState('')
+  const [propostaId, setPropostaId] = useState('')
   const [form, setForm] = useState({
     comprador1_nome: '', comprador1_cpf: '', comprador1_rg: '',
     comprador1_profissao: '', comprador1_email: '', comprador1_telefone: '',
@@ -116,9 +118,14 @@ export default function PropostaPage() {
       conjuge_profissao: temConjuge ? form.conjuge_profissao : null,
       conjuge_email: temConjuge ? form.conjuge_email : null,
       conjuge_telefone: temConjuge ? form.conjuge_telefone : null,
-      conjuge_nascimento: temConjuge ? form.conjuge_nascimento : null,
+      conjuge_nascimento: temConjuge && conjuge_nascimento ? conjuge_nascimento : null,
       comprador2_nome: temSegundoComprador ? form.comprador2_nome : null,
       comprador2_cpf: temSegundoComprador ? form.comprador2_cpf : null,
+      comprador2_rg: temSegundoComprador ? form.comprador2_rg : null,
+      comprador2_profissao: temSegundoComprador ? form.comprador2_profissao : null,
+      comprador2_email: temSegundoComprador ? form.comprador2_email : null,
+      comprador2_telefone: temSegundoComprador ? form.comprador2_telefone : null,
+      comprador2_nascimento: temSegundoComprador && comprador2_nascimento ? comprador2_nascimento : null,
     }
 
     const { data: proposta, error: err } = await supabase.from('propostas').insert([data]).select().single()
@@ -135,7 +142,8 @@ export default function PropostaPage() {
       `*Segue tabela:* ${segueTabela ? 'Sim' : 'Não'}\n\n` +
       `Acesse o sistema:\nhttps://tabelas.casaforteinc.com.br/admin/propostas/${proposta.id}`
     )
-    window.open(`https://wa.me/${tel}?text=${msg}`, '_blank')
+    setWhatsappLink(`https://wa.me/${tel}?text=${msg}`)
+    setPropostaId(proposta.id)
     setSuccess(true)
     setSaving(false)
   }
@@ -168,10 +176,20 @@ export default function PropostaPage() {
     <div style={{minHeight:'100vh',background:'#F5F3F0',display:'flex',alignItems:'center',justifyContent:'center',padding:'2rem'}}>
       <div style={{background:'white',borderRadius:'16px',padding:'3rem',textAlign:'center',maxWidth:'480px'}}>
         <div style={{fontSize:'4rem',marginBottom:'1rem'}}>✅</div>
-        <h1 style={{fontSize:'1.5rem',fontWeight:'700',color:'#111',marginBottom:'0.5rem'}}>Proposta enviada!</h1>
-        <p style={{color:'#6b7280',marginBottom:'1.5rem'}}>Sua proposta foi registrada e a equipe Casa Forte foi notificada via WhatsApp.</p>
-        <a href={`/empreendimentos/${slug}`} style={{display:'inline-block',padding:'10px 24px',background:'#E8390E',color:'white',borderRadius:'8px',textDecoration:'none',fontWeight:'500'}}>
-          Voltar ao empreendimento
+        <h1 style={{fontSize:'1.5rem',fontWeight:'700',color:'#111',marginBottom:'0.5rem'}}>Proposta registrada!</h1>
+        <p style={{color:'#6b7280',marginBottom:'1.5rem'}}>Proposta enviada com sucesso. Escolha como notificar a equipe Casa Forte:</p>
+        <div style={{display:'flex',flexDirection:'column',gap:'12px',marginBottom:'20px'}}>
+          <a href={whatsappLink} target="_blank" rel="noreferrer"
+            style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'8px',padding:'12px 24px',background:'#25D366',color:'white',borderRadius:'10px',textDecoration:'none',fontWeight:'600',fontSize:'15px'}}>
+            📲 Notificar via WhatsApp
+          </a>
+          <a href={`/admin/propostas/${propostaId}/pdf`} target="_blank" rel="noreferrer"
+            style={{display:'inline-flex',alignItems:'center',justifyContent:'center',gap:'8px',padding:'12px 24px',background:'#E8390E',color:'white',borderRadius:'10px',textDecoration:'none',fontWeight:'600',fontSize:'15px'}}>
+            📄 Ver / Imprimir PDF da proposta
+          </a>
+        </div>
+        <a href={`/empreendimentos/${slug}`} style={{display:'inline-block',fontSize:'13px',color:'#9ca3af',textDecoration:'none'}}>
+          ← Voltar ao empreendimento
         </a>
       </div>
     </div>
@@ -315,9 +333,9 @@ export default function PropostaPage() {
           )}
 
           <button type="submit" disabled={saving} style={{width:'100%',padding:'14px',background:'#E8390E',color:'white',border:'none',borderRadius:'10px',fontSize:'16px',fontWeight:'600',cursor:'pointer'}}>
-            {saving ? 'Enviando...' : '📤 Enviar proposta via WhatsApp'}
+            {saving ? 'Enviando...' : '📤 Enviar proposta'}
           </button>
-          <p style={{textAlign:'center',fontSize:'12px',color:'#9ca3af',marginTop:'12px'}}>Ao enviar, a equipe Casa Forte será notificada via WhatsApp.</p>
+          <p style={{textAlign:'center',fontSize:'12px',color:'#9ca3af',marginTop:'12px'}}>Ao enviar, você poderá notificar a equipe via WhatsApp ou baixar o PDF.</p>
         </form>
       </div>
     </div>
