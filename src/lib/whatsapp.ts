@@ -31,23 +31,19 @@ export function formatarMensagemProposta(dados: {
 }) {
   const valor = dados.valorProposto
     ? `R$ ${dados.valorProposto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-    : '_Segue tabela_'
+    : 'Segue tabela'
 
-  return `🏠 *Nova Proposta Recebida!*
+  const mensagem = [
+    'Nova Proposta Recebida!',
+    '',
+    `Empreendimento: ${dados.empreendimento}`,
+    `Unidade: ${dados.unidade}`,
+    `Comprador: ${dados.comprador}`,
+    `Corretor: ${dados.corretor ?? 'Nao informado'}`,
+    `Valor proposto: ${valor}`,
+    '',
+    `Ver proposta: https://tabelas.casaforteinc.com.br/admin/propostas/${dados.propostaId}`,
+  ].join('\n')
 
-📍 *Empreendimento:* ${dados.empreendimento}
-🏢 *Unidade:* ${dados.unidade}
-👤 *Comprador:* ${dados.comprador}
-🤝 *Corretor:* ${dados.corretor}
-💰 *Valor proposto:* ${valor}
-
-🔗 https://tabelas.casaforteinc.com.br/admin/propostas/${dados.propostaId}`
-}
-📍 *Empreendimento:* ${dados.empreendimento}
-🏢 *Unidade:* ${dados.unidade}
-👤 *Comprador:* ${dados.comprador}
-🤝 *Corretor:* ${dados.corretor ?? 'Não informado'}
-💰 *Valor proposto:* ${valor}
-
-🔗 https://tabelas.casaforteinc.com.br/admin/propostas/${dados.propostaId}`
+  return mensagem
 }
