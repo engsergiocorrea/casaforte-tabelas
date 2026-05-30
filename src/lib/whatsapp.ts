@@ -33,8 +33,16 @@ export function formatarMensagemProposta(dados: {
     ? `R$ ${dados.valorProposto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
     : '_Segue tabela_'
 
-  return `🏠 *Nova proposta recebida!*
+  return `🏠 *Nova Proposta Recebida!*
 
+📍 *Empreendimento:* ${dados.empreendimento}
+🏢 *Unidade:* ${dados.unidade}
+👤 *Comprador:* ${dados.comprador}
+🤝 *Corretor:* ${dados.corretor}
+💰 *Valor proposto:* ${valor}
+
+🔗 https://tabelas.casaforteinc.com.br/admin/propostas/${dados.propostaId}`
+}
 📍 *Empreendimento:* ${dados.empreendimento}
 🏢 *Unidade:* ${dados.unidade}
 👤 *Comprador:* ${dados.comprador}
