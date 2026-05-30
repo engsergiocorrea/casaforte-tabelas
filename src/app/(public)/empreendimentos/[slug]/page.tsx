@@ -37,7 +37,6 @@ export default async function EmpreendimentoPage({ params }: Props) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  // Buscar empreendimento
   const { data: empreendimento } = await supabase
     .from("empreendimentos")
     .select("*")
@@ -47,7 +46,6 @@ export default async function EmpreendimentoPage({ params }: Props) {
 
   if (!empreendimento) notFound();
 
-  // Buscar unidades
   const { data: unidades } = await supabase
     .from("unidades")
     .select("*")
@@ -55,7 +53,6 @@ export default async function EmpreendimentoPage({ params }: Props) {
     .order("pavimento", { ascending: true })
     .order("unidade", { ascending: true });
 
-  // Buscar configurações
   const { data: configuracao } = await supabase
     .from("configuracoes_tabela")
     .select("*")
@@ -63,26 +60,38 @@ export default async function EmpreendimentoPage({ params }: Props) {
     .single();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div style={{ minHeight: '100vh', background: '#F5F3F0' }}>
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            <Link
-              href="/"
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
-              <div className="w-7 h-7 bg-slate-800 rounded flex items-center justify-center">
-                <span className="text-white font-bold text-xs">CF</span>
+      <header style={{
+        background: 'white',
+        borderBottom: '1px solid #e5e7eb',
+        position: 'sticky',
+        top: 0,
+        zIndex: 40,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
+      }}>
+        <div style={{ maxWidth: '80rem', margin: '0 auto', padding: '0 1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '56px' }}>
+            <Link href="/" style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              textDecoration: 'none', opacity: 1
+            }}>
+              <div style={{
+                width: '28px', height: '28px', background: '#1e293b',
+                borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <span style={{ color: 'white', fontWeight: 'bold', fontSize: '11px' }}>CF</span>
               </div>
-              <span className="text-sm text-gray-600 hidden sm:block">
-                ← Todos os empreendimentos
-              </span>
-              <span className="text-sm text-gray-600 sm:hidden">← Voltar</span>
+              <span style={{ fontSize: '14px', color: '#6b7280' }}>← Todos os empreendimentos</span>
             </Link>
-            <a
+            
               href={`/empreendimentos/${slug}/download`}
-              className="flex items-center gap-2 px-4 py-1.5 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition-colors"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '6px 16px', background: '#1e293b', color: 'white',
+                fontSize: '14px', fontWeight: '500', borderRadius: '8px',
+                textDecoration: 'none'
+              }}
             >
               <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
                 <path
@@ -99,28 +108,38 @@ export default async function EmpreendimentoPage({ params }: Props) {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main style={{ maxWidth: '80rem', margin: '0 auto', padding: '24px 1.5rem' }}>
         {/* Hero do empreendimento */}
-        <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-6">
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          border: '1px solid #e5e7eb',
+          overflow: 'hidden',
+          marginBottom: '24px'
+        }}>
           {/* Imagem de capa */}
           {empreendimento.imagem_capa_url && (
-            <div className="h-56 md:h-72 relative">
+            <div style={{ height: '420px', position: 'relative' }}>
               <Image
                 src={empreendimento.imagem_capa_url}
                 alt={empreendimento.nome}
                 fill
-                className="object-cover"
+                style={{ objectFit: 'cover', objectPosition: 'center' }}
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-6 right-6">
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 50%)'
+              }} />
+              <div style={{ position: 'absolute', bottom: '16px', left: '24px', right: '24px' }}>
                 {empreendimento.logo_url && (
                   <Image
                     src={empreendimento.logo_url}
                     alt={`Logo ${empreendimento.nome}`}
                     width={120}
                     height={40}
-                    className="mb-2 object-contain"
+                    style={{ objectFit: 'contain', marginBottom: '8px' }}
                   />
                 )}
               </div>
@@ -128,41 +147,34 @@ export default async function EmpreendimentoPage({ params }: Props) {
           )}
 
           {/* Info do empreendimento */}
-          <div className="p-6">
-            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+          <div style={{ padding: '24px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', marginBottom: '16px' }}>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
-                    {
-                      EMPREENDIMENTO_STATUS_LABELS[
-                        empreendimento.status as keyof typeof EMPREENDIMENTO_STATUS_LABELS
-                      ]
-                    }
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span style={{
+                    fontSize: '11px', fontWeight: '600', padding: '2px 8px',
+                    borderRadius: '9999px', background: '#dbeafe', color: '#1d4ed8'
+                  }}>
+                    {EMPREENDIMENTO_STATUS_LABELS[empreendimento.status as keyof typeof EMPREENDIMENTO_STATUS_LABELS]}
                   </span>
-                  <span className="text-xs text-gray-400 capitalize">
+                  <span style={{ fontSize: '12px', color: '#9ca3af', textTransform: 'capitalize' }}>
                     {empreendimento.tipo}
                   </span>
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: 0 }}>
                   {empreendimento.nome}
                 </h1>
-                <p className="text-gray-500 mt-1">
-                  {[
-                    empreendimento.localizacao,
-                    empreendimento.cidade,
-                    empreendimento.estado,
-                  ]
+                <p style={{ color: '#6b7280', marginTop: '4px', margin: '4px 0 0' }}>
+                  {[empreendimento.localizacao, empreendimento.cidade, empreendimento.estado]
                     .filter(Boolean)
                     .join(", ")}
                 </p>
               </div>
 
               {empreendimento.data_prevista_entrega && (
-                <div className="text-right">
-                  <div className="text-xs text-gray-400">
-                    Previsão de entrega
-                  </div>
-                  <div className="font-semibold text-gray-700">
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '12px', color: '#9ca3af' }}>Previsão de entrega</div>
+                  <div style={{ fontWeight: '600', color: '#374151' }}>
                     {formatDate(empreendimento.data_prevista_entrega)}
                   </div>
                 </div>
@@ -170,43 +182,42 @@ export default async function EmpreendimentoPage({ params }: Props) {
             </div>
 
             {empreendimento.descricao_curta && (
-              <p className="text-gray-600 text-sm mb-4">
+              <p style={{ color: '#4b5563', fontSize: '14px', marginBottom: '16px' }}>
                 {empreendimento.descricao_curta}
               </p>
             )}
 
             {/* Condições comerciais */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-slate-50 rounded-xl">
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+              gap: '12px',
+              padding: '16px',
+              background: '#f8fafc',
+              borderRadius: '12px'
+            }}>
               <div>
-                <div className="text-xs text-gray-400 mb-0.5">
+                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>
                   Correção até a entrega
                 </div>
-                <div className="text-sm font-semibold text-gray-700">
-                  {
-                    INDICE_LABELS[
-                      empreendimento.indice_ate_entrega as keyof typeof INDICE_LABELS
-                    ]
-                  }
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                  {INDICE_LABELS[empreendimento.indice_ate_entrega as keyof typeof INDICE_LABELS]}
                 </div>
               </div>
               <div>
-                <div className="text-xs text-gray-400 mb-0.5">
+                <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>
                   Correção após entrega
                 </div>
-                <div className="text-sm font-semibold text-gray-700">
-                  {
-                    INDICE_LABELS[
-                      empreendimento.indice_apos_entrega as keyof typeof INDICE_LABELS
-                    ]
-                  }
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+                  {INDICE_LABELS[empreendimento.indice_apos_entrega as keyof typeof INDICE_LABELS]}
                 </div>
               </div>
               {empreendimento.parcelas_padrao > 0 && (
                 <div>
-                  <div className="text-xs text-gray-400 mb-0.5">
+                  <div style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>
                     Parcelamento padrão
                   </div>
-                  <div className="text-sm font-semibold text-gray-700">
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
                     Até {empreendimento.parcelas_padrao}x mensais
                   </div>
                 </div>
@@ -214,9 +225,15 @@ export default async function EmpreendimentoPage({ params }: Props) {
             </div>
 
             {empreendimento.observacoes_publicas && (
-              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                <p className="text-sm text-amber-800">
-                  <span className="font-semibold">Observações: </span>
+              <div style={{
+                marginTop: '16px',
+                padding: '12px',
+                background: '#fffbeb',
+                border: '1px solid #fde68a',
+                borderRadius: '8px'
+              }}>
+                <p style={{ fontSize: '14px', color: '#92400e', margin: 0 }}>
+                  <span style={{ fontWeight: '600' }}>Observações: </span>
                   {empreendimento.observacoes_publicas}
                 </p>
               </div>
@@ -232,8 +249,15 @@ export default async function EmpreendimentoPage({ params }: Props) {
         />
 
         {/* Aviso legal */}
-        <div className="mt-6 p-4 bg-white border border-gray-200 rounded-xl text-center">
-          <p className="text-xs text-gray-400">
+        <div style={{
+          marginTop: '24px',
+          padding: '16px',
+          background: 'white',
+          border: '1px solid #e5e7eb',
+          borderRadius: '12px',
+          textAlign: 'center'
+        }}>
+          <p style={{ fontSize: '12px', color: '#9ca3af', margin: 0 }}>
             ⚠️ Os valores e condições apresentados são de referência e podem
             sofrer alteração sem aviso prévio. • Última atualização:{" "}
             {formatDate(empreendimento.updated_at)} • Casa Forte Construtora e
