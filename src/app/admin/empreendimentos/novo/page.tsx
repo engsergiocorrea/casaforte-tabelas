@@ -35,20 +35,27 @@ export default function NovoEmpreendimentoPage() {
     setLoading(true)
     setError('')
     const supabase = createClient()
-    const { error: err } = await supabase.from('empreendimentos').insert([form])
+    const data = {
+      ...form,
+      data_prevista_entrega: form.data_prevista_entrega || null,
+      parcelas_padrao: Number(form.parcelas_padrao) || null,
+      percentual_sinal_padrao: Number(form.percentual_sinal_padrao) || null,
+      percentual_chaves_padrao: Number(form.percentual_chaves_padrao) || null,
+    }
+    const { error: err } = await supabase.from('empreendimentos').insert([data])
     if (err) { setError(err.message); setLoading(false); return }
     router.push('/admin/empreendimentos')
   }
 
-  const label = (text: string) => (
+  const lbl = (text: string) => (
     <label style={{display:'block',fontSize:'13px',fontWeight:'500',color:'#374151',marginBottom:'4px'}}>{text}</label>
   )
-  const input = (name: string, type = 'text', placeholder = '') => (
+  const inp = (name: string, type = 'text', placeholder = '') => (
     <input name={name} type={type} placeholder={placeholder}
       value={String((form as any)[name])} onChange={handleChange}
       style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
   )
-  const select = (name: string, options: {value:string,label:string}[]) => (
+  const sel = (name: string, options: {value:string,label:string}[]) => (
     <select name={name} value={String((form as any)[name])} onChange={handleChange}
       style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',background:'white'}}>
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -69,35 +76,35 @@ export default function NovoEmpreendimentoPage() {
           <h2 style={{fontSize:'15px',fontWeight:'600',color:'#111',marginBottom:'16px'}}>Informações básicas</h2>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div style={{gridColumn:'1/-1'}}>
-              {label('Nome do empreendimento *')}
-              {input('nome','text','Ex: UMÁ Milagres')}
+              {lbl('Nome do empreendimento *')}
+              {inp('nome','text','Ex: UMÁ Milagres')}
             </div>
             <div>
-              {label('Slug (URL pública)')}
-              {input('slug','text')}
+              {lbl('Slug (URL pública)')}
+              {inp('slug','text')}
             </div>
             <div>
-              {label('Cidade *')}
-              {input('cidade','text','Ex: Maceió')}
+              {lbl('Cidade *')}
+              {inp('cidade','text','Ex: Maceió')}
             </div>
             <div>
-              {label('Estado')}
-              {select('estado',[{value:'AL',label:'AL'},{value:'PE',label:'PE'},{value:'BA',label:'BA'},{value:'SE',label:'SE'},{value:'CE',label:'CE'},{value:'RN',label:'RN'},{value:'PB',label:'PB'},{value:'PI',label:'PI'},{value:'MA',label:'MA'}])}
+              {lbl('Estado')}
+              {sel('estado',[{value:'AL',label:'AL'},{value:'PE',label:'PE'},{value:'BA',label:'BA'},{value:'SE',label:'SE'},{value:'CE',label:'CE'},{value:'RN',label:'RN'},{value:'PB',label:'PB'},{value:'PI',label:'PI'},{value:'MA',label:'MA'}])}
             </div>
             <div>
-              {label('Localização')}
-              {input('localizacao','text','Ex: Praia dos Milagres')}
+              {lbl('Localização')}
+              {inp('localizacao','text','Ex: Porto de Pedras - Patacho')}
             </div>
             <div>
-              {label('Status')}
-              {select('status',[{value:'pre_lancamento',label:'Pré-lançamento'},{value:'lancamento',label:'Lançamento'},{value:'em_obras',label:'Em obras'},{value:'entregue',label:'Entregue'},{value:'encerrado',label:'Encerrado'}])}
+              {lbl('Status')}
+              {sel('status',[{value:'pre_lancamento',label:'Pré-lançamento'},{value:'lancamento',label:'Lançamento'},{value:'em_obras',label:'Em obras'},{value:'entregue',label:'Entregue'},{value:'encerrado',label:'Encerrado'}])}
             </div>
             <div>
-              {label('Tipo')}
-              {select('tipo',[{value:'apartamentos',label:'Apartamentos'},{value:'casas',label:'Casas'},{value:'studios',label:'Studios'},{value:'lotes',label:'Lotes'},{value:'misto',label:'Misto'}])}
+              {lbl('Tipo')}
+              {sel('tipo',[{value:'apartamentos',label:'Apartamentos'},{value:'casas',label:'Casas'},{value:'studios',label:'Studios'},{value:'lotes',label:'Lotes'},{value:'misto',label:'Misto'}])}
             </div>
             <div style={{gridColumn:'1/-1'}}>
-              {label('Descrição curta')}
+              {lbl('Descrição curta')}
               <textarea name="descricao_curta" value={form.descricao_curta} onChange={handleChange} rows={2}
                 style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',resize:'vertical'}} />
             </div>
@@ -108,34 +115,34 @@ export default function NovoEmpreendimentoPage() {
           <h2 style={{fontSize:'15px',fontWeight:'600',color:'#111',marginBottom:'16px'}}>Condições comerciais</h2>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div>
-              {label('Índice até a entrega')}
-              {select('indice_ate_entrega',[{value:'INCC',label:'INCC'},{value:'INCC-M',label:'INCC-M'},{value:'IPCA',label:'IPCA'},{value:'IGP-M',label:'IGP-M'},{value:'outro',label:'Outro'}])}
+              {lbl('Índice até a entrega')}
+              {sel('indice_ate_entrega',[{value:'INCC',label:'INCC'},{value:'INCC-M',label:'INCC-M'},{value:'IPCA',label:'IPCA'},{value:'IGP-M',label:'IGP-M'},{value:'outro',label:'Outro'}])}
             </div>
             <div>
-              {label('Índice após entrega')}
-              {select('indice_apos_entrega',[{value:'1_mais_igpm',label:'1% + IGP-M'},{value:'1_mais_ipca',label:'1% + IPCA'},{value:'IPCA',label:'IPCA'},{value:'IGP-M',label:'IGP-M'},{value:'outro',label:'Outro'}])}
+              {lbl('Índice após entrega')}
+              {sel('indice_apos_entrega',[{value:'1_mais_igpm',label:'1% + IGP-M'},{value:'1_mais_ipca',label:'1% + IPCA'},{value:'IPCA',label:'IPCA'},{value:'IGP-M',label:'IGP-M'},{value:'outro',label:'Outro'}])}
             </div>
             <div>
-              {label('Parcelas padrão')}
+              {lbl('Parcelas padrão')}
               <input name="parcelas_padrao" type="number" value={form.parcelas_padrao} onChange={handleChange}
                 style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
             </div>
             <div>
-              {label('% Sinal padrão')}
+              {lbl('% Sinal padrão')}
               <input name="percentual_sinal_padrao" type="number" value={form.percentual_sinal_padrao} onChange={handleChange}
                 style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
             </div>
             <div>
-              {label('% Chaves padrão')}
+              {lbl('% Chaves padrão')}
               <input name="percentual_chaves_padrao" type="number" value={form.percentual_chaves_padrao} onChange={handleChange}
                 style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
             </div>
             <div>
-              {label('Data prevista de entrega')}
-              {input('data_prevista_entrega','date')}
+              {lbl('Data prevista de entrega')}
+              {inp('data_prevista_entrega','date')}
             </div>
             <div style={{gridColumn:'1/-1'}}>
-              {label('Observações públicas')}
+              {lbl('Observações públicas')}
               <textarea name="observacoes_publicas" value={form.observacoes_publicas} onChange={handleChange} rows={3}
                 style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',resize:'vertical'}}
                 placeholder="Ex: Até a entrega incide INCC-M. Após a entrega: 1% + IGP-M." />
