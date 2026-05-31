@@ -1,4 +1,3 @@
-import React from 'react'
 import { renderToBuffer, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 
 const styles = StyleSheet.create({
@@ -20,27 +19,19 @@ const styles = StyleSheet.create({
   rodapeTexto: { fontSize: 7, color: '#9ca3af' },
 })
 
-function fmt(v: any) {
+function fmt(v: any): string {
   if (!v && v !== 0) return ''
   const n = Number(v)
   if (!n) return ''
   return `R$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
 }
 
-function campo(label: string, valor: any, full = false) {
-  if (!valor) return null
-  return React.createElement(View, { style: full ? styles.campoFull : styles.campo },
-    React.createElement(Text, { style: styles.label }, label),
-    React.createElement(Text, { style: styles.valor }, String(valor))
-  )
-}
-
-function secao(titulo: string, ...campos: any[]) {
-  return React.createElement(View, { style: styles.secao },
-    React.createElement(Text, { style: styles.secaoTitulo }, titulo),
-    React.createElement(View, { style: styles.grid }, ...campos.filter(Boolean))
-  )
-}
+// Cria elementos sem JSX usando a API interna do @react-pdf/renderer
+const el = (type: any, props: any, ...children: any[]) => ({
+  type,
+  props: { ...props, children: children.filter(Boolean) },
+  key: null,
+})
 
 export interface DadosProposta {
   empreendimento: string
@@ -89,26 +80,38 @@ export async function gerarPdfProposta(dados: DadosProposta): Promise<string> {
     ? `${dados.quantidade_intercaladas}x de ${fmt(dados.valor_intercalada)}${dados.periodicidade_intercaladas ? ` (${dados.periodicidade_intercaladas})` : ''}`
     : ''
 
-  const doc = React.createElement(Document, null,
-    React.createElement(Page, { size: 'A4', style: styles.page },
+  function campo(label: string, valor: any, full = false) {
+    if (!valor) return null
+    return el(View, { style: full ? styles.campoFull : styles.campo },
+      el(Text, { style: styles.label }, label),
+      el(Text, { style: styles.valor }, String(valor))
+    )
+  }
 
-      // Header
-      React.createElement(View, { style: styles.header },
-        React.createElement(Text, { style: styles.logo }, 'Casa Forte'),
-        React.createElement(View, null,
-          React.createElement(Text, { style: styles.headerSub }, 'Proposta de Compra'),
-          React.createElement(Text, { style: styles.headerSub }, `#${dados.propostaId.slice(0, 8).toUpperCase()}`),
-          React.createElement(Text, { style: styles.headerSub }, dados.dataEnvio),
+  function secao(titulo: string, ...filhos: any[]) {
+    return el(View, { style: styles.secao },
+      el(Text, { style: styles.secaoTitulo }, titulo),
+      el(View, { style: styles.grid }, ...filhos.filter(Boolean))
+    )
+  }
+
+  const doc = el(Document, {},
+    el(Page, { size: 'A4', style: styles.page },
+
+      el(View, { style: styles.header },
+        el(Text, { style: styles.logo }, 'Casa Forte'),
+        el(View, {},
+          el(Text, { style: styles.headerSub }, 'Proposta de Compra'),
+          el(Text, { style: styles.headerSub }, `#${dados.propostaId.slice(0, 8).toUpperCase()}`),
+          el(Text, { style: styles.headerSub }, dados.dataEnvio),
         )
       ),
 
-      // Título
-      React.createElement(Text, { style: styles.titulo }, dados.empreendimento),
-      React.createElement(Text, { style: styles.subtitulo },
+      el(Text, { style: styles.titulo }, dados.empreendimento),
+      el(Text, { style: styles.subtitulo },
         `Unidade ${dados.unidade}${dados.pavimento ? ` · ${dados.pavimento}` : ''}${dados.area ? ` · ${dados.area}m²` : ''}${dados.quartos ? ` · ${dados.quartos} quartos` : ''}`
       ),
 
-      // Comprador
       secao('Dados do Comprador',
         campo('Nome completo', dados.comprador1_nome, true),
         campo('CPF', dados.comprador1_cpf),
@@ -124,7 +127,6 @@ export async function gerarPdfProposta(dados: DadosProposta): Promise<string> {
         campo('CPF 2º comprador', dados.comprador2_cpf),
       ),
 
-      // Corretor
       secao('Corretor / Imobiliária',
         campo('Corretor', dados.corretor_nome, true),
         campo('CPF/CNPJ', dados.corretor_cpf_cnpj),
@@ -133,14 +135,13 @@ export async function gerarPdfProposta(dados: DadosProposta): Promise<string> {
         campo('Imobiliária', dados.imobiliaria_nome),
       ),
 
-      // Pagamento
-      React.createElement(View, { style: styles.secao },
-        React.createElement(Text, { style: styles.secaoTitulo }, 'Condições de Pagamento'),
-        React.createElement(View, { style: styles.grid },
-          React.createElement(View, { style: styles.campoFull },
-            React.createElement(Text, { style: styles.label }, 'Valor total proposto'),
-            React.createElement(Text, { style: styles.destaque }, fmt(dados.valor_proposto)),
-            dados.segue_tabela ? React.createElement(Text, { style: { fontSize: 8, color: '#6b7280', marginTop: 2 } }, 'Segue valores da tabela') : null,
+      el(View, { style: styles.secao },
+        el(Text, { style: styles.secaoTitulo }, 'Condições de Pagamento'),
+        el(View, { style: styles.grid },
+          el(View, { style: styles.campoFull },
+            el(Text, { style: styles.label }, 'Valor total proposto'),
+            el(Text, { style: styles.destaque }, fmt(dados.valor_proposto) || 'Segue tabela'),
+            dados.segue_tabela ? el(Text, { style: { fontSize: 8, color: '#6b7280', marginTop: 2 } }, 'Segue valores da tabela') : null,
           ),
           campo('Sinal', fmt(dados.valor_sinal)),
           campo('Parcelas mensais', parcelas),
@@ -150,17 +151,15 @@ export async function gerarPdfProposta(dados: DadosProposta): Promise<string> {
         )
       ),
 
-      // Observações
       dados.observacoes ? secao('Observações', campo('', dados.observacoes, true)) : null,
 
-      // Rodapé
-      React.createElement(View, { style: styles.rodape },
-        React.createElement(Text, { style: styles.rodapeTexto }, 'Casa Forte Incorporações · tabelas.casaforteinc.com.br'),
-        React.createElement(Text, { style: styles.rodapeTexto }, `#${dados.propostaId.slice(0, 8).toUpperCase()}`),
+      el(View, { style: styles.rodape },
+        el(Text, { style: styles.rodapeTexto }, 'Casa Forte Incorporações · tabelas.casaforteinc.com.br'),
+        el(Text, { style: styles.rodapeTexto }, `#${dados.propostaId.slice(0, 8).toUpperCase()}`),
       )
     )
   )
 
-  const buffer = await renderToBuffer(doc)
+  const buffer = await renderToBuffer(doc as any)
   return buffer.toString('base64')
 }
