@@ -5,7 +5,10 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const mensagem = formatarMensagemProposta(body)
-    await enviarWhatsApp(mensagem)
+    await enviarWhatsApp({
+      corretorTelefone: body.corretorTelefone,
+      mensagem,
+    })
     return NextResponse.json({ ok: true })
   } catch (err) {
     console.error('[/api/whatsapp]', err)
