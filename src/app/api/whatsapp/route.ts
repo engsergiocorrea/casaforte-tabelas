@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
       propostaId: body.propostaId,
     })
 
-    // Gera o PDF no servidor
     let pdfBase64: string | undefined
     try {
       pdfBase64 = await gerarPdfProposta({
@@ -24,7 +23,6 @@ export async function POST(req: NextRequest) {
       })
     } catch (pdfErr) {
       console.error('[PDF] Erro ao gerar:', pdfErr)
-      // Não quebra o fluxo — envia o texto mesmo sem o PDF
     }
 
     await enviarWhatsApp({
@@ -32,7 +30,7 @@ export async function POST(req: NextRequest) {
       compradorTelefone: body.compradorTelefone || null,
       mensagem,
       pdfBase64,
-      nomeArquivo: `proposta-${body.empreendimento.toLowerCase().replace(/\s+/g, '-')}-${body.unidade}.pdf`,
+      nomeArquivo: `proposta-casaforte-${body.unidade}.pdf`,
     })
 
     return NextResponse.json({ ok: true })
