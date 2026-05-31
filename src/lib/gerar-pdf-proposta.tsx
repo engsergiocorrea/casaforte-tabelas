@@ -1,4 +1,5 @@
-import ReactPDF, { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer'
+import { renderToBuffer, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import React from 'react'
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#111' },
@@ -83,7 +84,6 @@ export async function gerarPdfProposta(dados: {
   const doc = (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.logo}>Casa Forte</Text>
           <View>
@@ -93,11 +93,9 @@ export async function gerarPdfProposta(dados: {
           </View>
         </View>
 
-        {/* Identificação */}
         <Text style={styles.titulo}>{dados.empreendimento}</Text>
         <Text style={styles.subtitulo}>Unidade {dados.unidade} · {dados.pavimento} · {dados.area}m² · {dados.quartos} quartos</Text>
 
-        {/* Comprador */}
         <Secao titulo="Dados do Comprador">
           <Campo label="Nome completo" valor={dados.comprador1_nome} full />
           <Campo label="CPF" valor={dados.comprador1_cpf} />
@@ -113,7 +111,6 @@ export async function gerarPdfProposta(dados: {
           {dados.comprador2_cpf && <Campo label="CPF 2º comprador" valor={dados.comprador2_cpf} />}
         </Secao>
 
-        {/* Corretor */}
         <Secao titulo="Corretor / Imobiliária">
           <Campo label="Corretor" valor={dados.corretor_nome} full />
           <Campo label="CPF/CNPJ" valor={dados.corretor_cpf_cnpj} />
@@ -122,7 +119,6 @@ export async function gerarPdfProposta(dados: {
           <Campo label="Imobiliária" valor={dados.imobiliaria_nome} />
         </Secao>
 
-        {/* Pagamento */}
         <Secao titulo="Condições de Pagamento">
           <View style={styles.campoFull}>
             <Text style={styles.label}>Valor total proposto</Text>
@@ -136,14 +132,12 @@ export async function gerarPdfProposta(dados: {
           {dados.observacoes_pagamento && <Campo label="Obs. pagamento" valor={dados.observacoes_pagamento} full />}
         </Secao>
 
-        {/* Observações */}
         {dados.observacoes && (
           <Secao titulo="Observações">
             <Campo label="" valor={dados.observacoes} full />
           </Secao>
         )}
 
-        {/* Rodapé */}
         <View style={styles.rodape}>
           <Text style={styles.rodapeTexto}>Casa Forte Incorporações · tabelas.casaforteinc.com.br</Text>
           <Text style={styles.rodapeTexto}>Proposta #{dados.propostaId.slice(0, 8).toUpperCase()}</Text>
@@ -152,6 +146,6 @@ export async function gerarPdfProposta(dados: {
     </Document>
   )
 
-  const buffer = await ReactPDF.renderToBuffer(doc)
+  const buffer = await renderToBuffer(doc)
   return buffer.toString('base64')
 }
