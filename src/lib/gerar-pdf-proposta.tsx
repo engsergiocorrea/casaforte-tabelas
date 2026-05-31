@@ -1,5 +1,5 @@
-import { renderToBuffer, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import React from 'react'
+import { renderToBuffer, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#111' },
@@ -8,142 +8,157 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 9, color: '#6b7280', textAlign: 'right' },
   titulo: { fontSize: 14, fontFamily: 'Helvetica-Bold', marginBottom: 4 },
   subtitulo: { fontSize: 10, color: '#6b7280', marginBottom: 20 },
-  secao: { marginBottom: 16 },
   secaoTitulo: { fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#E8390E', marginBottom: 8, paddingBottom: 4, borderBottomWidth: 1, borderBottomColor: '#f3d5cc' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  campo: { width: '48%', marginBottom: 8 },
+  secao: { marginBottom: 16 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap' },
+  campo: { width: '50%', marginBottom: 8, paddingRight: 8 },
   campoFull: { width: '100%', marginBottom: 8 },
-  label: { fontSize: 8, color: '#9ca3af', marginBottom: 2, textTransform: 'uppercase' },
+  label: { fontSize: 8, color: '#9ca3af', marginBottom: 2 },
   valor: { fontSize: 10, color: '#111' },
-  destaque: { fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#E8390E' },
-  rodape: { position: 'absolute', bottom: 30, left: 40, right: 40, borderTopWidth: 1, borderTopColor: '#e5e7eb', paddingTop: 8, flexDirection: 'row', justifyContent: 'space-between' },
-  rodapeTexto: { fontSize: 8, color: '#9ca3af' },
+  destaque: { fontSize: 13, fontFamily: 'Helvetica-Bold', color: '#E8390E' },
+  rodape: { position: 'absolute', bottom: 28, left: 40, right: 40, borderTopWidth: 0.5, borderTopColor: '#e5e7eb', paddingTop: 6, flexDirection: 'row', justifyContent: 'space-between' },
+  rodapeTexto: { fontSize: 7, color: '#9ca3af' },
 })
 
-function Campo({ label, valor, full = false }: { label: string; valor: string; full?: boolean }) {
-  if (!valor) return null
-  return (
-    <View style={full ? styles.campoFull : styles.campo}>
-      <Text style={styles.label}>{label}</Text>
-      <Text style={styles.valor}>{valor}</Text>
-    </View>
-  )
-}
-
-function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.secao}>
-      <Text style={styles.secaoTitulo}>{titulo}</Text>
-      <View style={styles.grid}>{children}</View>
-    </View>
-  )
-}
-
 function fmt(v: any) {
-  if (!v) return '—'
-  return `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+  if (!v && v !== 0) return ''
+  const n = Number(v)
+  if (!n) return ''
+  return `R$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
 }
 
-export async function gerarPdfProposta(dados: {
+function campo(label: string, valor: any, full = false) {
+  if (!valor) return null
+  return React.createElement(View, { style: full ? styles.campoFull : styles.campo },
+    React.createElement(Text, { style: styles.label }, label),
+    React.createElement(Text, { style: styles.valor }, String(valor))
+  )
+}
+
+function secao(titulo: string, ...campos: any[]) {
+  return React.createElement(View, { style: styles.secao },
+    React.createElement(Text, { style: styles.secaoTitulo }, titulo),
+    React.createElement(View, { style: styles.grid }, ...campos.filter(Boolean))
+  )
+}
+
+export interface DadosProposta {
   empreendimento: string
   unidade: string
-  pavimento: string
-  area: string
-  quartos: string
+  pavimento?: string
+  area?: string | number
+  quartos?: string | number
   comprador1_nome: string
-  comprador1_cpf: string
-  comprador1_rg: string
-  comprador1_profissao: string
-  comprador1_email: string
-  comprador1_telefone: string
-  comprador1_nascimento: string
-  comprador1_estado_civil: string
+  comprador1_cpf?: string
+  comprador1_rg?: string
+  comprador1_profissao?: string
+  comprador1_email?: string
+  comprador1_telefone?: string
+  comprador1_nascimento?: string
+  comprador1_estado_civil?: string
   conjuge_nome?: string
   conjuge_cpf?: string
   comprador2_nome?: string
   comprador2_cpf?: string
-  corretor_nome: string
-  corretor_cpf_cnpj: string
-  corretor_creci: string
-  corretor_telefone: string
-  imobiliaria_nome: string
-  segue_tabela: boolean
-  valor_proposto: number
-  valor_sinal: number
-  quantidade_parcelas: number
-  valor_parcela: number
-  quantidade_intercaladas: number
-  periodicidade_intercaladas: string
-  valor_intercalada: number
-  valor_chaves: number
-  observacoes_pagamento: string
-  observacoes: string
+  corretor_nome?: string
+  corretor_cpf_cnpj?: string
+  corretor_creci?: string
+  corretor_telefone?: string
+  imobiliaria_nome?: string
+  segue_tabela?: boolean
+  valor_proposto?: number
+  valor_sinal?: number
+  quantidade_parcelas?: number
+  valor_parcela?: number
+  quantidade_intercaladas?: number
+  periodicidade_intercaladas?: string
+  valor_intercalada?: number
+  valor_chaves?: number
+  observacoes_pagamento?: string
+  observacoes?: string
   propostaId: string
   dataEnvio: string
-}): Promise<string> {
-  const doc = (
-    <Document>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <Text style={styles.logo}>Casa Forte</Text>
-          <View>
-            <Text style={styles.headerSub}>Proposta de Compra</Text>
-            <Text style={styles.headerSub}>#{dados.propostaId.slice(0, 8).toUpperCase()}</Text>
-            <Text style={styles.headerSub}>{dados.dataEnvio}</Text>
-          </View>
-        </View>
+}
 
-        <Text style={styles.titulo}>{dados.empreendimento}</Text>
-        <Text style={styles.subtitulo}>Unidade {dados.unidade} · {dados.pavimento} · {dados.area}m² · {dados.quartos} quartos</Text>
+export async function gerarPdfProposta(dados: DadosProposta): Promise<string> {
+  const parcelas = dados.quantidade_parcelas && dados.valor_parcela
+    ? `${dados.quantidade_parcelas}x de ${fmt(dados.valor_parcela)}`
+    : ''
 
-        <Secao titulo="Dados do Comprador">
-          <Campo label="Nome completo" valor={dados.comprador1_nome} full />
-          <Campo label="CPF" valor={dados.comprador1_cpf} />
-          <Campo label="RG" valor={dados.comprador1_rg} />
-          <Campo label="Profissão" valor={dados.comprador1_profissao} />
-          <Campo label="Nascimento" valor={dados.comprador1_nascimento} />
-          <Campo label="Estado civil" valor={dados.comprador1_estado_civil} />
-          <Campo label="E-mail" valor={dados.comprador1_email} />
-          <Campo label="Telefone" valor={dados.comprador1_telefone} />
-          {dados.conjuge_nome && <Campo label="Cônjuge" valor={dados.conjuge_nome} />}
-          {dados.conjuge_cpf && <Campo label="CPF cônjuge" valor={dados.conjuge_cpf} />}
-          {dados.comprador2_nome && <Campo label="2º comprador" valor={dados.comprador2_nome} full />}
-          {dados.comprador2_cpf && <Campo label="CPF 2º comprador" valor={dados.comprador2_cpf} />}
-        </Secao>
+  const intercaladas = dados.quantidade_intercaladas && dados.valor_intercalada
+    ? `${dados.quantidade_intercaladas}x de ${fmt(dados.valor_intercalada)}${dados.periodicidade_intercaladas ? ` (${dados.periodicidade_intercaladas})` : ''}`
+    : ''
 
-        <Secao titulo="Corretor / Imobiliária">
-          <Campo label="Corretor" valor={dados.corretor_nome} full />
-          <Campo label="CPF/CNPJ" valor={dados.corretor_cpf_cnpj} />
-          <Campo label="CRECI" valor={dados.corretor_creci} />
-          <Campo label="Telefone" valor={dados.corretor_telefone} />
-          <Campo label="Imobiliária" valor={dados.imobiliaria_nome} />
-        </Secao>
+  const doc = React.createElement(Document, null,
+    React.createElement(Page, { size: 'A4', style: styles.page },
 
-        <Secao titulo="Condições de Pagamento">
-          <View style={styles.campoFull}>
-            <Text style={styles.label}>Valor total proposto</Text>
-            <Text style={styles.destaque}>{fmt(dados.valor_proposto)}</Text>
-            {dados.segue_tabela && <Text style={{ fontSize: 8, color: '#6b7280', marginTop: 2 }}>Segue valores da tabela</Text>}
-          </View>
-          <Campo label="Sinal" valor={fmt(dados.valor_sinal)} />
-          <Campo label="Parcelas mensais" valor={dados.quantidade_parcelas ? `${dados.quantidade_parcelas}x de ${fmt(dados.valor_parcela)}` : ''} />
-          <Campo label="Intercaladas" valor={dados.quantidade_intercaladas ? `${dados.quantidade_intercaladas}x de ${fmt(dados.valor_intercalada)} (${dados.periodicidade_intercaladas})` : ''} />
-          <Campo label="Chaves" valor={fmt(dados.valor_chaves)} />
-          {dados.observacoes_pagamento && <Campo label="Obs. pagamento" valor={dados.observacoes_pagamento} full />}
-        </Secao>
+      // Header
+      React.createElement(View, { style: styles.header },
+        React.createElement(Text, { style: styles.logo }, 'Casa Forte'),
+        React.createElement(View, null,
+          React.createElement(Text, { style: styles.headerSub }, 'Proposta de Compra'),
+          React.createElement(Text, { style: styles.headerSub }, `#${dados.propostaId.slice(0, 8).toUpperCase()}`),
+          React.createElement(Text, { style: styles.headerSub }, dados.dataEnvio),
+        )
+      ),
 
-        {dados.observacoes && (
-          <Secao titulo="Observações">
-            <Campo label="" valor={dados.observacoes} full />
-          </Secao>
-        )}
+      // Título
+      React.createElement(Text, { style: styles.titulo }, dados.empreendimento),
+      React.createElement(Text, { style: styles.subtitulo },
+        `Unidade ${dados.unidade}${dados.pavimento ? ` · ${dados.pavimento}` : ''}${dados.area ? ` · ${dados.area}m²` : ''}${dados.quartos ? ` · ${dados.quartos} quartos` : ''}`
+      ),
 
-        <View style={styles.rodape}>
-          <Text style={styles.rodapeTexto}>Casa Forte Incorporações · tabelas.casaforteinc.com.br</Text>
-          <Text style={styles.rodapeTexto}>Proposta #{dados.propostaId.slice(0, 8).toUpperCase()}</Text>
-        </View>
-      </Page>
-    </Document>
+      // Comprador
+      secao('Dados do Comprador',
+        campo('Nome completo', dados.comprador1_nome, true),
+        campo('CPF', dados.comprador1_cpf),
+        campo('RG', dados.comprador1_rg),
+        campo('Profissão', dados.comprador1_profissao),
+        campo('Nascimento', dados.comprador1_nascimento),
+        campo('Estado civil', dados.comprador1_estado_civil),
+        campo('E-mail', dados.comprador1_email),
+        campo('Telefone', dados.comprador1_telefone),
+        campo('Cônjuge', dados.conjuge_nome),
+        campo('CPF cônjuge', dados.conjuge_cpf),
+        campo('2º comprador', dados.comprador2_nome, true),
+        campo('CPF 2º comprador', dados.comprador2_cpf),
+      ),
+
+      // Corretor
+      secao('Corretor / Imobiliária',
+        campo('Corretor', dados.corretor_nome, true),
+        campo('CPF/CNPJ', dados.corretor_cpf_cnpj),
+        campo('CRECI', dados.corretor_creci),
+        campo('Telefone', dados.corretor_telefone),
+        campo('Imobiliária', dados.imobiliaria_nome),
+      ),
+
+      // Pagamento
+      React.createElement(View, { style: styles.secao },
+        React.createElement(Text, { style: styles.secaoTitulo }, 'Condições de Pagamento'),
+        React.createElement(View, { style: styles.grid },
+          React.createElement(View, { style: styles.campoFull },
+            React.createElement(Text, { style: styles.label }, 'Valor total proposto'),
+            React.createElement(Text, { style: styles.destaque }, fmt(dados.valor_proposto)),
+            dados.segue_tabela ? React.createElement(Text, { style: { fontSize: 8, color: '#6b7280', marginTop: 2 } }, 'Segue valores da tabela') : null,
+          ),
+          campo('Sinal', fmt(dados.valor_sinal)),
+          campo('Parcelas mensais', parcelas),
+          campo('Intercaladas', intercaladas),
+          campo('Chaves', fmt(dados.valor_chaves)),
+          campo('Obs. pagamento', dados.observacoes_pagamento, true),
+        )
+      ),
+
+      // Observações
+      dados.observacoes ? secao('Observações', campo('', dados.observacoes, true)) : null,
+
+      // Rodapé
+      React.createElement(View, { style: styles.rodape },
+        React.createElement(Text, { style: styles.rodapeTexto }, 'Casa Forte Incorporações · tabelas.casaforteinc.com.br'),
+        React.createElement(Text, { style: styles.rodapeTexto }, `#${dados.propostaId.slice(0, 8).toUpperCase()}`),
+      )
+    )
   )
 
   const buffer = await renderToBuffer(doc)
