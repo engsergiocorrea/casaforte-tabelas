@@ -131,8 +131,8 @@ export default function PropostaPage() {
     const { data: proposta, error: err } = await supabase.from('propostas').insert([data]).select().single()
     if (err) { setError(err.message); setSaving(false); return }
 
-    // Aguarda o WhatsApp antes de mostrar sucesso
-    await fetch('/api/whatsapp', {
+    // Dispara WhatsApp sem bloquear o usuário
+    fetch('/api/whatsapp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -146,6 +146,7 @@ export default function PropostaPage() {
       }),
     }).catch(e => console.error('[WhatsApp]', e))
 
+    // Mostra sucesso imediatamente
     setPropostaId(proposta.id)
     setSuccess(true)
     setSaving(false)
