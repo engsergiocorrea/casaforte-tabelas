@@ -93,7 +93,7 @@ export async function gerarPdfProposta(dados: DadosProposta): Promise<string> {
 
   y = height - 80
 
-  // Título
+  // Titulo
   texto(dados.empreendimento, 40, y, { bold: true, size: 14 })
   y -= 16
   const subtitulo = `Unidade ${dados.unidade}${dados.pavimento ? ` - ${dados.pavimento}` : ''}${dados.area ? ` - ${dados.area}m2` : ''}${dados.quartos ? ` - ${dados.quartos} quartos` : ''}`
@@ -162,14 +162,14 @@ export async function gerarPdfProposta(dados: DadosProposta): Promise<string> {
     y -= 28
   }
 
-  // Observações
+  // Observacoes
   if (dados.observacoes) {
     secao('Observacoes')
     texto(dados.observacoes.slice(0, 120), 40, y, { size: 9 })
     y -= 28
   }
 
-  // Rodapé
+  // Rodape
   linha(40)
   texto('Casa Forte Incorporacoes - tabelas.casaforteinc.com.br', 40, 28, { size: 7, color: cinza })
   texto(`#${dados.propostaId.slice(0, 8).toUpperCase()}`, width - 100, 28, { size: 7, color: cinza })
