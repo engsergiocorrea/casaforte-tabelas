@@ -1,37 +1,4 @@
-import { renderToBuffer, Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
-
-const styles = StyleSheet.create({
-  page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#111' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingBottom: 16, borderBottomWidth: 2, borderBottomColor: '#E8390E' },
-  logo: { fontSize: 18, fontFamily: 'Helvetica-Bold', color: '#E8390E' },
-  headerSub: { fontSize: 9, color: '#6b7280', textAlign: 'right' },
-  titulo: { fontSize: 14, fontFamily: 'Helvetica-Bold', marginBottom: 4 },
-  subtitulo: { fontSize: 10, color: '#6b7280', marginBottom: 20 },
-  secaoTitulo: { fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#E8390E', marginBottom: 8, paddingBottom: 4, borderBottomWidth: 1, borderBottomColor: '#f3d5cc' },
-  secao: { marginBottom: 16 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap' },
-  campo: { width: '50%', marginBottom: 8, paddingRight: 8 },
-  campoFull: { width: '100%', marginBottom: 8 },
-  label: { fontSize: 8, color: '#9ca3af', marginBottom: 2 },
-  valor: { fontSize: 10, color: '#111' },
-  destaque: { fontSize: 13, fontFamily: 'Helvetica-Bold', color: '#E8390E' },
-  rodape: { position: 'absolute', bottom: 28, left: 40, right: 40, borderTopWidth: 0.5, borderTopColor: '#e5e7eb', paddingTop: 6, flexDirection: 'row', justifyContent: 'space-between' },
-  rodapeTexto: { fontSize: 7, color: '#9ca3af' },
-})
-
-function fmt(v: any): string {
-  if (!v && v !== 0) return ''
-  const n = Number(v)
-  if (!n) return ''
-  return `R$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-}
-
-// Cria elementos sem JSX usando a API interna do @react-pdf/renderer
-const el = (type: any, props: any, ...children: any[]) => ({
-  type,
-  props: { ...props, children: children.filter(Boolean) },
-  key: null,
-})
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 
 export interface DadosProposta {
   empreendimento: string
@@ -71,95 +38,142 @@ export interface DadosProposta {
   dataEnvio: string
 }
 
+function fmt(v: any): string {
+  if (!v && v !== 0) return '—'
+  const n = Number(v)
+  if (!n) return '—'
+  return `R$ ${n.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+}
+
 export async function gerarPdfProposta(dados: DadosProposta): Promise<string> {
-  const parcelas = dados.quantidade_parcelas && dados.valor_parcela
-    ? `${dados.quantidade_parcelas}x de ${fmt(dados.valor_parcela)}`
-    : ''
+  const pdfDoc = await PDFDocument.create()
+  const page = pdfDoc.addPage([595, 842])
+  const { width, height } = page.getSize()
 
-  const intercaladas = dados.quantidade_intercaladas && dados.valor_intercalada
-    ? `${dados.quantidade_intercaladas}x de ${fmt(dados.valor_intercalada)}${dados.periodicidade_intercaladas ? ` (${dados.periodicidade_intercaladas})` : ''}`
-    : ''
+  const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica)
+  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
 
-  function campo(label: string, valor: any, full = false) {
-    if (!valor) return null
-    return el(View, { style: full ? styles.campoFull : styles.campo },
-      el(Text, { style: styles.label }, label),
-      el(Text, { style: styles.valor }, String(valor))
-    )
+  const vermelho = rgb(0.91, 0.22, 0.055)
+  const cinza = rgb(0.62, 0.62, 0.62)
+  const preto = rgb(0.07, 0.07, 0.07)
+  const cinzaClaro = rgb(0.96, 0.98, 0.99)
+
+  let y = height - 40
+
+  function texto(txt: string, x: number, yPos: number, opts: { bold?: boolean, size?: number, color?: any } = {}) {
+    const font = opts.bold ? fontBold : fontRegular
+    const size = opts.size ?? 10
+    const color = opts.color ?? preto
+    page.drawText(String(txt || ''), { x, y: yPos, size, font, color })
   }
 
-  function secao(titulo: string, ...filhos: any[]) {
-    return el(View, { style: styles.secao },
-      el(Text, { style: styles.secaoTitulo }, titulo),
-      el(View, { style: styles.grid }, ...filhos.filter(Boolean))
-    )
+  function linha(yPos: number) {
+    page.drawLine({ start: { x: 40, y: yPos }, end: { x: width - 40, y: yPos }, thickness: 0.5, color: rgb(0.9, 0.9, 0.9) })
   }
 
-  const doc = el(Document, {},
-    el(Page, { size: 'A4', style: styles.page },
+  function retangulo(x: number, yPos: number, w: number, h: number, color: any) {
+    page.drawRectangle({ x, y: yPos, width: w, height: h, color })
+  }
 
-      el(View, { style: styles.header },
-        el(Text, { style: styles.logo }, 'Casa Forte'),
-        el(View, {},
-          el(Text, { style: styles.headerSub }, 'Proposta de Compra'),
-          el(Text, { style: styles.headerSub }, `#${dados.propostaId.slice(0, 8).toUpperCase()}`),
-          el(Text, { style: styles.headerSub }, dados.dataEnvio),
-        )
-      ),
+  function secao(titulo: string) {
+    y -= 8
+    page.drawLine({ start: { x: 40, y }, end: { x: width - 40, y }, thickness: 0.5, color: rgb(0.95, 0.84, 0.8) })
+    y -= 14
+    texto(titulo, 40, y, { bold: true, size: 10, color: vermelho })
+    y -= 16
+  }
 
-      el(Text, { style: styles.titulo }, dados.empreendimento),
-      el(Text, { style: styles.subtitulo },
-        `Unidade ${dados.unidade}${dados.pavimento ? ` · ${dados.pavimento}` : ''}${dados.area ? ` · ${dados.area}m²` : ''}${dados.quartos ? ` · ${dados.quartos} quartos` : ''}`
-      ),
+  // Header
+  retangulo(0, height - 60, width, 60, rgb(0.99, 0.99, 0.99))
+  texto('Casa Forte', 40, height - 30, { bold: true, size: 18, color: vermelho })
+  texto('Proposta de Compra', width - 180, height - 22, { size: 8, color: cinza })
+  texto(`#${dados.propostaId.slice(0, 8).toUpperCase()}`, width - 180, height - 34, { size: 8, color: cinza })
+  texto(dados.dataEnvio, width - 180, height - 46, { size: 8, color: cinza })
+  page.drawLine({ start: { x: 40, y: height - 62 }, end: { x: width - 40, y: height - 62 }, thickness: 2, color: vermelho })
 
-      secao('Dados do Comprador',
-        campo('Nome completo', dados.comprador1_nome, true),
-        campo('CPF', dados.comprador1_cpf),
-        campo('RG', dados.comprador1_rg),
-        campo('Profissão', dados.comprador1_profissao),
-        campo('Nascimento', dados.comprador1_nascimento),
-        campo('Estado civil', dados.comprador1_estado_civil),
-        campo('E-mail', dados.comprador1_email),
-        campo('Telefone', dados.comprador1_telefone),
-        campo('Cônjuge', dados.conjuge_nome),
-        campo('CPF cônjuge', dados.conjuge_cpf),
-        campo('2º comprador', dados.comprador2_nome, true),
-        campo('CPF 2º comprador', dados.comprador2_cpf),
-      ),
+  y = height - 80
 
-      secao('Corretor / Imobiliária',
-        campo('Corretor', dados.corretor_nome, true),
-        campo('CPF/CNPJ', dados.corretor_cpf_cnpj),
-        campo('CRECI', dados.corretor_creci),
-        campo('Telefone', dados.corretor_telefone),
-        campo('Imobiliária', dados.imobiliaria_nome),
-      ),
+  // Título
+  texto(dados.empreendimento, 40, y, { bold: true, size: 14 })
+  y -= 16
+  const subtitulo = `Unidade ${dados.unidade}${dados.pavimento ? ` - ${dados.pavimento}` : ''}${dados.area ? ` - ${dados.area}m2` : ''}${dados.quartos ? ` - ${dados.quartos} quartos` : ''}`
+  texto(subtitulo, 40, y, { size: 9, color: cinza })
+  y -= 24
 
-      el(View, { style: styles.secao },
-        el(Text, { style: styles.secaoTitulo }, 'Condições de Pagamento'),
-        el(View, { style: styles.grid },
-          el(View, { style: styles.campoFull },
-            el(Text, { style: styles.label }, 'Valor total proposto'),
-            el(Text, { style: styles.destaque }, fmt(dados.valor_proposto) || 'Segue tabela'),
-            dados.segue_tabela ? el(Text, { style: { fontSize: 8, color: '#6b7280', marginTop: 2 } }, 'Segue valores da tabela') : null,
-          ),
-          campo('Sinal', fmt(dados.valor_sinal)),
-          campo('Parcelas mensais', parcelas),
-          campo('Intercaladas', intercaladas),
-          campo('Chaves', fmt(dados.valor_chaves)),
-          campo('Obs. pagamento', dados.observacoes_pagamento, true),
-        )
-      ),
+  // Comprador
+  secao('Dados do Comprador')
+  texto('NOME COMPLETO', 40, y, { size: 7, color: cinza })
+  texto(dados.comprador1_nome || '', 40, y - 12, { size: 9 })
+  y -= 28
 
-      dados.observacoes ? secao('Observações', campo('', dados.observacoes, true)) : null,
+  const col1 = 40, col2 = 310
+  const pares: [string, any][] = [
+    ['CPF', dados.comprador1_cpf],
+    ['RG', dados.comprador1_rg],
+    ['PROFISSAO', dados.comprador1_profissao],
+    ['NASCIMENTO', dados.comprador1_nascimento],
+    ['ESTADO CIVIL', dados.comprador1_estado_civil],
+    ['E-MAIL', dados.comprador1_email],
+    ['TELEFONE', dados.comprador1_telefone],
+  ]
+  for (let i = 0; i < pares.length; i += 2) {
+    const [l1, v1] = pares[i]
+    const [l2, v2] = pares[i + 1] ?? ['', null]
+    if (v1) { texto(l1, col1, y, { size: 7, color: cinza }); texto(String(v1), col1, y - 12, { size: 9 }) }
+    if (v2) { texto(l2, col2, y, { size: 7, color: cinza }); texto(String(v2), col2, y - 12, { size: 9 }) }
+    if (v1 || v2) y -= 28
+  }
+  if (dados.conjuge_nome) { texto('CONJUGE', col1, y, { size: 7, color: cinza }); texto(dados.conjuge_nome, col1, y - 12, { size: 9 }); y -= 28 }
+  if (dados.comprador2_nome) { texto('2 COMPRADOR', col1, y, { size: 7, color: cinza }); texto(dados.comprador2_nome, col1, y - 12, { size: 9 }); y -= 28 }
 
-      el(View, { style: styles.rodape },
-        el(Text, { style: styles.rodapeTexto }, 'Casa Forte Incorporações · tabelas.casaforteinc.com.br'),
-        el(Text, { style: styles.rodapeTexto }, `#${dados.propostaId.slice(0, 8).toUpperCase()}`),
-      )
-    )
-  )
+  // Corretor
+  secao('Corretor / Imobiliaria')
+  if (dados.corretor_nome) { texto('CORRETOR', col1, y, { size: 7, color: cinza }); texto(dados.corretor_nome, col1, y - 12, { size: 9, bold: true }) }
+  if (dados.corretor_telefone) { texto('TELEFONE', col2, y, { size: 7, color: cinza }); texto(dados.corretor_telefone, col2, y - 12, { size: 9 }) }
+  y -= 28
+  if (dados.corretor_creci) { texto('CRECI', col1, y, { size: 7, color: cinza }); texto(dados.corretor_creci, col1, y - 12, { size: 9 }) }
+  if (dados.imobiliaria_nome) { texto('IMOBILIARIA', col2, y, { size: 7, color: cinza }); texto(dados.imobiliaria_nome, col2, y - 12, { size: 9 }) }
+  y -= 28
 
-  const buffer = await renderToBuffer(doc as any)
-  return buffer.toString('base64')
+  // Pagamento
+  secao('Condicoes de Pagamento')
+  retangulo(40, y - 36, width - 80, 44, cinzaClaro)
+  texto('VALOR TOTAL PROPOSTO', 48, y - 8, { size: 7, color: cinza })
+  texto(fmt(dados.valor_proposto) !== '—' ? fmt(dados.valor_proposto) : 'Segue tabela', 48, y - 22, { bold: true, size: 14, color: vermelho })
+  if (dados.segue_tabela) texto('Segue valores da tabela', 48, y - 34, { size: 7, color: cinza })
+  y -= 52
+
+  const pagPares: [string, any][] = [
+    ['SINAL', fmt(dados.valor_sinal)],
+    ['PARCELAS MENSAIS', dados.quantidade_parcelas ? `${dados.quantidade_parcelas}x de ${fmt(dados.valor_parcela)}` : null],
+    ['INTERCALADAS', dados.quantidade_intercaladas ? `${dados.quantidade_intercaladas}x de ${fmt(dados.valor_intercalada)}${dados.periodicidade_intercaladas ? ` (${dados.periodicidade_intercaladas})` : ''}` : null],
+    ['CHAVES', fmt(dados.valor_chaves)],
+  ]
+  for (let i = 0; i < pagPares.length; i += 2) {
+    const [l1, v1] = pagPares[i]
+    const [l2, v2] = pagPares[i + 1] ?? ['', null]
+    if (v1 && v1 !== '—') { texto(l1, col1, y, { size: 7, color: cinza }); texto(String(v1), col1, y - 12, { size: 9 }) }
+    if (v2 && v2 !== '—') { texto(l2, col2, y, { size: 7, color: cinza }); texto(String(v2), col2, y - 12, { size: 9 }) }
+    if ((v1 && v1 !== '—') || (v2 && v2 !== '—')) y -= 28
+  }
+  if (dados.observacoes_pagamento) {
+    texto('OBS. PAGAMENTO', col1, y, { size: 7, color: cinza })
+    texto(dados.observacoes_pagamento.slice(0, 80), col1, y - 12, { size: 9 })
+    y -= 28
+  }
+
+  // Observações
+  if (dados.observacoes) {
+    secao('Observacoes')
+    texto(dados.observacoes.slice(0, 120), 40, y, { size: 9 })
+    y -= 28
+  }
+
+  // Rodapé
+  linha(40)
+  texto('Casa Forte Incorporacoes - tabelas.casaforteinc.com.br', 40, 28, { size: 7, color: cinza })
+  texto(`#${dados.propostaId.slice(0, 8).toUpperCase()}`, width - 100, 28, { size: 7, color: cinza })
+
+  const pdfBytes = await pdfDoc.save()
+  return Buffer.from(pdfBytes).toString('base64')
 }
