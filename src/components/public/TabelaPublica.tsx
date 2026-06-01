@@ -24,7 +24,7 @@ interface Props {
 }
 
 const DEFAULT_COLUNAS = [
-  'unidade', 'pavimento', 'area_construida',
+  'unidade', 'pavimento', 'area_construida', 'area_privativa_externa',
   'quartos', 'posicao', 'valor_imovel', 'valor_sinal',
   'quantidade_parcelas', 'valor_parcela', 'valor_intercalada',
   'valor_chaves', 'status',
@@ -190,7 +190,6 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
         </div>
       </div>
 
-      {/* Tabela com scroll horizontal apenas quando necessário */}
       <div style={{overflowX:'auto'}}>
         {Object.entries(grupos).map(([grupo, items]) => (
           <div key={grupo}>
@@ -206,6 +205,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                   {colunasVisiveis.includes('unidade') && <th style={thStyle()}>Unid.</th>}
                   {colunasVisiveis.includes('pavimento') && !agruparPor && <th style={thStyle()}>Pavimento</th>}
                   {colunasVisiveis.includes('area_construida') && <th style={thStyle('right')}>Área</th>}
+                  {colunasVisiveis.includes('area_privativa_externa') && <th style={thStyle('right')}>Área Ext.</th>}
                   {colunasVisiveis.includes('quartos') && <th style={thStyle('center')}>Qtos</th>}
                   {colunasVisiveis.includes('posicao') && <th style={thStyle()}>Posição</th>}
                   {colunasVisiveis.includes('valor_imovel') && <th style={thStyle('right')}>Valor</th>}
@@ -243,6 +243,11 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                       {colunasVisiveis.includes('area_construida') && (
                         <td style={tdStyle('right')}>
                           <span style={{color:'#6b7280'}}>{unidade.area_construida ? `${unidade.area_construida}m²` : '—'}</span>
+                        </td>
+                      )}
+                      {colunasVisiveis.includes('area_privativa_externa') && (
+                        <td style={tdStyle('right')}>
+                          <span style={{color:'#6b7280'}}>{unidade.area_privativa_externa ? `${unidade.area_privativa_externa}m²` : '—'}</span>
                         </td>
                       )}
                       {colunasVisiveis.includes('quartos') && (
@@ -302,10 +307,9 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                           </span>
                         </td>
                       )}
-                      {/* Coluna de ação separada */}
                       <td style={tdStyle('center')}>
                         {unidade.status === 'disponivel' && (
-                          <a
+                          
                             href={`/empreendimentos/${empreendimento.slug}/proposta/${unidade.id}`}
                             style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'5px 12px',background:'#E8390E',color:'white',borderRadius:'6px',fontSize:'12px',fontWeight:'600',textDecoration:'none',whiteSpace:'nowrap'}}
                           >
