@@ -131,9 +131,10 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
     whiteSpace:'nowrap' as const,
   })
 
+  const slugEmp = empreendimento.slug
+
   return (
     <div style={{background:'white',borderRadius:'16px',border:'1px solid #e5e7eb',overflow:'hidden'}}>
-      {/* Header */}
       <div style={{padding:'14px 20px',borderBottom:'1px solid #f3f4f6'}}>
         <div style={{display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:'12px',marginBottom:'12px'}}>
           <div>
@@ -224,9 +225,9 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                   const ocultarValores =
                     (isReservada && !mostrarValoresReservadas) ||
                     (isVendida && !configuracao?.mostrar_valores_vendidas)
-
                   const rowBg = isReservada ? '#fffbeb' : isVendida ? '#fef2f2' : 'transparent'
                   const rowOpacity = isVendida ? 0.72 : 1
+                  const linkProposta = '/empreendimentos/' + slugEmp + '/proposta/' + unidade.id
 
                   return (
                     <tr key={unidade.id} style={{backgroundColor:rowBg, opacity:rowOpacity}}>
@@ -242,12 +243,12 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                       )}
                       {colunasVisiveis.includes('area_construida') && (
                         <td style={tdStyle('right')}>
-                          <span style={{color:'#6b7280'}}>{unidade.area_construida ? `${unidade.area_construida}m²` : '—'}</span>
+                          <span style={{color:'#6b7280'}}>{unidade.area_construida ? unidade.area_construida + 'm²' : '—'}</span>
                         </td>
                       )}
                       {colunasVisiveis.includes('area_privativa_externa') && (
                         <td style={tdStyle('right')}>
-                          <span style={{color:'#6b7280'}}>{unidade.area_privativa_externa ? `${unidade.area_privativa_externa}m²` : '—'}</span>
+                          <span style={{color:'#6b7280'}}>{unidade.area_privativa_externa ? unidade.area_privativa_externa + 'm²' : '—'}</span>
                         </td>
                       )}
                       {colunasVisiveis.includes('quartos') && (
@@ -280,14 +281,14 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                       {colunasVisiveis.includes('quantidade_parcelas') && colunasVisiveis.includes('valor_parcela') && (
                         <td style={tdStyle('right')}>
                           <span style={{color:'#6b7280'}}>
-                            {ocultarValores ? '—' : (unidade.quantidade_parcelas && unidade.valor_parcela ? `${unidade.quantidade_parcelas}x ${fmtC(unidade.valor_parcela)}` : '—')}
+                            {ocultarValores ? '—' : (unidade.quantidade_parcelas && unidade.valor_parcela ? unidade.quantidade_parcelas + 'x ' + fmtC(unidade.valor_parcela) : '—')}
                           </span>
                         </td>
                       )}
                       {colunasVisiveis.includes('valor_intercalada') && (
                         <td style={tdStyle('right')}>
                           <span style={{color:'#6b7280'}}>
-                            {ocultarValores ? '—' : (unidade.quantidade_intercaladas && unidade.valor_intercalada ? `${unidade.quantidade_intercaladas}x ${fmtC(unidade.valor_intercalada)}` : '—')}
+                            {ocultarValores ? '—' : (unidade.quantidade_intercaladas && unidade.valor_intercalada ? unidade.quantidade_intercaladas + 'x ' + fmtC(unidade.valor_intercalada) : '—')}
                           </span>
                         </td>
                       )}
@@ -309,11 +310,8 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                       )}
                       <td style={tdStyle('center')}>
                         {unidade.status === 'disponivel' && (
-                          
-                            href={`/empreendimentos/${empreendimento.slug}/proposta/${unidade.id}`}
-                            style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'5px 12px',background:'#E8390E',color:'white',borderRadius:'6px',fontSize:'12px',fontWeight:'600',textDecoration:'none',whiteSpace:'nowrap'}}
-                          >
-                            📋 Proposta
+                          <a href={linkProposta} style={{display:'inline-flex',alignItems:'center',gap:'4px',padding:'5px 12px',background:'#E8390E',color:'white',borderRadius:'6px',fontSize:'12px',fontWeight:'600',textDecoration:'none',whiteSpace:'nowrap'}}>
+                            Proposta
                           </a>
                         )}
                       </td>
