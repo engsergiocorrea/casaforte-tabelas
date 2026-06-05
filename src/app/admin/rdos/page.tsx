@@ -10,7 +10,7 @@ export default async function RDOsPage() {
 
   const { data: rdos } = await supabase
     .from('relatorios')
-    .select('*, obras(nome), clientes(nome), engenheiros(nome), profiles(nome)')
+    .select('*, obras(nome), clientes(nome), engenheiros(nome)')
     .eq('tipo', 'rdo')
     .order('created_at', { ascending: false })
 
