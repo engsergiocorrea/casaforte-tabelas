@@ -318,3 +318,205 @@ export const COLUNAS_DISPONIVEIS = [
   { key: 'valor_chaves', label: 'Chaves' },
   { key: 'status', label: 'Status' },
 ]
+// ============================================================
+// MÓDULO DE RELATÓRIOS TÉCNICOS
+// ============================================================
+
+export type ObraStatus =
+  | 'planejamento'
+  | 'em_andamento'
+  | 'paralisada'
+  | 'concluida'
+  | 'entregue'
+  | 'cancelada'
+
+export type TipoRegistro = 'CREA' | 'CAU' | 'outro'
+
+export type RelatorioStatus =
+  | 'rascunho'
+  | 'enviado_para_aprovacao'
+  | 'aprovado'
+  | 'recusado'
+  | 'enviado_ao_cliente'
+  | 'cancelado'
+
+export type RelatorioTipo = 'rdo' | 'laudo'
+
+export type AtividadeStatus =
+  | 'nao_iniciada'
+  | 'em_andamento'
+  | 'concluida'
+  | 'paralisada'
+
+export interface Engenheiro {
+  id: string
+  usuario_id?: string
+  nome: string
+  email?: string
+  telefone?: string
+  cargo?: string
+  registro_profissional?: string
+  tipo_registro: TipoRegistro
+  uf_registro?: string
+  cpf?: string
+  assinatura_url?: string
+  ativo: boolean
+  observacoes?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface Cliente {
+  id: string
+  nome: string
+  email?: string
+  telefone?: string
+  cpf_cnpj?: string
+  endereco?: string
+  cidade?: string
+  estado?: string
+  observacoes?: string
+  ativo: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface Obra {
+  id: string
+  nome: string
+  tipo?: string
+  empreendimento_id?: string
+  endereco?: string
+  cidade?: string
+  estado?: string
+  contratante_nome?: string
+  contratante_cpf_cnpj?: string
+  data_inicio?: string
+  prazo_contratual_dias?: number
+  data_prevista_conclusao?: string
+  responsavel_tecnico_id?: string
+  status: ObraStatus
+  observacoes?: string
+  ativo: boolean
+  created_by?: string
+  created_at: string
+  updated_at: string
+  engenheiros?: Engenheiro
+  empreendimentos?: { nome: string }
+}
+
+export interface RelatorioMaoObra {
+  id: string
+  relatorio_id: string
+  funcao: string
+  quantidade: number
+}
+
+export interface RelatorioAtividade {
+  id: string
+  relatorio_id: string
+  descricao: string
+  percentual?: number
+  status?: AtividadeStatus
+}
+
+export interface RelatorioImagem {
+  id: string
+  relatorio_id: string
+  url: string
+  path?: string
+  legenda?: string
+  ordem: number
+}
+
+export interface RelatorioHistorico {
+  id: string
+  relatorio_id: string
+  usuario_id?: string
+  acao: string
+  observacao?: string
+  created_at: string
+  profiles?: { nome: string }
+}
+
+export interface Relatorio {
+  id: string
+  numero?: number
+  tipo: RelatorioTipo
+  obra_id?: string
+  empreendimento_id?: string
+  unidade_id?: string
+  cliente_id?: string
+  engenheiro_id?: string
+  data_relatorio?: string
+  status: RelatorioStatus
+  prazo_contratual_dias?: number
+  prazo_decorrido_dias?: number
+  prazo_a_vencer_dias?: number
+  clima_manha?: string
+  clima_tarde?: string
+  observacoes_clima?: string
+  total_mao_obra_direta?: number
+  comentarios?: string
+  objetivo?: string
+  descricao_tecnica?: string
+  constatacoes?: string
+  analise_tecnica?: string
+  recomendacoes?: string
+  conclusao?: string
+  aprovado_por?: string
+  aprovado_em?: string
+  recusado_por?: string
+  recusado_em?: string
+  motivo_recusa?: string
+  enviado_em?: string
+  pdf_url?: string
+  pdf_path?: string
+  obra_nome_snapshot?: string
+  obra_local_snapshot?: string
+  contratante_snapshot?: string
+  engenheiro_nome_snapshot?: string
+  engenheiro_registro_snapshot?: string
+  engenheiro_cargo_snapshot?: string
+  engenheiro_assinatura_url_snapshot?: string
+  cliente_nome_snapshot?: string
+  cliente_email_snapshot?: string
+  created_by?: string
+  created_at: string
+  updated_at: string
+  obras?: { nome: string; cidade?: string; estado?: string }
+  clientes?: { nome: string; email?: string }
+  engenheiros?: { nome: string; cargo?: string; registro_profissional?: string }
+  profiles?: { nome: string }
+  relatorio_mao_obra?: RelatorioMaoObra[]
+  relatorio_atividades?: RelatorioAtividade[]
+  relatorio_imagens?: RelatorioImagem[]
+  relatorio_historico?: RelatorioHistorico[]
+}
+
+export const OBRA_STATUS_LABELS: Record<ObraStatus, string> = {
+  planejamento: '📋 Planejamento',
+  em_andamento: '🔨 Em andamento',
+  paralisada: '⏸️ Paralisada',
+  concluida: '✅ Concluída',
+  entregue: '🏁 Entregue',
+  cancelada: '❌ Cancelada',
+}
+
+export const RELATORIO_STATUS_LABELS: Record<RelatorioStatus, string> = {
+  rascunho: 'Rascunho',
+  enviado_para_aprovacao: 'Aguardando aprovação',
+  aprovado: 'Aprovado',
+  recusado: 'Recusado',
+  enviado_ao_cliente: 'Enviado ao cliente',
+  cancelado: 'Cancelado',
+}
+
+export const RELATORIO_STATUS_COLORS: Record<RelatorioStatus, { bg: string; color: string }> = {
+  rascunho: { bg: '#f3f4f6', color: '#6b7280' },
+  enviado_para_aprovacao: { bg: '#fef3c7', color: '#92400e' },
+  aprovado: { bg: '#dcfce7', color: '#15803d' },
+  recusado: { bg: '#fee2e2', color: '#b91c1c' },
+  enviado_ao_cliente: { bg: '#dbeafe', color: '#1d4ed8' },
+  cancelado: { bg: '#f3f4f6', color: '#6b7280' },
+}
