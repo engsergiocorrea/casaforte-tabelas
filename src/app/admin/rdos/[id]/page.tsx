@@ -2,8 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import AprovarRecusarRDO from '@/app/admin/rdos/[id]/AprovarRecusarRDO'
-
+import AprovarRecusarRDO from '@/app/admin/rdos/AprovarRecusarRDO'
 export default function AprovarRecusarRDO({ rdoId }: { rdoId: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
