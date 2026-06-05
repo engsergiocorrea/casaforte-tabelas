@@ -43,7 +43,7 @@ export default async function EngenheirosPage() {
                   <td style={{ padding: '10px 14px', fontWeight: '600', color: '#111' }}>{eng.nome}</td>
                   <td style={{ padding: '10px 14px', color: '#6b7280' }}>{eng.cargo ?? '—'}</td>
                   <td style={{ padding: '10px 14px', color: '#6b7280' }}>
-                    {eng.registro_profissional ? `${eng.tipo_registro} ${eng.registro_profissional}${eng.uf_registro ? '/' + eng.uf_registro : ''}` : '—'}
+                    {eng.registro_profissional ? eng.tipo_registro + ' ' + eng.registro_profissional + (eng.uf_registro ? '/' + eng.uf_registro : '') : '—'}
                   </td>
                   <td style={{ padding: '10px 14px', color: '#6b7280' }}>{eng.email ?? '—'}</td>
                   <td style={{ padding: '10px 14px', color: '#6b7280' }}>{eng.telefone ?? '—'}</td>
@@ -53,7 +53,7 @@ export default async function EngenheirosPage() {
                     </span>
                   </td>
                   <td style={{ padding: '10px 14px' }}>
-                    <Link href={`/admin/engenheiros/${eng.id}`} style={{ padding: '3px 10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '12px', color: '#374151', textDecoration: 'none' }}>
+                    <Link href={'/admin/engenheiros/' + eng.id} style={{ padding: '3px 10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '12px', color: '#374151', textDecoration: 'none' }}>
                       Ver
                     </Link>
                   </td>
