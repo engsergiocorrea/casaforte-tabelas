@@ -2,6 +2,8 @@ import { createClient as createServerClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { RELATORIO_STATUS_LABELS, RELATORIO_STATUS_COLORS } from '@/types'
 
+export const dynamic = 'force-dynamic'
+
 export default async function RDOsPage() {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
