@@ -1,9 +1,12 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createServerClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { RELATORIO_STATUS_LABELS, RELATORIO_STATUS_COLORS } from '@/types'
 
 export default async function RDOsPage() {
-  const supabase = await createClient()
+  const supabase = createServerClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
   const { data: rdos } = await supabase
     .from('relatorios')
