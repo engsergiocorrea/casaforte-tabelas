@@ -15,6 +15,7 @@ const NAV = [
   { href: '/admin/engenheiros', label: 'Engenheiros', icon: '👷' },
   { href: '/admin/clientes', label: 'Clientes', icon: '👤' },
   { href: '/admin/usuarios', label: 'Usuários', icon: '👥' },
+  { href: '/admin/rdos', label: 'RDOs', icon: '📝' },
 ]
 
 function Sidebar({ onSignOut }: { onSignOut: () => void }) {
