@@ -10,8 +10,12 @@ const NAV = [
   { href: '/admin/unidades', label: 'Unidades', icon: '🏠' },
   { href: '/admin/vendas', label: 'Vendas', icon: '💼' },
   { href: '/admin/relatorios', label: 'Relatórios', icon: '📈' },
-{ href: '/admin/propostas', label: 'Propostas', icon: '📋' },
-{ href: '/admin/usuarios', label: 'Usuários', icon: '👥' },]
+  { href: '/admin/propostas', label: 'Propostas', icon: '📋' },
+  { href: '/admin/obras', label: 'Obras', icon: '🔨' },
+  { href: '/admin/engenheiros', label: 'Engenheiros', icon: '👷' },
+  { href: '/admin/clientes', label: 'Clientes', icon: '👤' },
+  { href: '/admin/usuarios', label: 'Usuários', icon: '👥' },
+]
 
 function Sidebar({ onSignOut }: { onSignOut: () => void }) {
   const pathname = usePathname()
@@ -26,7 +30,7 @@ function Sidebar({ onSignOut }: { onSignOut: () => void }) {
           </div>
         </div>
       </div>
-      <nav style={{flex:1,padding:'10px 8px'}}>
+      <nav style={{flex:1,padding:'10px 8px',overflowY:'auto'}}>
         {NAV.map(item => {
           const active = pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href))
           return (
@@ -71,12 +75,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/admin/login')
   }
 
-  // Página de login — sem sidebar
   if (pathname === '/admin/login') {
     return <>{children}</>
   }
 
-  // Aguardando verificação de autenticação
   if (authenticated === null) {
     return (
       <div style={{minHeight:'100vh',background:'#F5F3F0',display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -85,7 +87,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     )
   }
 
-  // Não autenticado
   if (!authenticated) return null
 
   return (
