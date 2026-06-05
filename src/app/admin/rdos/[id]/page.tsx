@@ -2,8 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { RELATORIO_STATUS_LABELS, RELATORIO_STATUS_COLORS } from '@/types'
-import AprovarRecusarRDO from '@/app/admin/rdos/AprovarRecusarRDO'
-
+import AprovarRecusarRDO from '@/components/rdos/AprovarRecusarRDO'
 export default async function RDODetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
