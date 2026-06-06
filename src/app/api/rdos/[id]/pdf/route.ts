@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient as createServerClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = createServerClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+  const supabase = await createClient()
 
   const { data: rdo } = await supabase
     .from('relatorios')
@@ -31,21 +28,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   function novaPage() {
     const p = pdfDoc.addPage([595, 842])
     const { width, height } = p.getSize()
-
-    // Header vermelho
     p.drawRectangle({ x: 0, y: height - 70, width, height: 70, color: vermelho })
     p.drawText('CASA FORTE', { x: 30, y: height - 28, size: 16, font: fontBold, color: branco })
     p.drawText('Construtora e Incorporadora', { x: 30, y: height - 44, size: 9, font: fontRegular, color: rgb(1, 0.8, 0.8) })
-    p.drawText('RELATÓRIO DIÁRIO DE OBRA — RDO', { x: 30, y: height - 60, size: 8, font: fontBold, color: branco })
-
-    const rdoInfo = 'RDO Nº ' + (rdo.numero ?? '—') + '   |   ' + (rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : '—') + '   |   ✓ APROVADO'
+    p.drawText('RELATORIO DIARIO DE OBRA - RDO', { x: 30, y: height - 60, size: 8, font: fontBold, color: branco })
+    const rdoInfo = 'RDO No ' + (rdo.numero ?? '-') + '   |   ' + (rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '-') + '   |   APROVADO'
     p.drawText(rdoInfo, { x: width - 30 - fontRegular.widthOfTextAtSize(rdoInfo, 8), y: height - 44, size: 8, font: fontRegular, color: branco })
-
-    // Rodapé
     p.drawLine({ start: { x: 30, y: 30 }, end: { x: width - 30, y: 30 }, thickness: 0.5, color: cinza })
     p.drawText('Casa Forte Construtora e Incorporadora', { x: 30, y: 18, size: 7, font: fontRegular, color: cinza })
-    p.drawText('RDO #' + (rdo.numero ?? '—'), { x: width - 30 - fontRegular.widthOfTextAtSize('RDO #' + (rdo.numero ?? '—'), 7), y: 18, size: 7, font: fontRegular, color: cinza })
-
+    p.drawText('RDO #' + (rdo.numero ?? '-'), { x: width - 30 - fontRegular.widthOfTextAtSize('RDO #' + (rdo.numero ?? '-'), 7), y: 18, size: 7, font: fontRegular, color: cinza })
     return { p, y: height - 90 }
   }
 
@@ -76,12 +67,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     y -= 20
   }
 
-  function drawCampo(label: string, valor: string, x: number, yPos: number, w: number) {
-    drawText(label.toUpperCase(), x, yPos, { size: 7, color: cinza })
-    drawText(valor || '—', x, yPos - 11, { size: 9 })
-    return yPos - 26
-  }
-
   const climaLabel: Record<string, string> = {
     sol: 'Sol', nublado: 'Nublado',
     chuva_fraca: 'Chuva fraca', chuva_forte: 'Chuva forte', vento: 'Vento',
@@ -91,22 +76,22 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   drawSecao('Dados Gerais')
   const col1 = marginL, col2 = marginL + contentW / 2
   drawText('OBRA', col1, y, { size: 7, color: cinza })
-  drawText((rdo.obras as any)?.nome ?? '—', col1, y - 11, { size: 9, bold: true })
+  drawText((rdo.obras as any)?.nome ?? '-', col1, y - 11, { size: 9, bold: true })
   drawText('DATA', col2, y, { size: 7, color: cinza })
-  drawText(rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '—', col2, y - 11, { size: 9 })
+  drawText(rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '-', col2, y - 11, { size: 9 })
   y -= 26
 
   drawText('LOCAL', col1, y, { size: 7, color: cinza })
   const local = [(rdo.obras as any)?.endereco, (rdo.obras as any)?.cidade, (rdo.obras as any)?.estado].filter(Boolean).join(', ')
-  drawText(local || '—', col1, y - 11, { size: 9 })
+  drawText(local || '-', col1, y - 11, { size: 9 })
   drawText('CONTRATANTE', col2, y, { size: 7, color: cinza })
-  drawText((rdo.obras as any)?.contratante_nome ?? '—', col2, y - 11, { size: 9 })
+  drawText((rdo.obras as any)?.contratante_nome ?? '-', col2, y - 11, { size: 9 })
   y -= 26
 
   drawText('RESPONSAVEL TECNICO', col1, y, { size: 7, color: cinza })
-  const engNome = (rdo.engenheiros as any)?.nome ?? '—'
+  const engNome = (rdo.engenheiros as any)?.nome ?? '-'
   const engReg = (rdo.engenheiros as any)?.registro_profissional ? (rdo.engenheiros as any).tipo_registro + ' ' + (rdo.engenheiros as any).registro_profissional : ''
-  drawText(engNome + (engReg ? ' — ' + engReg : ''), col1, y - 11, { size: 9 })
+  drawText(engNome + (engReg ? ' - ' + engReg : ''), col1, y - 11, { size: 9 })
   y -= 26
 
   // PRAZOS
@@ -115,11 +100,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const col3 = marginL + contentW / 3
     const col4 = marginL + (contentW / 3) * 2
     drawText('PRAZO CONTRATUAL', col1, y, { size: 7, color: cinza })
-    drawText(rdo.prazo_contratual_dias ? rdo.prazo_contratual_dias + ' dias' : '—', col1, y - 11, { size: 9 })
+    drawText(rdo.prazo_contratual_dias ? rdo.prazo_contratual_dias + ' dias' : '-', col1, y - 11, { size: 9 })
     drawText('PRAZO DECORRIDO', col3, y, { size: 7, color: cinza })
-    drawText(rdo.prazo_decorrido_dias ? rdo.prazo_decorrido_dias + ' dias' : '—', col3, y - 11, { size: 9 })
+    drawText(rdo.prazo_decorrido_dias ? rdo.prazo_decorrido_dias + ' dias' : '-', col3, y - 11, { size: 9 })
     drawText('PRAZO A VENCER', col4, y, { size: 7, color: cinza })
-    drawText(rdo.prazo_a_vencer_dias !== null ? rdo.prazo_a_vencer_dias + ' dias' : '—', col4, y - 11, { size: 9 })
+    drawText(rdo.prazo_a_vencer_dias !== null ? rdo.prazo_a_vencer_dias + ' dias' : '-', col4, y - 11, { size: 9 })
     y -= 26
   }
 
@@ -127,9 +112,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   if (rdo.clima_manha || rdo.clima_tarde) {
     drawSecao('Condicao Climatica')
     drawText('MANHA', col1, y, { size: 7, color: cinza })
-    drawText(rdo.clima_manha ? climaLabel[rdo.clima_manha] ?? rdo.clima_manha : '—', col1, y - 11, { size: 9 })
+    drawText(rdo.clima_manha ? climaLabel[rdo.clima_manha] ?? rdo.clima_manha : '-', col1, y - 11, { size: 9 })
     drawText('TARDE', col2, y, { size: 7, color: cinza })
-    drawText(rdo.clima_tarde ? climaLabel[rdo.clima_tarde] ?? rdo.clima_tarde : '—', col2, y - 11, { size: 9 })
+    drawText(rdo.clima_tarde ? climaLabel[rdo.clima_tarde] ?? rdo.clima_tarde : '-', col2, y - 11, { size: 9 })
     y -= 26
     if (rdo.observacoes_clima) {
       drawText('OBSERVACOES', col1, y, { size: 7, color: cinza })
@@ -145,7 +130,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     drawText('FUNCAO', marginL + 8, y + 8, { size: 7, color: cinza, bold: true })
     drawText('QTD', marginL + contentW - 50, y + 8, { size: 7, color: cinza, bold: true })
     y -= 20
-
     let totalMao = 0
     for (const m of rdo.relatorio_mao_obra) {
       checkY(20)
@@ -170,7 +154,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     drawText('%', marginL + contentW - 100, y + 8, { size: 7, color: cinza, bold: true })
     drawText('STATUS', marginL + contentW - 70, y + 8, { size: 7, color: cinza, bold: true })
     y -= 20
-
     const statusLabel: Record<string, string> = { nao_iniciada: 'Nao iniciada', em_andamento: 'Em andamento', concluida: 'Concluida', paralisada: 'Paralisada' }
     for (const a of rdo.relatorio_atividades) {
       checkY(20)
@@ -199,7 +182,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   checkY(80)
   y -= 20
   page.drawLine({ start: { x: marginL, y }, end: { x: marginL + 200, y }, thickness: 0.5, color: preto })
-  drawText((rdo.engenheiros as any)?.nome ?? 'Responsável Técnico', marginL, y - 12, { size: 9 })
+  drawText((rdo.engenheiros as any)?.nome ?? 'Responsavel Tecnico', marginL, y - 12, { size: 9 })
   if ((rdo.engenheiros as any)?.registro_profissional) {
     drawText((rdo.engenheiros as any).tipo_registro + ' ' + (rdo.engenheiros as any).registro_profissional, marginL, y - 22, { size: 8, color: cinza })
   }
