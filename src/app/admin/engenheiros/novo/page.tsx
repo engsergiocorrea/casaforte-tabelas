@@ -21,20 +21,25 @@ export default function NovoEngenheiroPage() {
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!form.nome) { setError('Nome é obrigatório'); return }
-    setSaving(true)
-    setError('')
-    const supabase = createClient()
-    const { error: err } = await supabase.from('engenheiros').insert([form])
-    if (err) {
-      setError('Erro: ' + err.message + ' | Code: ' + err.code)
-      setSaving(false)
-      return
-    }
+  e.preventDefault()
+  if (!form.nome) { setError('Nome é obrigatório'); return }
+  setSaving(true)
+  setError('')
+  try {
+    const res = await fetch('/api/engenheiros', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+    const json = await res.json()
+    if (!res.ok) { setError('Erro: ' + JSON.stringify(json)); setSaving(false); return }
     setSuccess(true)
     setTimeout(() => router.push('/admin/engenheiros'), 1000)
+  } catch (err: any) {
+    setError('Erro: ' + err.message)
+    setSaving(false)
   }
+}
 
   const inp = (name: string, type = 'text') => (
     <input name={name} type={type} value={(form as any)[name]} onChange={handleChange}
