@@ -10,15 +10,17 @@ export default function ObrasLoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    const supabase = createClient()
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-    if (err) { setError('E-mail ou senha inválidos'); setLoading(false); return }
-    window.location.href = '/obras'
-  }
+async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault()
+  setLoading(true)
+  setError('')
+  const supabase = createClient()
+  const { data, error: err } = await supabase.auth.signInWithPassword({ email, password })
+  if (err) { setError('Erro: ' + err.message); setLoading(false); return }
+  if (!data.session) { setError('Login ok mas sem sessão'); setLoading(false); return }
+  setError('Login OK! Redirecionando...')
+  setTimeout(() => { window.location.href = '/obras' }, 1000)
+}
 
   return (
     <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
