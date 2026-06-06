@@ -21,7 +21,6 @@ async function handleSubmit(e: React.FormEvent) {
   setError('Login OK! Redirecionando...')
   setTimeout(() => { window.location.href = '/obras' }, 1000)
 }
-
   return (
     <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #DDD9D3', padding: '2.5rem', width: '100%', maxWidth: '400px' }}>
