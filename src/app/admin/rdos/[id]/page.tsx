@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { RELATORIO_STATUS_LABELS, RELATORIO_STATUS_COLORS } from '@/types'
 import AprovarRecusarRDO from '@/components/rdos/AprovarRecusarRDO'
+import ExcluirRDO from '@/components/rdos/ExcluirRDO'
+
 export default async function RDODetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
@@ -54,6 +56,7 @@ export default async function RDODetalhePage({ params }: { params: Promise<{ id:
               ✏️ Editar
             </Link>
           )}
+          <ExcluirRDO rdoId={rdo.id} />
         </div>
       </div>
 
