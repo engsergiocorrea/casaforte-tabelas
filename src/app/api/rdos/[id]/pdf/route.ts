@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const cinza = rgb(0.62, 0.62, 0.62)
   const cinzaClaro = rgb(0.97, 0.97, 0.97)
   const branco = rgb(1, 1, 1)
-  const cinzaEscuro = rgb(0.12, 0.12, 0.12)
+  const cinzaEscuro = rgb(1, 1, 1)
 
   // Logo
   let logoImage: any = null
