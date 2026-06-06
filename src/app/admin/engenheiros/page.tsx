@@ -1,95 +1,63 @@
-'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import type { Engenheiro } from '@/types'
+
 export const dynamic = 'force-dynamic'
 
-export default function NovoEngenheiroPage() {
-  const router = useRouter()
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [form, setForm] = useState({
-    nome: '', email: '', telefone: '', cargo: '',
-    registro_profissional: '', tipo_registro: 'CREA', uf_registro: '', cpf: '',
-    observacoes: '', ativo: true,
-  })
-
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
-    const { name, value, type } = e.target
-    setForm(f => ({ ...f, [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value }))
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (!form.nome) { setError('Nome é obrigatório'); return }
-    setSaving(true)
-    setError('')
-    const { error: err } = await createClient().from('engenheiros').insert([form])
-    if (err) { setError(err.message); setSaving(false); return }
-    router.push('/admin/engenheiros')
-  }
-
-  const inp = (name: string, type = 'text') => (
-    <input name={name} type={type} value={(form as any)[name]} onChange={handleChange}
-      style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
-  )
-  const lbl = (text: string) => <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>{text}</label>
+export default async function EngenheirosPage() {
+  const supabase = await createClient()
+  const { data: engenheiros } = await supabase.from('engenheiros').select('*').order('nome')
 
   return (
-    <div style={{ maxWidth: '700px' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <Link href="/admin/engenheiros" style={{ fontSize: '13px', color: '#6b7280', textDecoration: 'none' }}>← Engenheiros</Link>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111', marginTop: '4px' }}>Novo Engenheiro</h1>
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111' }}>Engenheiros</h1>
+          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.25rem' }}>{engenheiros?.length ?? 0} cadastrados</p>
+        </div>
+        <Link href="/admin/engenheiros/novo" style={{ padding: '8px 20px', background: '#E8390E', color: 'white', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
+          + Novo engenheiro
+        </Link>
       </div>
-      {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#b91c1c', fontSize: '14px' }}>{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Dados pessoais</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-            <div style={{ gridColumn: '1/-1' }}>{lbl('Nome completo *')}{inp('nome')}</div>
-            <div>{lbl('E-mail')}{inp('email', 'email')}</div>
-            <div>{lbl('Telefone')}{inp('telefone', 'tel')}</div>
-            <div>{lbl('CPF')}{inp('cpf')}</div>
-            <div>{lbl('Cargo')}{inp('cargo')}</div>
+      <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', overflow: 'hidden' }}>
+        {!engenheiros || engenheiros.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👷</div>
+            <p style={{ fontSize: '1rem', color: '#374151', fontWeight: '500' }}>Nenhum engenheiro cadastrado</p>
           </div>
-        </div>
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Registro profissional</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
-            <div>
-              {lbl('Tipo')}
-              <select name="tipo_registro" value={form.tipo_registro} onChange={handleChange}
-                style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }}>
-                <option value="CREA">CREA</option>
-                <option value="CAU">CAU</option>
-                <option value="outro">Outro</option>
-              </select>
-            </div>
-            <div>{lbl('Número')}{inp('registro_profissional')}</div>
-            <div>{lbl('UF')}{inp('uf_registro')}</div>
-          </div>
-        </div>
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
-          <div style={{ marginBottom: '14px' }}>
-            {lbl('Observações')}
-            <textarea name="observacoes" value={form.observacoes} onChange={handleChange} rows={3}
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' as const }} />
-          </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px' }}>
-            <input type="checkbox" name="ativo" checked={form.ativo} onChange={handleChange} style={{ width: '16px', height: '16px', accentColor: '#E8390E' }} />
-            Engenheiro ativo
-          </label>
-        </div>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button type="submit" disabled={saving} style={{ padding: '10px 24px', background: '#E8390E', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
-            {saving ? 'Salvando...' : 'Salvar engenheiro'}
-          </button>
-          <button type="button" onClick={() => router.back()} style={{ padding: '10px 24px', background: 'white', border: '1px solid #DDD9D3', color: '#374151', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
-            Cancelar
-          </button>
-        </div>
-      </form>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+            <thead>
+              <tr style={{ background: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
+                {['Nome', 'Cargo', 'Registro', 'E-mail', 'Telefone', 'Status', ''].map(h => (
+                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {engenheiros.map((eng: Engenheiro) => (
+                <tr key={eng.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <td style={{ padding: '10px 14px', fontWeight: '600', color: '#111' }}>{eng.nome}</td>
+                  <td style={{ padding: '10px 14px', color: '#6b7280' }}>{eng.cargo ?? '—'}</td>
+                  <td style={{ padding: '10px 14px', color: '#6b7280' }}>
+                    {eng.registro_profissional ? eng.tipo_registro + ' ' + eng.registro_profissional + (eng.uf_registro ? '/' + eng.uf_registro : '') : '—'}
+                  </td>
+                  <td style={{ padding: '10px 14px', color: '#6b7280' }}>{eng.email ?? '—'}</td>
+                  <td style={{ padding: '10px 14px', color: '#6b7280' }}>{eng.telefone ?? '—'}</td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '600', background: eng.ativo ? '#dcfce7' : '#f3f4f6', color: eng.ativo ? '#15803d' : '#6b7280' }}>
+                      {eng.ativo ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <Link href={'/admin/engenheiros/' + eng.id} style={{ padding: '3px 10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '12px', color: '#374151', textDecoration: 'none' }}>Ver</Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   )
 }
