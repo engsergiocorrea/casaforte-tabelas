@@ -24,6 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const cinza = rgb(0.62, 0.62, 0.62)
   const cinzaClaro = rgb(0.97, 0.97, 0.97)
   const branco = rgb(1, 1, 1)
+  const cinzaEscuro = rgb(0.12, 0.12, 0.12)
 
   // Logo
   let logoImage: any = null
@@ -55,34 +56,30 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   function novaPage() {
     const p = pdfDoc.addPage([595, 842])
     const { width, height } = p.getSize()
+
     // Header cinza escuro
-p.drawRectangle({ x: 0, y: height - 70, width, height: 70, color: rgb(0.12, 0.12, 0.12) })
+    p.drawRectangle({ x: 0, y: height - 70, width, height: 70, color: cinzaEscuro })
 
-if (logoImage) {
-  p.drawImage(logoImage, { x: 24, y: height - 60, width: 100, height: 36 })
-} else {
-  p.drawText('CASA FORTE', { x: 30, y: height - 28, size: 16, font: fontBold, color: branco })
-  p.drawText('Construtora e Incorporadora', { x: 30, y: height - 44, size: 9, font: fontRegular, color: rgb(0.7, 0.7, 0.7) })
-}
+    // Linha vermelha embaixo do header
+    p.drawRectangle({ x: 0, y: height - 72, width, height: 2, color: vermelho })
 
-// Linha vermelha embaixo do header
-p.drawRectangle({ x: 0, y: height - 72, width, height: 2, color: vermelho })
-
-p.drawText('RELATORIO DIARIO DE OBRA - RDO', { x: 30, y: height - 64, size: 7, font: fontBold, color: rgb(0.7, 0.7, 0.7) })
-const rdoInfo = 'RDO No ' + (rdo.numero ?? '-') + '   |   ' + (rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '-') + '   |   APROVADO'
-p.drawText(rdoInfo, { x: width - 30 - fontRegular.widthOfTextAtSize(rdoInfo, 8), y: height - 44, size: 8, font: fontRegular, color: branco })
     if (logoImage) {
-      p.drawImage(logoImage, { x: 24, y: height - 62, width: 120, height: 44 })
+      p.drawImage(logoImage, { x: 24, y: height - 62, width: 100, height: 36 })
     } else {
       p.drawText('CASA FORTE', { x: 30, y: height - 28, size: 16, font: fontBold, color: branco })
-      p.drawText('Construtora e Incorporadora', { x: 30, y: height - 44, size: 9, font: fontRegular, color: rgb(1, 0.8, 0.8) })
+      p.drawText('Construtora e Incorporadora', { x: 30, y: height - 44, size: 9, font: fontRegular, color: rgb(0.7, 0.7, 0.7) })
     }
-    p.drawText('RELATORIO DIARIO DE OBRA - RDO', { x: 30, y: height - 62, size: 7, font: fontBold, color: branco })
-    const rdoInfo = 'RDO No ' + (rdo.numero ?? '-') + '   |   ' + (rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '-') + '   |   APROVADO'
-    p.drawText(rdoInfo, { x: width - 30 - fontRegular.widthOfTextAtSize(rdoInfo, 8), y: height - 44, size: 8, font: fontRegular, color: branco })
+
+    p.drawText('RELATORIO DIARIO DE OBRA - RDO', { x: 30, y: height - 64, size: 7, font: fontBold, color: rgb(0.7, 0.7, 0.7) })
+
+    const info = 'RDO No ' + (rdo.numero ?? '-') + '   |   ' + (rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '-') + '   |   APROVADO'
+    p.drawText(info, { x: width - 30 - fontRegular.widthOfTextAtSize(info, 8), y: height - 44, size: 8, font: fontRegular, color: branco })
+
+    // Rodapé
     p.drawLine({ start: { x: 30, y: 30 }, end: { x: width - 30, y: 30 }, thickness: 0.5, color: cinza })
     p.drawText('Casa Forte Construtora e Incorporadora', { x: 30, y: 18, size: 7, font: fontRegular, color: cinza })
     p.drawText('RDO #' + (rdo.numero ?? '-'), { x: width - 30 - fontRegular.widthOfTextAtSize('RDO #' + (rdo.numero ?? '-'), 7), y: 18, size: 7, font: fontRegular, color: cinza })
+
     return { p, y: height - 90 }
   }
 
