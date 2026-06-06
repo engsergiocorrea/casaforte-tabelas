@@ -16,7 +16,7 @@ export default function ObrasLoginPage() {
     const { error: err } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: 'https://tabelas.casaforteinc.com.br/obras',
+  emailRedirectTo: 'https://tabelas.casaforteinc.com.br/obras/auth/callback',
       },
     })
     if (err) { setError('Erro: ' + err.message); setLoading(false); return }
