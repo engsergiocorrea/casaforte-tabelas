@@ -26,7 +26,7 @@ export default function NovoEngenheiroPage() {
     setSaving(true)
     setError('')
     const supabase = createClient()
-    const { data, error: err } = await supabase.from('engenheiros').insert([form]).select().single()
+    const { error: err } = await supabase.from('engenheiros').insert([form])
     if (err) {
       setError('Erro: ' + err.message + ' | Code: ' + err.code)
       setSaving(false)
