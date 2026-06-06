@@ -17,12 +17,9 @@ export default function ObrasRDODetalhePage() {
     const supabase = createClient()
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) { router.push('/obras/login'); return }
-
       const { data: eng } = await supabase.from('engenheiros').select('*').eq('usuario_id', session.user.id).single()
       const { data: cli } = await supabase.from('clientes').select('*').eq('usuario_id', session.user.id).single()
-      const p = eng ? { ...eng, tipo: 'engenheiro' } : cli ? { ...cli, tipo: 'cliente' } : null
-      setPerfil(p)
-
+      setPerfil(eng ? { ...eng, tipo: 'engenheiro' } : cli ? { ...cli, tipo: 'cliente' } : null)
       const { data } = await supabase
         .from('relatorios')
         .select('*, obras(nome, endereco, cidade, estado, contratante_nome), engenheiros(nome, cargo, registro_profissional, tipo_registro, uf_registro), relatorio_mao_obra(*), relatorio_atividades(*), relatorio_imagens(*)')
