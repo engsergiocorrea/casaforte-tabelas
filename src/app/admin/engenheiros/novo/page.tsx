@@ -1,11 +1,9 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
 export default function NovoEngenheiroPage() {
-  const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -21,25 +19,14 @@ export default function NovoEngenheiroPage() {
   }
 
   async function handleSubmit(e: React.FormEvent) {
-  e.preventDefault()
-  if (!form.nome) { setError('Nome é obrigatório'); return }
-  setSaving(true)
-  setError('')
-  try {
-    const res = await fetch('/api/engenheiros', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    const json = await res.json()
-    if (!res.ok) { setError('Erro: ' + JSON.stringify(json)); setSaving(false); return }
-    setSuccess(true)
-    setTimeout(() => router.push('/admin/engenheiros'), 1000)
-  } catch (err: any) {
-    setError('Erro: ' + err.message)
-    setSaving(false)
+    e.preventDefault()
+    if (!form.nome) { setError('Nome é obrigatório'); return }
+    setSaving(true)
+    setError('')
+    const { error: err } = await createClient().from('engenheiros').insert([form])
+    if (err) { setError(err.message); setSaving(false); return }
+    window.location.href = '/admin/engenheiros'
   }
-}
 
   const inp = (name: string, type = 'text') => (
     <input name={name} type={type} value={(form as any)[name]} onChange={handleChange}
@@ -50,7 +37,7 @@ export default function NovoEngenheiroPage() {
   )
 
   if (success) return (
-    <div style={{ padding: '2rem', color: '#15803d', fontSize: '16px' }}>✅ Engenheiro salvo! Redirecionando...</div>
+    <div style={{ padding: '2rem', color: '#15803d', fontSize: '16px' }}>✅ Engenheiro salvo!</div>
   )
 
   return (
@@ -113,7 +100,7 @@ export default function NovoEngenheiroPage() {
             style={{ padding: '10px 24px', background: '#E8390E', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
             {saving ? 'Salvando...' : 'Salvar engenheiro'}
           </button>
-          <button type="button" onClick={() => router.back()}
+          <button type="button" onClick={() => window.location.href = '/admin/engenheiros'}
             style={{ padding: '10px 24px', background: 'white', border: '1px solid #DDD9D3', color: '#374151', borderRadius: '8px', fontSize: '14px', cursor: 'pointer' }}>
             Cancelar
           </button>
