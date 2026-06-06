@@ -178,6 +178,49 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     y -= 6
   }
 
+  // FOTOS
+  if (rdo.relatorio_imagens?.length > 0) {
+    drawSecao('Fotos (' + rdo.relatorio_imagens.length + ')')
+    const imgW = (contentW - 16) / 3
+    const imgH = imgW * 0.75
+    let col = 0
+
+    for (const img of rdo.relatorio_imagens) {
+      try {
+        const response = await fetch(img.url)
+        const arrayBuffer = await response.arrayBuffer()
+        const uint8 = new Uint8Array(arrayBuffer)
+        const contentType = response.headers.get('content-type') ?? ''
+
+        let embedded
+        if (contentType.includes('png')) {
+          embedded = await pdfDoc.embedPng(uint8)
+        } else {
+          embedded = await pdfDoc.embedJpg(uint8)
+        }
+
+        checkY(imgH + 20)
+        const x = marginL + col * (imgW + 8)
+        page.drawImage(embedded, { x, y: y - imgH, width: imgW, height: imgH })
+
+        if (img.legenda) {
+          drawText(img.legenda.slice(0, 30), x, y - imgH - 10, { size: 7, color: cinza })
+        }
+
+        col++
+        if (col >= 3) {
+          col = 0
+          y -= imgH + 20
+        }
+      } catch (e) {
+        console.error('[PDF] Erro ao embedar imagem:', img.url, e)
+      }
+    }
+
+    if (col > 0) y -= imgH + 20
+    y -= 6
+  }
+
   // ASSINATURA
   checkY(80)
   y -= 20
