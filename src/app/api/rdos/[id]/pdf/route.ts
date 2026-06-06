@@ -70,7 +70,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       p.drawText('Construtora e Incorporadora', { x: 30, y: height - 44, size: 9, font: fontRegular, color: rgb(0.7, 0.7, 0.7) })
     }
 
-    p.drawText('RELATORIO DIARIO DE OBRA - RDO', { x: 30, y: height - 64, size: 7, font: fontBold, color: rgb(0.7, 0.7, 0.7) })
+    const textoRdo = 'RELATORIO DIARIO DE OBRA - RDO'
+const textoRdoW = fontBold.widthOfTextAtSize(textoRdo, 8)
+p.drawText(textoRdo, { x: (width - textoRdoW) / 2, y: height - 82, size: 8, font: fontBold, color: rgb(0.4, 0.4, 0.4) })
 
     const info = 'RDO No ' + (rdo.numero ?? '-') + '   |   ' + (rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '-') + '   |   APROVADO'
     p.drawText(info, { x: width - 30 - fontRegular.widthOfTextAtSize(info, 8), y: height - 44, size: 8, font: fontRegular, color: branco })
