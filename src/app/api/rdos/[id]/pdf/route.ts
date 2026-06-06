@@ -8,7 +8,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { data: rdo } = await supabase
     .from('relatorios')
-    .select('*, obras(nome, endereco, cidade, estado, contratante_nome, data_inicio, prazo_contratual_dias), engenheiros(nome, cargo, registro_profissional, tipo_registro, uf_registro), relatorio_mao_obra(*), relatorio_atividades(*), relatorio_imagens(*)')
+    .select('*, obras(nome, endereco, cidade, estado, contratante_nome, data_inicio, prazo_contratual_dias), engenheiros(nome, cargo, registro_profissional, tipo_registro, uf_registro, assinatura_url), relatorio_mao_obra(*), relatorio_atividades(*), relatorio_imagens(*)')
     .eq('id', id)
     .single()
 
@@ -25,13 +25,44 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const cinzaClaro = rgb(0.97, 0.97, 0.97)
   const branco = rgb(1, 1, 1)
 
+  // Logo
+  let logoImage: any = null
+  try {
+    const logoUrl = 'https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png'
+    const logoResp = await fetch(logoUrl)
+    const logoBytes = new Uint8Array(await logoResp.arrayBuffer())
+    logoImage = await pdfDoc.embedPng(logoBytes)
+  } catch (e) {
+    console.error('[PDF] Erro ao carregar logo:', e)
+  }
+
+  // Assinatura
+  let assinaturaImage: any = null
+  const assinaturaUrl = (rdo.engenheiros as any)?.assinatura_url
+  if (assinaturaUrl) {
+    try {
+      const assResp = await fetch(assinaturaUrl)
+      const assBytes = new Uint8Array(await assResp.arrayBuffer())
+      const contentType = assResp.headers.get('content-type') ?? ''
+      assinaturaImage = contentType.includes('png')
+        ? await pdfDoc.embedPng(assBytes)
+        : await pdfDoc.embedJpg(assBytes)
+    } catch (e) {
+      console.error('[PDF] Erro ao carregar assinatura:', e)
+    }
+  }
+
   function novaPage() {
     const p = pdfDoc.addPage([595, 842])
     const { width, height } = p.getSize()
     p.drawRectangle({ x: 0, y: height - 70, width, height: 70, color: vermelho })
-    p.drawText('CASA FORTE', { x: 30, y: height - 28, size: 16, font: fontBold, color: branco })
-    p.drawText('Construtora e Incorporadora', { x: 30, y: height - 44, size: 9, font: fontRegular, color: rgb(1, 0.8, 0.8) })
-    p.drawText('RELATORIO DIARIO DE OBRA - RDO', { x: 30, y: height - 60, size: 8, font: fontBold, color: branco })
+    if (logoImage) {
+      p.drawImage(logoImage, { x: 24, y: height - 62, width: 120, height: 44 })
+    } else {
+      p.drawText('CASA FORTE', { x: 30, y: height - 28, size: 16, font: fontBold, color: branco })
+      p.drawText('Construtora e Incorporadora', { x: 30, y: height - 44, size: 9, font: fontRegular, color: rgb(1, 0.8, 0.8) })
+    }
+    p.drawText('RELATORIO DIARIO DE OBRA - RDO', { x: 30, y: height - 62, size: 7, font: fontBold, color: branco })
     const rdoInfo = 'RDO No ' + (rdo.numero ?? '-') + '   |   ' + (rdo.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '-') + '   |   APROVADO'
     p.drawText(rdoInfo, { x: width - 30 - fontRegular.widthOfTextAtSize(rdoInfo, 8), y: height - 44, size: 8, font: fontRegular, color: branco })
     p.drawLine({ start: { x: 30, y: 30 }, end: { x: width - 30, y: 30 }, thickness: 0.5, color: cinza })
@@ -184,29 +215,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const imgW = (contentW - 16) / 3
     const imgH = imgW * 0.75
     let col = 0
-
     for (const img of rdo.relatorio_imagens) {
       try {
         const response = await fetch(img.url)
         const arrayBuffer = await response.arrayBuffer()
         const uint8 = new Uint8Array(arrayBuffer)
         const contentType = response.headers.get('content-type') ?? ''
-
         let embedded
         if (contentType.includes('png')) {
           embedded = await pdfDoc.embedPng(uint8)
         } else {
           embedded = await pdfDoc.embedJpg(uint8)
         }
-
         checkY(imgH + 20)
         const x = marginL + col * (imgW + 8)
         page.drawImage(embedded, { x, y: y - imgH, width: imgW, height: imgH })
-
         if (img.legenda) {
           drawText(img.legenda.slice(0, 30), x, y - imgH - 10, { size: 7, color: cinza })
         }
-
         col++
         if (col >= 3) {
           col = 0
@@ -216,14 +242,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         console.error('[PDF] Erro ao embedar imagem:', img.url, e)
       }
     }
-
     if (col > 0) y -= imgH + 20
     y -= 6
   }
 
   // ASSINATURA
-  checkY(80)
+  checkY(100)
   y -= 20
+  if (assinaturaImage) {
+    page.drawImage(assinaturaImage, { x: marginL, y: y - 50, width: 150, height: 50 })
+    y -= 55
+  }
   page.drawLine({ start: { x: marginL, y }, end: { x: marginL + 200, y }, thickness: 0.5, color: preto })
   drawText((rdo.engenheiros as any)?.nome ?? 'Responsavel Tecnico', marginL, y - 12, { size: 9 })
   if ((rdo.engenheiros as any)?.registro_profissional) {
