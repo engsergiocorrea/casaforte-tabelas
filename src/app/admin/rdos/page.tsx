@@ -1,14 +1,11 @@
-import { createClient as createServerClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { RELATORIO_STATUS_LABELS, RELATORIO_STATUS_COLORS } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function RDOsPage() {
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = await createClient()
 
   const { data: rdos, error } = await supabase
     .from('relatorios')
@@ -16,7 +13,7 @@ export default async function RDOsPage() {
     .eq('tipo', 'rdo')
     .order('created_at', { ascending: false })
 
-  console.log('[RDOs]', { count: rdos?.length, error })
+  console.log('[RDOs]', { count: rdos?.length, error: error?.message })
 
   return (
     <div>
@@ -35,7 +32,7 @@ export default async function RDOsPage() {
           <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
             <p style={{ fontSize: '1rem', color: '#374151', fontWeight: '500' }}>Nenhum RDO criado ainda</p>
-            <p style={{ fontSize: '13px', color: '#9ca3af', marginTop: '8px' }}>{error ? 'Erro: ' + error.message : ''}</p>
+            <p style={{ fontSize: '13px', color: '#b91c1c', marginTop: '8px' }}>{error ? 'Erro: ' + error.message : ''}</p>
             <Link href="/admin/rdos/novo" style={{ display: 'inline-block', marginTop: '12px', padding: '8px 20px', background: '#E8390E', color: 'white', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
               Criar primeiro RDO
             </Link>
