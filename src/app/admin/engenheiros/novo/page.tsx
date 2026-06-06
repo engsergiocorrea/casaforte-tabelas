@@ -8,6 +8,7 @@ export default function NovoEngenheiroPage() {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
   const [form, setForm] = useState({
     nome: '', email: '', telefone: '', cargo: '',
     registro_profissional: '', tipo_registro: 'CREA', uf_registro: '', cpf: '',
@@ -24,9 +25,15 @@ export default function NovoEngenheiroPage() {
     if (!form.nome) { setError('Nome é obrigatório'); return }
     setSaving(true)
     setError('')
-    const { error: err } = await createClient().from('engenheiros').insert([form])
-    if (err) { setError(err.message); setSaving(false); return }
-    router.push('/admin/engenheiros')
+    const supabase = createClient()
+    const { data, error: err } = await supabase.from('engenheiros').insert([form]).select().single()
+    if (err) {
+      setError('Erro: ' + err.message + ' | Code: ' + err.code)
+      setSaving(false)
+      return
+    }
+    setSuccess(true)
+    setTimeout(() => router.push('/admin/engenheiros'), 1000)
   }
 
   const inp = (name: string, type = 'text') => (
@@ -35,6 +42,10 @@ export default function NovoEngenheiroPage() {
   )
   const lbl = (text: string) => (
     <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>{text}</label>
+  )
+
+  if (success) return (
+    <div style={{ padding: '2rem', color: '#15803d', fontSize: '16px' }}>✅ Engenheiro salvo! Redirecionando...</div>
   )
 
   return (
@@ -80,7 +91,6 @@ export default function NovoEngenheiroPage() {
         </div>
 
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Outras informações</h2>
           <div style={{ marginBottom: '14px' }}>
             {lbl('Observações')}
             <textarea name="observacoes" value={form.observacoes} onChange={handleChange} rows={3}
