@@ -1,58 +1,70 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
-export default function ObrasLoginPage() {
+export default function ObrasLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
   const router = useRouter()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null)
+  const [perfil, setPerfil] = useState<any>(null)
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+  useEffect(() => {
     const supabase = createClient()
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-    if (err) { setError('E-mail ou senha inválidos'); setLoading(false); return }
-    window.location.href = '/obras'
+
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!session && pathname !== '/obras/login') {
+        router.push('/obras/login')
+        return
+      }
+      if (session) {
+        const { data: eng } = await supabase.from('engenheiros').select('*').eq('usuario_id', session.user.id).single()
+        const { data: cli } = await supabase.from('clientes').select('*').eq('usuario_id', session.user.id).single()
+        setPerfil(eng ? { ...eng, tipo: 'engenheiro' } : cli ? { ...cli, tipo: 'cliente' } : null)
+        setAuthenticated(true)
+      }
+    })
+  }, [pathname])
+
+  async function handleSignOut() {
+    await createClient().auth.signOut()
+    window.location.href = '/obras/login'
   }
 
+  if (pathname === '/obras/login') return <>{children}</>
+
+  if (authenticated === null) return (
+    <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ color: '#6b7280', fontSize: '14px' }}>Carregando...</div>
+    </div>
+  )
+
+  if (!authenticated) return null
+
   return (
-    <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #DDD9D3', padding: '2.5rem', width: '100%', maxWidth: '400px' }}>
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+    <div style={{ minHeight: '100vh', background: '#F5F3F0' }}>
+      <header style={{ background: '#1E1E1E', padding: '0 24px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <img src="https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png"
-            alt="Casa Forte" style={{ height: '48px', objectFit: 'contain', marginBottom: '12px' }} />
-          <h1 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#111', marginBottom: '4px' }}>Portal de Obras</h1>
-          <p style={{ fontSize: '13px', color: '#6b7280' }}>Casa Forte Incorporações</p>
+            alt="Casa Forte" style={{ height: '28px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+          <div style={{ width: '1px', height: '20px', background: 'rgba(255,255,255,0.2)' }} />
+          <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px' }}>Portal de Obras</span>
         </div>
-
-        {error && (
-          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '10px 12px', marginBottom: '16px', color: '#b91c1c', fontSize: '14px' }}>
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '14px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>E-mail</label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-              style={{ width: '100%', padding: '10px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
-          </div>
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Senha</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
-              style={{ width: '100%', padding: '10px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
-          </div>
-          <button type="submit" disabled={loading}
-            style={{ width: '100%', padding: '12px', background: '#E8390E', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>
-            {loading ? 'Entrando...' : 'Entrar'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {perfil && (
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>
+              {perfil.tipo === 'engenheiro' ? '👷 ' : '👤 '}{perfil.nome}
+            </span>
+          )}
+          <button onClick={handleSignOut}
+            style={{ background: 'none', border: '1px solid rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.6)', padding: '4px 12px', borderRadius: '6px', fontSize: '12px', cursor: 'pointer' }}>
+            Sair
           </button>
-        </form>
-      </div>
+        </div>
+      </header>
+      <main style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+        {children}
+      </main>
     </div>
   )
 }
