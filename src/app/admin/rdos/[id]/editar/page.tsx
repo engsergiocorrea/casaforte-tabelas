@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { compressImage } from '@/lib/compress-image'
 
 interface MaoObra { id?: string; funcao: string; quantidade: number }
 interface Atividade { id?: string; descricao: string; percentual: number; status: string }
@@ -16,12 +17,10 @@ export default function EditarRDOPage() {
   const [error, setError] = useState('')
   const [obras, setObras] = useState<any[]>([])
   const [engenheiros, setEngenheiros] = useState<any[]>([])
-  const [obraSelecionada, setObraSelecionada] = useState<any>(null)
   const [maoObra, setMaoObra] = useState<MaoObra[]>([])
   const [atividades, setAtividades] = useState<Atividade[]>([])
   const [imagens, setImagens] = useState<File[]>([])
   const [imagensExistentes, setImagensExistentes] = useState<any[]>([])
-
   const [form, setForm] = useState<any>(null)
 
   useEffect(() => {
@@ -57,8 +56,11 @@ export default function EditarRDOPage() {
   function addAtividade() { setAtividades(prev => [...prev, { descricao: '', percentual: 0, status: 'em_andamento' }]) }
   function removeAtividade(i: number) { setAtividades(prev => prev.filter((_, idx) => idx !== i)) }
 
-  function handleImagemChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) setImagens(prev => [...prev, ...Array.from(e.target.files!)])
+  async function handleImagemChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files) return
+    const files = Array.from(e.target.files)
+    const compressed = await Promise.all(files.map(f => compressImage(f)))
+    setImagens(prev => [...prev, ...compressed])
   }
 
   async function removerImagemExistente(imgId: string, path: string) {
@@ -79,13 +81,7 @@ export default function EditarRDOPage() {
     const payload = {
       ...form,
       status,
-      obra_id: form.obra_id,
       engenheiro_id: form.engenheiro_id || null,
-      data_relatorio: form.data_relatorio,
-      clima_manha: form.clima_manha,
-      clima_tarde: form.clima_tarde,
-      observacoes_clima: form.observacoes_clima,
-      comentarios: form.comentarios,
       prazo_contratual_dias: form.prazo_contratual_dias ? Number(form.prazo_contratual_dias) : null,
       prazo_decorrido_dias: form.prazo_decorrido_dias ? Number(form.prazo_decorrido_dias) : null,
       prazo_a_vencer_dias: form.prazo_a_vencer_dias ? Number(form.prazo_a_vencer_dias) : null,
@@ -96,26 +92,22 @@ export default function EditarRDOPage() {
     const { error: err } = await supabase.from('relatorios').update(payload).eq('id', id)
     if (err) { setError(err.message); setSaving(false); return }
 
-    // Atualiza mão de obra
     await supabase.from('relatorio_mao_obra').delete().eq('relatorio_id', id)
     const maoObraValida = maoObra.filter(m => m.funcao)
     if (maoObraValida.length > 0) {
       await supabase.from('relatorio_mao_obra').insert(maoObraValida.map(m => ({ relatorio_id: id, funcao: m.funcao, quantidade: Number(m.quantidade) })))
     }
 
-    // Atualiza atividades
     await supabase.from('relatorio_atividades').delete().eq('relatorio_id', id)
     const atividadesValidas = atividades.filter(a => a.descricao)
     if (atividadesValidas.length > 0) {
       await supabase.from('relatorio_atividades').insert(atividadesValidas.map(a => ({ relatorio_id: id, descricao: a.descricao, percentual: Number(a.percentual), status: a.status })))
     }
 
-    // Upload novas imagens
     if (imagens.length > 0) {
       for (let i = 0; i < imagens.length; i++) {
         const file = imagens[i]
-        const ext = file.name.split('.').pop()
-        const path = 'rdos/' + id + '/' + Date.now() + '_' + i + '.' + ext
+        const path = 'rdos/' + id + '/' + Date.now() + '_' + i + '.jpg'
         const { data: upload } = await supabase.storage.from('relatorios-imagens').upload(path, file)
         if (upload) {
           const { data: urlData } = supabase.storage.from('relatorios-imagens').getPublicUrl(path)
@@ -124,7 +116,6 @@ export default function EditarRDOPage() {
       }
     }
 
-    // Histórico
     await supabase.from('relatorio_historico').insert({ relatorio_id: id, acao: status === 'rascunho' ? 'edicao' : 'enviado_para_aprovacao', observacao: 'RDO atualizado' })
 
     router.push('/admin/rdos/' + id)
@@ -148,7 +139,6 @@ export default function EditarRDOPage() {
       {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#b91c1c', fontSize: '14px' }}>{error}</div>}
 
       <form onSubmit={e => handleSubmit(e, 'rascunho')}>
-
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Identificação</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
