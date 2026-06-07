@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
 import { RELATORIO_STATUS_LABELS, RELATORIO_STATUS_COLORS } from '@/types'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,8 +12,6 @@ export default async function RDOsPage() {
     .select('*, obras(nome), engenheiros(nome)')
     .eq('tipo', 'rdo')
     .order('created_at', { ascending: false })
-
-  console.log('[RDOs]', { count: rdos?.length, error: error?.message })
 
   return (
     <div>
@@ -32,7 +30,7 @@ export default async function RDOsPage() {
           <div style={{ textAlign: 'center', padding: '4rem', color: '#9ca3af' }}>
             <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
             <p style={{ fontSize: '1rem', color: '#374151', fontWeight: '500' }}>Nenhum RDO criado ainda</p>
-            <p style={{ fontSize: '13px', color: '#b91c1c', marginTop: '8px' }}>{error ? 'Erro: ' + error.message : ''}</p>
+            {error && <p style={{ fontSize: '13px', color: '#b91c1c', marginTop: '8px' }}>Erro: {error.message}</p>}
             <Link href="/admin/rdos/novo" style={{ display: 'inline-block', marginTop: '12px', padding: '8px 20px', background: '#E8390E', color: 'white', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
               Criar primeiro RDO
             </Link>
@@ -61,9 +59,9 @@ export default async function RDOsPage() {
                       </span>
                     </td>
                     <td style={{ padding: '10px 14px' }}>
-                      <Link href={'/admin/rdos/' + rdo.id} style={{ padding: '3px 10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '12px', color: '#374151', textDecoration: 'none' }}>
+                      <a href={'/admin/rdos/' + rdo.id} target="_blank" rel="noreferrer" style={{ padding: '3px 10px', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '12px', color: '#374151', textDecoration: 'none' }}>
                         Ver
-                      </Link>
+                      </a>
                     </td>
                   </tr>
                 )
