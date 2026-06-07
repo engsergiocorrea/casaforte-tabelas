@@ -6,7 +6,6 @@ import Link from 'next/link'
 export default function NovoEngenheiroPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
   const [form, setForm] = useState({
     nome: '', email: '', telefone: '', cargo: '',
     registro_profissional: '', tipo_registro: 'CREA', uf_registro: '', cpf: '',
@@ -21,10 +20,33 @@ export default function NovoEngenheiroPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.nome) { setError('Nome é obrigatório'); return }
+    if (!form.email) { setError('E-mail é obrigatório para acesso ao portal'); return }
     setSaving(true)
     setError('')
-    const { error: err } = await createClient().from('engenheiros').insert([form])
+
+    // 1. Cria usuário no Supabase Auth via API interna
+    const res = await fetch('/api/admin/criar-usuario', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: form.email, nome: form.nome }),
+    })
+    const result = await res.json()
+
+    if (!result.ok) {
+      setError(result.erro ?? 'Erro ao criar usuário')
+      setSaving(false)
+      return
+    }
+
+    // 2. Cadastra o engenheiro com o usuario_id
+    const supabase = createClient()
+    const { error: err } = await supabase.from('engenheiros').insert([{
+      ...form,
+      usuario_id: result.usuario_id,
+    }])
+
     if (err) { setError(err.message); setSaving(false); return }
+
     window.location.href = '/admin/engenheiros'
   }
 
@@ -34,10 +56,6 @@ export default function NovoEngenheiroPage() {
   )
   const lbl = (text: string) => (
     <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>{text}</label>
-  )
-
-  if (success) return (
-    <div style={{ padding: '2rem', color: '#15803d', fontSize: '16px' }}>✅ Engenheiro salvo!</div>
   )
 
   return (
@@ -58,10 +76,13 @@ export default function NovoEngenheiroPage() {
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Dados pessoais</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div style={{ gridColumn: '1/-1' }}>{lbl('Nome completo *')}{inp('nome')}</div>
-            <div>{lbl('E-mail')}{inp('email', 'email')}</div>
+            <div>{lbl('E-mail *')}{inp('email', 'email')}</div>
             <div>{lbl('Telefone')}{inp('telefone', 'tel')}</div>
             <div>{lbl('CPF')}{inp('cpf')}</div>
             <div>{lbl('Cargo')}{inp('cargo')}</div>
+          </div>
+          <div style={{ marginTop: '12px', padding: '10px 12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', fontSize: '13px', color: '#15803d' }}>
+            📧 O engenheiro receberá um e-mail para definir sua senha de acesso ao portal.
           </div>
         </div>
 
