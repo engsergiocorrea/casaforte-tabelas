@@ -9,7 +9,7 @@ export default function ObrasLayout({ children }: { children: React.ReactNode })
   const [perfil, setPerfil] = useState<any>(null)
 
   useEffect(() => {
-    if (pathname === '/obras/login') { setChecked(true); return }
+    if (pathname === '/obras/login' || pathname === '/obras/nova-senha') { setChecked(true); return }
 
     const supabase = createClient()
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -17,6 +17,13 @@ export default function ObrasLayout({ children }: { children: React.ReactNode })
         window.location.href = '/obras/login'
         return
       }
+
+      // Se for sessão de recuperação de senha, redireciona para nova-senha
+      if (session.user.aud === 'authenticated' && (session as any).type === 'recovery') {
+        window.location.href = '/obras/nova-senha'
+        return
+      }
+
       const { data: eng } = await supabase.from('engenheiros').select('*').eq('usuario_id', session.user.id).single()
       const { data: cli } = await supabase.from('clientes').select('*').eq('usuario_id', session.user.id).single()
       setPerfil(eng ? { ...eng, tipo: 'engenheiro' } : cli ? { ...cli, tipo: 'cliente' } : null)
@@ -29,7 +36,7 @@ export default function ObrasLayout({ children }: { children: React.ReactNode })
     window.location.href = '/obras/login'
   }
 
-  if (pathname === '/obras/login') return <>{children}</>
+  if (pathname === '/obras/login' || pathname === '/obras/nova-senha') return <>{children}</>
 
   if (!checked) return (
     <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
