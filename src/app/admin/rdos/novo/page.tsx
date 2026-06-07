@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { compressImage } from '@/lib/compress-image'
 
 interface MaoObra { funcao: string; quantidade: number }
 interface Atividade { descricao: string; percentual: number; status: string }
@@ -96,9 +97,13 @@ export default function NovoRDOPage() {
   function addAtividade() { setAtividades(prev => [...prev, { descricao: '', percentual: 0, status: 'em_andamento' }]) }
   function removeAtividade(i: number) { setAtividades(prev => prev.filter((_, idx) => idx !== i)) }
 
-  function handleImagemChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) setImagens(prev => [...prev, ...Array.from(e.target.files!)])
+  async function handleImagemChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files) return
+    const files = Array.from(e.target.files)
+    const compressed = await Promise.all(files.map(f => compressImage(f)))
+    setImagens(prev => [...prev, ...compressed])
   }
+
   function removeImagem(i: number) { setImagens(prev => prev.filter((_, idx) => idx !== i)) }
 
   async function handleSubmit(e: React.FormEvent, status = 'rascunho') {
@@ -108,11 +113,9 @@ export default function NovoRDOPage() {
     setError('')
     const supabase = createClient()
 
-    // Busca próximo número
     const { data: ultimoRdo } = await supabase.from('relatorios').select('numero').eq('tipo', 'rdo').order('numero', { ascending: false }).limit(1).single()
     const numero = (ultimoRdo?.numero ?? 0) + 1
 
-    // Snapshot da obra
     const obra = obraSelecionada ?? obras.find(o => o.id === form.obra_id)
     const totalMaoObra = maoObra.reduce((acc, m) => acc + (Number(m.quantidade) || 0), 0)
 
@@ -139,25 +142,21 @@ export default function NovoRDOPage() {
     const { data: rdo, error: err } = await supabase.from('relatorios').insert([payload]).select().single()
     if (err) { setError(err.message); setSaving(false); return }
 
-    // Mão de obra
     const maoObraValida = maoObra.filter(m => m.funcao)
     if (maoObraValida.length > 0) {
       await supabase.from('relatorio_mao_obra').insert(maoObraValida.map(m => ({ relatorio_id: rdo.id, funcao: m.funcao, quantidade: Number(m.quantidade) })))
     }
 
-    // Atividades
     const atividadesValidas = atividades.filter(a => a.descricao)
     if (atividadesValidas.length > 0) {
       await supabase.from('relatorio_atividades').insert(atividadesValidas.map(a => ({ relatorio_id: rdo.id, descricao: a.descricao, percentual: Number(a.percentual), status: a.status })))
     }
 
-    // Upload de imagens
     if (imagens.length > 0) {
       setUploadando(true)
       for (let i = 0; i < imagens.length; i++) {
         const file = imagens[i]
-        const ext = file.name.split('.').pop()
-        const path = `rdos/${rdo.id}/${Date.now()}_${i}.${ext}`
+        const path = `rdos/${rdo.id}/${Date.now()}_${i}.jpg`
         const { data: upload } = await supabase.storage.from('relatorios-imagens').upload(path, file)
         if (upload) {
           const { data: urlData } = supabase.storage.from('relatorios-imagens').getPublicUrl(path)
@@ -167,7 +166,6 @@ export default function NovoRDOPage() {
       setUploadando(false)
     }
 
-    // Histórico
     await supabase.from('relatorio_historico').insert({ relatorio_id: rdo.id, acao: status === 'rascunho' ? 'criacao' : 'enviado_para_aprovacao', observacao: 'RDO criado' })
 
     router.push('/admin/rdos/' + rdo.id)
@@ -189,8 +187,6 @@ export default function NovoRDOPage() {
       {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#b91c1c', fontSize: '14px' }}>{error}</div>}
 
       <form onSubmit={e => handleSubmit(e, 'rascunho')}>
-
-        {/* Identificação */}
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Identificação</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
@@ -220,7 +216,6 @@ export default function NovoRDOPage() {
           </div>
         </div>
 
-        {/* Prazos */}
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Prazos</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
@@ -230,7 +225,6 @@ export default function NovoRDOPage() {
           </div>
         </div>
 
-        {/* Clima */}
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Condição climática</h2>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
@@ -266,14 +260,10 @@ export default function NovoRDOPage() {
           </div>
         </div>
 
-        {/* Mão de obra */}
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '15px', fontWeight: '700' }}>Mão de obra</h2>
-            <button type="button" onClick={addMaoObra}
-              style={{ padding: '4px 12px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>
-              + Adicionar
-            </button>
+            <button type="button" onClick={addMaoObra} style={{ padding: '4px 12px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>+ Adicionar</button>
           </div>
           {maoObra.map((m, i) => (
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 120px 40px', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
@@ -292,14 +282,10 @@ export default function NovoRDOPage() {
           </div>
         </div>
 
-        {/* Atividades */}
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '15px', fontWeight: '700' }}>Atividades</h2>
-            <button type="button" onClick={addAtividade}
-              style={{ padding: '4px 12px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>
-              + Adicionar
-            </button>
+            <button type="button" onClick={addAtividade} style={{ padding: '4px 12px', background: '#f3f4f6', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '13px', cursor: 'pointer' }}>+ Adicionar</button>
           </div>
           {atividades.map((a, i) => (
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 100px 140px 40px', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
@@ -322,7 +308,6 @@ export default function NovoRDOPage() {
           ))}
         </div>
 
-        {/* Comentários */}
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Comentários</h2>
           <textarea name="comentarios" value={form.comentarios} onChange={handleChange} rows={4}
@@ -330,11 +315,9 @@ export default function NovoRDOPage() {
             style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' as const }} />
         </div>
 
-        {/* Fotos */}
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Fotos</h2>
-          <input type="file" accept="image/*" multiple onChange={handleImagemChange}
-            style={{ marginBottom: '12px' }} />
+          <input type="file" accept="image/*" multiple onChange={handleImagemChange} style={{ marginBottom: '12px' }} />
           {imagens.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', marginTop: '12px' }}>
               {imagens.map((img, i) => (
@@ -348,7 +331,6 @@ export default function NovoRDOPage() {
           )}
         </div>
 
-        {/* Botões */}
         <div style={{ display: 'flex', gap: '12px' }}>
           <button type="submit" disabled={saving || uploadando}
             style={{ padding: '10px 24px', background: '#6b7280', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
