@@ -207,10 +207,10 @@ export default async function RDODetalhePage({ params }: { params: Promise<{ id:
 
       {rdo.status === 'aprovado' && (
         <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-          <Link href={'/api/rdos/' + id + '/pdf'}
-            style={{ padding: '10px 20px', background: '#E8390E', color: 'white', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
-            📄 Gerar PDF
-          </Link>
+          <a href={'/api/rdos/' + id + '/pdf'} target="_blank" rel="noreferrer"
+  style={{ padding: '10px 20px', background: '#E8390E', color: 'white', borderRadius: '8px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
+  📄 Gerar PDF
+</a>
         </div>
       )}
     </div>
