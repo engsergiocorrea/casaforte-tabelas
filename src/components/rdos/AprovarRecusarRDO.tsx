@@ -34,7 +34,7 @@ export default function AprovarRecusarRDO({ rdoId }: { rdoId: string }) {
       const numero = telefone.replace(/\D/g, '')
       const mensagem = `✅ *RDO #${rdo?.numero} Aprovado*\n\nOlá, ${nomeEngenheiro}!\n\nSeu Relatório Diário de Obra foi *aprovado* pela diretoria.\n\n📋 *Obra:* ${nomeObra}\n📅 *Data:* ${dataRdo}\n\nAcesse o relatório pelo link:\n${linkRdo}`
 
-      await fetch('/api/whatsapp', {
+      await fetch('/api/whatsapp-rdo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ numero, mensagem }),
@@ -69,7 +69,7 @@ export default function AprovarRecusarRDO({ rdoId }: { rdoId: string }) {
       const numero = telefone.replace(/\D/g, '')
       const mensagem = `❌ *RDO #${rdo?.numero} Recusado*\n\nOlá, ${nomeEngenheiro}!\n\nSeu Relatório Diário de Obra foi *recusado* pela diretoria.\n\n📋 *Obra:* ${nomeObra}\n📅 *Data:* ${dataRdo}\n\n📝 *Motivo:* ${motivo}\n\nAcesse o portal para corrigir e reenviar:\nhttps://tabelas.casaforteinc.com.br/obras`
       
-      await fetch('/api/whatsapp', {
+      await fetch('/api/whatsapp-rdo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ numero, mensagem }),
