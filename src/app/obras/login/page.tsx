@@ -4,8 +4,8 @@ import { createClient } from '@/lib/supabase/client'
 
 export default function ObrasLoginPage() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
   const [error, setError] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
@@ -13,26 +13,10 @@ export default function ObrasLoginPage() {
     setLoading(true)
     setError('')
     const supabase = createClient()
-    const { error: err } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-  emailRedirectTo: 'https://tabelas.casaforteinc.com.br/obras/auth/callback',
-      },
-    })
+    const { error: err } = await supabase.auth.signInWithPassword({ email, password })
     if (err) { setError('Erro: ' + err.message); setLoading(false); return }
-    setSent(true)
-    setLoading(false)
+    window.location.href = '/obras'
   }
-
-  if (sent) return (
-    <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #DDD9D3', padding: '2.5rem', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📧</div>
-        <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#111', marginBottom: '8px' }}>Verifique seu email</h2>
-        <p style={{ fontSize: '14px', color: '#6b7280' }}>Enviamos um link de acesso para <strong>{email}</strong>. Clique no link para entrar.</p>
-      </div>
-    </div>
-  )
 
   return (
     <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
@@ -51,20 +35,21 @@ export default function ObrasLoginPage() {
         )}
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: '20px' }}>
+          <div style={{ marginBottom: '14px' }}>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>E-mail</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} required
-              placeholder="seu@email.com"
+              style={{ width: '100%', padding: '10px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
+          </div>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Senha</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required
               style={{ width: '100%', padding: '10px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
           </div>
           <button type="submit" disabled={loading}
             style={{ width: '100%', padding: '12px', background: '#E8390E', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', fontWeight: '600', cursor: 'pointer' }}>
-            {loading ? 'Enviando...' : 'Enviar link de acesso'}
+            {loading ? 'Entrando...' : 'Entrar'}
           </button>
         </form>
-        <p style={{ fontSize: '12px', color: '#9ca3af', textAlign: 'center', marginTop: '16px' }}>
-          Você receberá um link de acesso no seu email
-        </p>
       </div>
     </div>
   )
