@@ -10,6 +10,11 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // Verifica se é recuperação de senha
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        return NextResponse.redirect(new URL('/obras/nova-senha', origin))
+      }
       return NextResponse.redirect(new URL(next, origin))
     }
   }
