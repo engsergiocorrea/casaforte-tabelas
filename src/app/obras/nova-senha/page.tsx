@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function NovaSenhaPage() {
@@ -8,25 +8,6 @@ export default function NovaSenhaPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [sucesso, setSucesso] = useState(false)
-  const [pronto, setPronto] = useState(false)
-
-  useEffect(() => {
-    // Processa o code da URL
-    const supabase = createClient()
-    const params = new URLSearchParams(window.location.search)
-    const code = params.get('code')
-
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
-          setError('Link inválido ou expirado. Solicite um novo.')
-        }
-        setPronto(true)
-      })
-    } else {
-      setPronto(true)
-    }
-  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -39,21 +20,15 @@ export default function NovaSenhaPage() {
     if (err) { setError('Erro: ' + err.message); setLoading(false); return }
     setSucesso(true)
     setLoading(false)
-    setTimeout(() => { window.location.href = '/obras' }, 2000)
+    setTimeout(() => { window.location.href = '/obras/login' }, 2000)
   }
-
-  if (!pronto) return (
-    <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#6b7280', fontSize: '14px' }}>Verificando link...</div>
-    </div>
-  )
 
   if (sucesso) return (
     <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
       <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #DDD9D3', padding: '2.5rem', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
         <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#111', marginBottom: '8px' }}>Senha redefinida!</h2>
-        <p style={{ fontSize: '14px', color: '#6b7280' }}>Redirecionando para o portal...</p>
+        <p style={{ fontSize: '14px', color: '#6b7280' }}>Redirecionando para o login...</p>
       </div>
     </div>
   )
