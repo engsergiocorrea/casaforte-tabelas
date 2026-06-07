@@ -1,28 +1,26 @@
 'use client'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function ObrasLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const router = useRouter()
-  const [authenticated, setAuthenticated] = useState<boolean | null>(null)
+  const [checked, setChecked] = useState(false)
   const [perfil, setPerfil] = useState<any>(null)
 
   useEffect(() => {
-    const supabase = createClient()
+    if (pathname === '/obras/login') { setChecked(true); return }
 
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (!session && pathname !== '/obras/login') {
-        router.push('/obras/login')
+    const supabase = createClient()
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session) {
+        window.location.href = '/obras/login'
         return
       }
-      if (session) {
-        const { data: eng } = await supabase.from('engenheiros').select('*').eq('usuario_id', session.user.id).single()
-        const { data: cli } = await supabase.from('clientes').select('*').eq('usuario_id', session.user.id).single()
-        setPerfil(eng ? { ...eng, tipo: 'engenheiro' } : cli ? { ...cli, tipo: 'cliente' } : null)
-        setAuthenticated(true)
-      }
+      const { data: eng } = await supabase.from('engenheiros').select('*').eq('usuario_id', session.user.id).single()
+      const { data: cli } = await supabase.from('clientes').select('*').eq('usuario_id', session.user.id).single()
+      setPerfil(eng ? { ...eng, tipo: 'engenheiro' } : cli ? { ...cli, tipo: 'cliente' } : null)
+      setChecked(true)
     })
   }, [pathname])
 
@@ -33,13 +31,11 @@ export default function ObrasLayout({ children }: { children: React.ReactNode })
 
   if (pathname === '/obras/login') return <>{children}</>
 
-  if (authenticated === null) return (
+  if (!checked) return (
     <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ color: '#6b7280', fontSize: '14px' }}>Carregando...</div>
     </div>
   )
-
-  if (!authenticated) return null
 
   return (
     <div style={{ minHeight: '100vh', background: '#F5F3F0' }}>
