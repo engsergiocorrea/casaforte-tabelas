@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
+import { compressImage } from '@/lib/compress-image'
 
 interface MaoObra { funcao: string; quantidade: number }
 interface Atividade { descricao: string; percentual: number; status: string }
@@ -51,8 +52,11 @@ export default function ObrasNovoRDOPage() {
   function addAtividade() { setAtividades(prev => [...prev, { descricao: '', percentual: 0, status: 'em_andamento' }]) }
   function removeAtividade(i: number) { setAtividades(prev => prev.filter((_, idx) => idx !== i)) }
 
-  function handleImagemChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) setImagens(prev => [...prev, ...Array.from(e.target.files!)])
+  async function handleImagemChange(e: React.ChangeEvent<HTMLInputElement>) {
+    if (!e.target.files) return
+    const files = Array.from(e.target.files)
+    const compressed = await Promise.all(files.map(f => compressImage(f)))
+    setImagens(prev => [...prev, ...compressed])
   }
 
   async function handleSubmit(e: React.FormEvent, status = 'rascunho') {
@@ -97,8 +101,7 @@ export default function ObrasNovoRDOPage() {
     if (imagens.length > 0) {
       for (let i = 0; i < imagens.length; i++) {
         const file = imagens[i]
-        const ext = file.name.split('.').pop()
-        const path = 'rdos/' + rdo.id + '/' + Date.now() + '_' + i + '.' + ext
+        const path = 'rdos/' + rdo.id + '/' + Date.now() + '_' + i + '.jpg'
         const { data: upload } = await supabase.storage.from('relatorios-imagens').upload(path, file)
         if (upload) {
           const { data: urlData } = supabase.storage.from('relatorios-imagens').getPublicUrl(path)
