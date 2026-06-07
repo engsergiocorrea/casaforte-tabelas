@@ -31,9 +31,9 @@ export default function ObrasLoginPage() {
     setLoading(true)
     setError('')
     const supabase = createClient()
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://obras.casaforteinc.com.br/obras/nova-senha',
-    })
+const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+  redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback',
+})
     if (err) { setError('Erro ao enviar email: ' + err.message); setLoading(false); return }
     setEnviado(true)
     setLoading(false)
