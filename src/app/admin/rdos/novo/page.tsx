@@ -31,9 +31,6 @@ export default function NovoRDOPage() {
     clima_tarde: '',
     observacoes_clima: '',
     comentarios: '',
-    prazo_contratual_dias: '',
-    prazo_decorrido_dias: '',
-    prazo_a_vencer_dias: '',
   })
 
   useEffect(() => {
@@ -52,32 +49,17 @@ export default function NovoRDOPage() {
 
   function carregarObra(obra: any) {
     setObraSelecionada(obra)
-    const dataRelatorio = form.data_relatorio || new Date().toISOString().split('T')[0]
-    let decorrido = ''
-    let aVencer = ''
-    if (obra.data_inicio) {
-      const inicio = new Date(obra.data_inicio)
-      const hoje = new Date(dataRelatorio)
-      const diff = Math.floor((hoje.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24))
-      decorrido = String(diff)
-      if (obra.prazo_contratual_dias) {
-        aVencer = String(obra.prazo_contratual_dias - diff)
-      }
-    }
     setForm(f => ({
       ...f,
       obra_id: obra.id,
       engenheiro_id: obra.engenheiros?.id ?? f.engenheiro_id,
-      prazo_contratual_dias: obra.prazo_contratual_dias ? String(obra.prazo_contratual_dias) : '',
-      prazo_decorrido_dias: decorrido,
-      prazo_a_vencer_dias: aVencer,
     }))
   }
 
   function handleObraChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const obra = obras.find(o => o.id === e.target.value)
     if (obra) carregarObra(obra)
-    else setForm(f => ({ ...f, obra_id: '' }))
+    else { setObraSelecionada(null); setForm(f => ({ ...f, obra_id: '' })) }
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
@@ -106,6 +88,17 @@ export default function NovoRDOPage() {
 
   function removeImagem(i: number) { setImagens(prev => prev.filter((_, idx) => idx !== i)) }
 
+  function calcDias() {
+    const hoje = new Date()
+    const decorrido = obraSelecionada?.data_inicio
+      ? Math.floor((hoje.getTime() - new Date(obraSelecionada.data_inicio).getTime()) / (1000 * 60 * 60 * 24))
+      : null
+    const aVencer = obraSelecionada?.data_prevista_conclusao
+      ? Math.floor((new Date(obraSelecionada.data_prevista_conclusao).getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
+      : null
+    return { decorrido, aVencer }
+  }
+
   async function handleSubmit(e: React.FormEvent, status = 'rascunho') {
     e.preventDefault()
     if (!form.obra_id) { setError('Selecione uma obra'); return }
@@ -118,6 +111,7 @@ export default function NovoRDOPage() {
 
     const obra = obraSelecionada ?? obras.find(o => o.id === form.obra_id)
     const totalMaoObra = maoObra.reduce((acc, m) => acc + (Number(m.quantidade) || 0), 0)
+    const { decorrido, aVencer } = calcDias()
 
     const payload = {
       tipo: 'rdo',
@@ -130,9 +124,9 @@ export default function NovoRDOPage() {
       clima_tarde: form.clima_tarde,
       observacoes_clima: form.observacoes_clima,
       comentarios: form.comentarios,
-      prazo_contratual_dias: form.prazo_contratual_dias ? Number(form.prazo_contratual_dias) : null,
-      prazo_decorrido_dias: form.prazo_decorrido_dias ? Number(form.prazo_decorrido_dias) : null,
-      prazo_a_vencer_dias: form.prazo_a_vencer_dias ? Number(form.prazo_a_vencer_dias) : null,
+      prazo_contratual_dias: obra?.prazo_contratual_dias ?? null,
+      prazo_decorrido_dias: decorrido,
+      prazo_a_vencer_dias: aVencer,
       total_mao_obra_direta: totalMaoObra,
       obra_nome_snapshot: obra?.nome ?? '',
       obra_local_snapshot: [obra?.endereco, obra?.cidade, obra?.estado].filter(Boolean).join(', '),
@@ -216,14 +210,39 @@ export default function NovoRDOPage() {
           </div>
         </div>
 
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Prazos</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
-            <div>{lbl('Prazo contratual (dias)')}{inp('prazo_contratual_dias', 'number')}</div>
-            <div>{lbl('Prazo decorrido (dias)')}{inp('prazo_decorrido_dias', 'number')}</div>
-            <div>{lbl('Prazo a vencer (dias)')}{inp('prazo_a_vencer_dias', 'number')}</div>
+        {obraSelecionada && (
+          <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Prazos</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+              <div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' as const, marginBottom: '4px' }}>Data de início</div>
+                <div style={{ fontSize: '14px', fontWeight: '500', color: '#111' }}>
+                  {obraSelecionada.data_inicio ? new Date(obraSelecionada.data_inicio).toLocaleDateString('pt-BR') : '—'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' as const, marginBottom: '4px' }}>Data de entrega</div>
+                <div style={{ fontSize: '14px', fontWeight: '500', color: '#111' }}>
+                  {obraSelecionada.data_prevista_conclusao ? new Date(obraSelecionada.data_prevista_conclusao).toLocaleDateString('pt-BR') : '—'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' as const, marginBottom: '4px' }}>Dias até a entrega</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: (() => {
+                  if (!obraSelecionada.data_prevista_conclusao) return '#111'
+                  const diff = Math.floor((new Date(obraSelecionada.data_prevista_conclusao).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                  return diff < 0 ? '#b91c1c' : diff < 30 ? '#b45309' : '#15803d'
+                })() }}>
+                  {(() => {
+                    if (!obraSelecionada.data_prevista_conclusao) return '—'
+                    const diff = Math.floor((new Date(obraSelecionada.data_prevista_conclusao).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                    return diff < 0 ? `${Math.abs(diff)} dias em atraso` : `${diff} dias`
+                  })()}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Condição climática</h2>
