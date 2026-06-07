@@ -16,13 +16,9 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 })
 
-    // Envia email de recuperação de senha para o engenheiro definir a própria senha
-    await supabase.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-      options: {
-        redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback',
-      },
+    // Envia email de recuperação para o engenheiro definir a senha
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback',
     })
 
     return NextResponse.json({ ok: true, usuario_id: data.user.id })
