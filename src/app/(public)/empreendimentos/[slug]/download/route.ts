@@ -108,18 +108,22 @@ export async function GET(
   })
   y -= 36
 
-  // Condições com labels corretos
-  y -= 4
-  const conds = [
-    `Correcao ate entrega: ${indiceLabel[empreendimento.indice_ate_entrega] ?? empreendimento.indice_ate_entrega ?? '-'}`,
-    `Correcao apos entrega: ${indiceLabel[empreendimento.indice_apos_entrega] ?? empreendimento.indice_apos_entrega ?? '-'}`,
-    `Parcelamento: ate ${empreendimento.parcelas_padrao ?? 60}x mensais`,
-    empreendimento.data_prevista_entrega ? `Entrega prev.: ${new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR')}` : '',
-  ].filter(Boolean)
-  conds.forEach((c, i) => {
-    page.drawText(c, { x: mL + i * (contentW / 4), y, size: 7.5, font: fontR, color: preto })
-  })
-  y -= 14
+  // Condições com fundo destacado
+y -= 4
+page.drawRectangle({ x: mL, y: y - 6, width: contentW, height: 18, color: rgb(0.12, 0.12, 0.12) })
+page.drawRectangle({ x: mL, y: y - 6, width: 3, height: 18, color: vermelho })
+const conds = [
+  { label: 'Correcao ate entrega:', value: indiceLabel[empreendimento.indice_ate_entrega] ?? empreendimento.indice_ate_entrega ?? '-' },
+  { label: 'Correcao apos entrega:', value: indiceLabel[empreendimento.indice_apos_entrega] ?? empreendimento.indice_apos_entrega ?? '-' },
+  { label: 'Parcelamento:', value: `ate ${empreendimento.parcelas_padrao ?? 60}x mensais` },
+  empreendimento.data_prevista_entrega ? { label: 'Entrega prev.:', value: new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR') } : null,
+].filter(Boolean) as { label: string, value: string }[]
+conds.forEach((c, i) => {
+  const lx = mL + 6 + i * (contentW / 4)
+  page.drawText(c.label, { x: lx, y: y + 5, size: 7, font: fontR, color: cinza })
+  page.drawText(c.value, { x: lx + fontR.widthOfTextAtSize(c.label + ' ', 7), y: y + 5, size: 7.5, font: fontB, color: branco })
+})
+y -= 22
 
   // Verifica se há área externa em alguma unidade
   const temAreaExt = unidadesFiltradas.some(u => u.area_privativa_externa)
