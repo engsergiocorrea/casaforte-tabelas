@@ -1,50 +1,29 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function AuthCallbackPage() {
+  const [info, setInfo] = useState('')
+
   useEffect(() => {
     const supabase = createClient()
     const params = new URLSearchParams(window.location.search)
-    const hashParams = new URLSearchParams(window.location.hash.replace('#', ''))
-    const type = params.get('type') ?? hashParams.get('type')
-    const next = params.get('next')
-    const error = hashParams.get('error')
+    const hash = window.location.hash
 
-    if (error) {
-      window.location.href = '/obras/login'
-      return
-    }
-
-    // O Supabase client processa o hash automaticamente
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        if (type === 'recovery' || next === 'nova-senha') {
-          window.location.href = '/obras/nova-senha'
-        } else {
-          window.location.href = '/obras'
-        }
-      } else {
-        // Tenta onAuthStateChange para pegar sessão do hash
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-          subscription.unsubscribe()
-          if (session) {
-            if (type === 'recovery' || next === 'nova-senha') {
-              window.location.href = '/obras/nova-senha'
-            } else {
-              window.location.href = '/obras'
-            }
-          } else {
-            window.location.href = '/obras/login'
-          }
-        })
-      }
+      setInfo(JSON.stringify({
+        search: window.location.search,
+        hash: hash,
+        session: session ? { user: session.user.email } : null,
+        all_params: Object.fromEntries(params.entries()),
+      }, null, 2))
     })
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ color: '#6b7280', fontSize: '14px' }}>Verificando acesso...</div>
+    <div style={{ padding: '2rem', fontFamily: 'monospace', fontSize: '13px', whiteSpace: 'pre-wrap' }}>
+      <h2>Debug Callback</h2>
+      {info || 'Carregando...'}
     </div>
   )
 }
