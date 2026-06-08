@@ -8,7 +8,6 @@ export async function POST(req: NextRequest) {
 
     const supabase = createAdminClient()
 
-    // Cria o usuário com email confirmado
     const { data, error } = await supabase.auth.admin.createUser({
       email,
       email_confirm: true,
@@ -16,11 +15,8 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 })
 
-    // Envia email de recuperação para o engenheiro definir a senha
     await supabase.auth.resetPasswordForEmail(email, {
-     await supabase.auth.resetPasswordForEmail(email, {
-  redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback?type=recovery',
-})
+      redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback?type=recovery',
     })
 
     return NextResponse.json({ ok: true, usuario_id: data.user.id })
