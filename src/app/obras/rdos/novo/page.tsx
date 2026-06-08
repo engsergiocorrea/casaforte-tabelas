@@ -14,13 +14,13 @@ export default function ObrasNovoRDOPage() {
   const [error, setError] = useState('')
   const [engenheiro, setEngenheiro] = useState<any>(null)
   const [obras, setObras] = useState<any[]>([])
+  const [obraSelecionada, setObraSelecionada] = useState<any>(null)
   const [maoObra, setMaoObra] = useState<MaoObra[]>([{ funcao: '', quantidade: 1 }])
   const [atividades, setAtividades] = useState<Atividade[]>([{ descricao: '', percentual: 0, status: 'em_andamento' }])
   const [imagens, setImagens] = useState<File[]>([])
   const [form, setForm] = useState({
     obra_id: '', data_relatorio: new Date().toISOString().split('T')[0],
-    clima_manha: '', clima_tarde: '', observacoes_clima: '',
-    comentarios: '', prazo_contratual_dias: '', prazo_decorrido_dias: '', prazo_a_vencer_dias: '',
+    clima_manha: '', clima_tarde: '', observacoes_clima: '', comentarios: '',
   })
 
   useEffect(() => {
@@ -30,10 +30,16 @@ export default function ObrasNovoRDOPage() {
       const { data: eng } = await supabase.from('engenheiros').select('*').eq('usuario_id', session.user.id).single()
       if (!eng) { router.push('/obras'); return }
       setEngenheiro(eng)
-const { data: obrasData } = await supabase.from('obras').select('id, nome').eq('ativo', true).order('nome')      
-  setObras(obrasData ?? [])
+      const { data: obrasData } = await supabase.from('obras').select('id, nome, data_inicio, data_prevista_conclusao, prazo_contratual_dias').eq('ativo', true).order('nome')
+      setObras(obrasData ?? [])
     })
   }, [])
+
+  function handleObraChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const obra = obras.find(o => o.id === e.target.value)
+    setObraSelecionada(obra ?? null)
+    setForm(f => ({ ...f, obra_id: e.target.value }))
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
@@ -59,6 +65,17 @@ const { data: obrasData } = await supabase.from('obras').select('id, nome').eq('
     setImagens(prev => [...prev, ...compressed])
   }
 
+  function calcDias() {
+    const hoje = new Date()
+    const decorrido = obraSelecionada?.data_inicio
+      ? Math.floor((hoje.getTime() - new Date(obraSelecionada.data_inicio).getTime()) / (1000 * 60 * 60 * 24))
+      : null
+    const aVencer = obraSelecionada?.data_prevista_conclusao
+      ? Math.floor((new Date(obraSelecionada.data_prevista_conclusao).getTime() - hoje.getTime()) / (1000 * 60 * 60 * 24))
+      : null
+    return { decorrido, aVencer }
+  }
+
   async function handleSubmit(e: React.FormEvent, status = 'rascunho') {
     e.preventDefault()
     if (!form.obra_id) { setError('Selecione uma obra'); return }
@@ -69,6 +86,7 @@ const { data: obrasData } = await supabase.from('obras').select('id, nome').eq('
     const { data: ultimoRdo } = await supabase.from('relatorios').select('numero').eq('tipo', 'rdo').order('numero', { ascending: false }).limit(1).single()
     const numero = (ultimoRdo?.numero ?? 0) + 1
     const totalMaoObra = maoObra.reduce((acc, m) => acc + (Number(m.quantidade) || 0), 0)
+    const { decorrido, aVencer } = calcDias()
 
     const payload = {
       tipo: 'rdo', numero, status,
@@ -79,9 +97,9 @@ const { data: obrasData } = await supabase.from('obras').select('id, nome').eq('
       clima_tarde: form.clima_tarde,
       observacoes_clima: form.observacoes_clima,
       comentarios: form.comentarios,
-      prazo_contratual_dias: form.prazo_contratual_dias ? Number(form.prazo_contratual_dias) : null,
-      prazo_decorrido_dias: form.prazo_decorrido_dias ? Number(form.prazo_decorrido_dias) : null,
-      prazo_a_vencer_dias: form.prazo_a_vencer_dias ? Number(form.prazo_a_vencer_dias) : null,
+      prazo_contratual_dias: obraSelecionada?.prazo_contratual_dias ?? null,
+      prazo_decorrido_dias: decorrido,
+      prazo_a_vencer_dias: aVencer,
       total_mao_obra_direta: totalMaoObra,
     }
 
@@ -116,10 +134,6 @@ const { data: obrasData } = await supabase.from('obras').select('id, nome').eq('
   }
 
   const lbl = (text: string) => <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>{text}</label>
-  const inp = (name: string, type = 'text') => (
-    <input name={name} type={type} value={(form as any)[name] ?? ''} onChange={handleChange}
-      style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
-  )
 
   if (!engenheiro) return <div style={{ textAlign: 'center', padding: '4rem', color: '#6b7280' }}>Carregando...</div>
 
@@ -138,27 +152,56 @@ const { data: obrasData } = await supabase.from('obras').select('id, nome').eq('
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
             <div style={{ gridColumn: '1/-1' }}>
               {lbl('Obra *')}
-              <select name="obra_id" value={form.obra_id} onChange={handleChange}
+              <select name="obra_id" value={form.obra_id} onChange={handleObraChange}
                 style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }}>
                 <option value="">Selecione uma obra</option>
                 {obras.map(o => <option key={o.id} value={o.id}>{o.nome}</option>)}
               </select>
             </div>
-            <div>{lbl('Data do relatório *')}{inp('data_relatorio', 'date')}</div>
+            <div>
+              {lbl('Data do relatório *')}
+              <input name="data_relatorio" type="date" value={form.data_relatorio} onChange={handleChange}
+                style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' as const }} />
+            </div>
             <div style={{ padding: '10px 12px', background: '#f8fafc', borderRadius: '8px', fontSize: '13px', color: '#374151' }}>
               👷 <strong>{engenheiro.nome}</strong>
             </div>
           </div>
         </div>
 
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Prazos</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
-            <div>{lbl('Contratual (dias)')}{inp('prazo_contratual_dias', 'number')}</div>
-            <div>{lbl('Decorrido (dias)')}{inp('prazo_decorrido_dias', 'number')}</div>
-            <div>{lbl('A vencer (dias)')}{inp('prazo_a_vencer_dias', 'number')}</div>
+        {obraSelecionada && (
+          <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Prazos</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px' }}>
+              <div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' as const, marginBottom: '4px' }}>Data de início</div>
+                <div style={{ fontSize: '14px', fontWeight: '500', color: '#111' }}>
+                  {obraSelecionada.data_inicio ? new Date(obraSelecionada.data_inicio).toLocaleDateString('pt-BR') : '—'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' as const, marginBottom: '4px' }}>Data de entrega</div>
+                <div style={{ fontSize: '14px', fontWeight: '500', color: '#111' }}>
+                  {obraSelecionada.data_prevista_conclusao ? new Date(obraSelecionada.data_prevista_conclusao).toLocaleDateString('pt-BR') : '—'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: '#9ca3af', textTransform: 'uppercase' as const, marginBottom: '4px' }}>Dias até a entrega</div>
+                <div style={{ fontSize: '14px', fontWeight: '700', color: (() => {
+                  if (!obraSelecionada.data_prevista_conclusao) return '#111'
+                  const diff = Math.floor((new Date(obraSelecionada.data_prevista_conclusao).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                  return diff < 0 ? '#b91c1c' : diff < 30 ? '#b45309' : '#15803d'
+                })() }}>
+                  {(() => {
+                    if (!obraSelecionada.data_prevista_conclusao) return '—'
+                    const diff = Math.floor((new Date(obraSelecionada.data_prevista_conclusao).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                    return diff < 0 ? `${Math.abs(diff)} dias em atraso` : `${diff} dias`
+                  })()}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
 
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
           <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Condição climática</h2>
