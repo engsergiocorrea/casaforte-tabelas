@@ -30,8 +30,7 @@ export default function ObrasNovoRDOPage() {
       const { data: eng } = await supabase.from('engenheiros').select('*').eq('usuario_id', session.user.id).single()
       if (!eng) { router.push('/obras'); return }
       setEngenheiro(eng)
-      const { data: obrasData } = await supabase.from('obras').select('id, nome').eq('responsavel_tecnico_id', eng.id).eq('ativo', true).order('nome')
-      setObras(obrasData ?? [])
+const { data: obrasData } = await supabase.from('obras').select('id, nome').eq('ativo', true).order('nome')      setObras(obrasData ?? [])
     })
   }, [])
 
