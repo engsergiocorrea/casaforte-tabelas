@@ -16,7 +16,7 @@ export async function GET(
     .eq('ativo_publico', true)
     .single()
 
-  if (!empreendimento) return new NextResponse('Não encontrado', { status: 404 })
+  if (!empreendimento) return new NextResponse('Nao encontrado', { status: 404 })
 
   const { data: unidades } = await supabase
     .from('unidades')
@@ -29,16 +29,15 @@ export async function GET(
 
   const fmt = (v: any) => v ? `R$${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
 
+  // Remove acentos para pdf-lib
+  function s(text: string): string {
+    return (text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x00-\x7F]/g, '')
+  }
+
   const indiceLabel: Record<string, string> = {
-    'incc_m': 'INCC-M',
-    'incc': 'INCC',
-    'igpm': 'IGP-M',
-    'ipca': 'IPCA',
-    '1_mais_igpm': '1% + IGP-M',
-    '1_mais_ipca': '1% + IPCA',
-    '1_mais_incc': '1% + INCC',
-    'pre_fixado': 'Pré-fixado',
-    'sem_correcao': 'Sem correção',
+    'incc_m': 'INCC-M', 'incc': 'INCC', 'igpm': 'IGP-M', 'ipca': 'IPCA',
+    '1_mais_igpm': '1% + IGP-M', '1_mais_ipca': '1% + IPCA', '1_mais_incc': '1% + INCC',
+    'pre_fixado': 'Pre-fixado', 'sem_correcao': 'Sem correcao',
   }
 
   const statusLabel: Record<string, string> = { disponivel: 'Disponivel', reservada: 'Reservada', vendida: 'Vendida' }
@@ -69,24 +68,22 @@ export async function GET(
 
   const W = 841.89
   const H = 595.28
-  const mL = 20, mR = 20, mB = 18
+  const mL = 18, mR = 18, mB = 18
+  const contentW = W - mL - mR
 
   function novaPage() {
     const p = pdfDoc.addPage([W, H])
     p.drawRectangle({ x: 0, y: H - 50, width: W, height: 50, color: escuro })
     p.drawRectangle({ x: 0, y: H - 52, width: W, height: 2, color: vermelho })
-    if (logoImage) {
-      p.drawImage(logoImage, { x: mL, y: H - 44, width: 75, height: 28 })
-    }
-    p.drawText(empreendimento.nome, { x: mL + 85, y: H - 24, size: 13, font: fontB, color: branco })
-    p.drawText(`${empreendimento.cidade}, ${empreendimento.estado}  |  Tabela de Vendas  |  ${new Date().toLocaleDateString('pt-BR')}`, { x: mL + 85, y: H - 38, size: 8, font: fontR, color: cinza })
+    if (logoImage) p.drawImage(logoImage, { x: mL, y: H - 44, width: 75, height: 28 })
+    p.drawText(s(empreendimento.nome), { x: mL + 85, y: H - 24, size: 13, font: fontB, color: branco })
+    p.drawText(s(`${empreendimento.cidade}, ${empreendimento.estado}  |  Tabela de Vendas  |  ${new Date().toLocaleDateString('pt-BR')}`), { x: mL + 85, y: H - 38, size: 8, font: fontR, color: cinza })
     p.drawLine({ start: { x: mL, y: mB + 8 }, end: { x: W - mR, y: mB + 8 }, thickness: 0.4, color: cinza })
     p.drawText('Casa Forte Construtora e Incorporadora  |  Valores de referencia sujeitos a alteracao.', { x: mL, y: mB, size: 7, font: fontR, color: cinza })
     return { p, y: H - 58 }
   }
 
   let { p: page, y } = novaPage()
-  const contentW = W - mL - mR
 
   // Resumo
   const disponiveis = unidadesFiltradas.filter(u => u.status === 'disponivel').length
@@ -108,57 +105,55 @@ export async function GET(
   })
   y -= 36
 
-  // Condições com fundo destacado
-y -= 4
-page.drawRectangle({ x: mL, y: y - 6, width: contentW, height: 18, color: rgb(0.12, 0.12, 0.12) })
-page.drawRectangle({ x: mL, y: y - 6, width: 3, height: 18, color: vermelho })
-const conds = [
-  { label: 'Correcao ate entrega:', value: indiceLabel[empreendimento.indice_ate_entrega] ?? empreendimento.indice_ate_entrega ?? '-' },
-  { label: 'Correcao apos entrega:', value: indiceLabel[empreendimento.indice_apos_entrega] ?? empreendimento.indice_apos_entrega ?? '-' },
-  { label: 'Parcelamento:', value: `ate ${empreendimento.parcelas_padrao ?? 60}x mensais` },
-  empreendimento.data_prevista_entrega ? { label: 'Entrega prev.:', value: new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR') } : null,
-].filter(Boolean) as { label: string, value: string }[]
-conds.forEach((c, i) => {
-  const lx = mL + 6 + i * (contentW / 4)
-  page.drawText(c.label, { x: lx, y: y + 5, size: 7, font: fontR, color: cinza })
-  page.drawText(c.value, { x: lx + fontR.widthOfTextAtSize(c.label + ' ', 7), y: y + 5, size: 7.5, font: fontB, color: branco })
-})
-y -= 22
+  // Condições destacadas
+  y -= 4
+  page.drawRectangle({ x: mL, y: y - 6, width: contentW, height: 18, color: escuro })
+  page.drawRectangle({ x: mL, y: y - 6, width: 3, height: 18, color: vermelho })
+  const conds = [
+    { label: 'Correcao ate entrega:', value: indiceLabel[empreendimento.indice_ate_entrega] ?? s(empreendimento.indice_ate_entrega ?? '-') },
+    { label: 'Correcao apos entrega:', value: indiceLabel[empreendimento.indice_apos_entrega] ?? s(empreendimento.indice_apos_entrega ?? '-') },
+    { label: 'Parcelamento:', value: `ate ${empreendimento.parcelas_padrao ?? 60}x mensais` },
+    empreendimento.data_prevista_entrega ? { label: 'Entrega prev.:', value: new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR') } : null,
+  ].filter(Boolean) as { label: string, value: string }[]
+  conds.forEach((c, i) => {
+    const lx = mL + 6 + i * (contentW / 4)
+    page.drawText(c.label, { x: lx, y: y + 5, size: 7, font: fontR, color: cinza })
+    page.drawText(c.value, { x: lx + fontR.widthOfTextAtSize(c.label + ' ', 7), y: y + 5, size: 7.5, font: fontB, color: branco })
+  })
+  y -= 22
 
-  // Verifica se há área externa em alguma unidade
+  // Colunas
   const temAreaExt = unidadesFiltradas.some(u => u.area_privativa_externa)
-
-  // Colunas dinâmicas
   const cols = temAreaExt ? [
-    { label: 'Unidade',     w: 46,  align: 'left'   },
-    { label: 'Pavimento',   w: 98,  align: 'left'   },
-    { label: 'Area Priv.',  w: 44,  align: 'right'  },
-    { label: 'Area Ext.',   w: 44,  align: 'right'  },
-    { label: 'Qtos',        w: 26,  align: 'center' },
-    { label: 'Posicao',     w: 52,  align: 'left'   },
-    { label: 'Valor Total', w: 82,  align: 'right'  },
-    { label: 'Entrada',     w: 72,  align: 'right'  },
-    { label: 'Parcelas',    w: 86,  align: 'right'  },
-    { label: 'Intercalad.', w: 86,  align: 'right'  },
-    { label: 'Chaves',      w: 72,  align: 'right'  },
-    { label: 'Status',      w: 55,  align: 'center' },
+    { label: 'Unidade',    w: 44,  align: 'left'   },
+    { label: 'Pavimento',  w: 92,  align: 'left'   },
+    { label: 'Area Priv.', w: 42,  align: 'right'  },
+    { label: 'Area Ext.',  w: 42,  align: 'right'  },
+    { label: 'Qtos',       w: 24,  align: 'center' },
+    { label: 'Posicao',    w: 50,  align: 'left'   },
+    { label: 'Valor',      w: 82,  align: 'right'  },
+    { label: 'Entrada',    w: 72,  align: 'right'  },
+    { label: 'Parcelas',   w: 84,  align: 'right'  },
+    { label: 'Intercal.',  w: 84,  align: 'right'  },
+    { label: 'Chaves',     w: 72,  align: 'right'  },
+    { label: 'Status',     w: 57,  align: 'center' },
   ] : [
-    { label: 'Unidade',     w: 50,  align: 'left'   },
-    { label: 'Pavimento',   w: 108, align: 'left'   },
-    { label: 'Area',        w: 44,  align: 'right'  },
-    { label: 'Qtos',        w: 28,  align: 'center' },
-    { label: 'Posicao',     w: 55,  align: 'left'   },
-    { label: 'Valor Total', w: 88,  align: 'right'  },
-    { label: 'Entrada',     w: 78,  align: 'right'  },
-    { label: 'Parcelas',    w: 92,  align: 'right'  },
-    { label: 'Intercalad.', w: 92,  align: 'right'  },
-    { label: 'Chaves',      w: 78,  align: 'right'  },
-    { label: 'Status',      w: 50,  align: 'center' },
+    { label: 'Unidade',    w: 48,  align: 'left'   },
+    { label: 'Pavimento',  w: 102, align: 'left'   },
+    { label: 'Area',       w: 42,  align: 'right'  },
+    { label: 'Qtos',       w: 26,  align: 'center' },
+    { label: 'Posicao',    w: 54,  align: 'left'   },
+    { label: 'Valor',      w: 88,  align: 'right'  },
+    { label: 'Entrada',    w: 76,  align: 'right'  },
+    { label: 'Parcelas',   w: 90,  align: 'right'  },
+    { label: 'Intercal.',  w: 90,  align: 'right'  },
+    { label: 'Chaves',     w: 76,  align: 'right'  },
+    { label: 'Status',     w: 53,  align: 'center' },
   ]
 
-  // Ajusta última coluna para preencher exato
+  // Ajusta para preencher exato
   const totalW = cols.reduce((a, c) => a + c.w, 0)
-  cols[cols.length - 1].w += contentW - totalW
+  cols[1].w += contentW - totalW
 
   function truncate(text: string, font: any, size: number, maxW: number): string {
     if (font.widthOfTextAtSize(text, size) <= maxW) return text
@@ -195,12 +190,12 @@ y -= 22
     page.drawRectangle({ x: mL, y: y - 2, width: contentW, height: 13, color: rowBg })
 
     const vals = temAreaExt ? [
-      u.unidade ?? '-',
-      u.pavimento ?? '-',
+      s(u.unidade ?? '-'),
+      s(u.pavimento ?? '-'),
       u.area_construida ? u.area_construida + 'm2' : '-',
       u.area_privativa_externa ? u.area_privativa_externa + 'm2' : '-',
       u.quartos ? String(u.quartos) : '-',
-      u.posicao?.replace(/_/g, ' ') ?? '-',
+      s(u.posicao?.replace(/_/g, ' ') ?? '-'),
       u.valor_imovel ? fmt(u.valor_imovel) : '-',
       u.valor_sinal ? fmt(u.valor_sinal) : '-',
       u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
@@ -208,11 +203,11 @@ y -= 22
       u.valor_chaves ? fmt(u.valor_chaves) : '-',
       statusLabel[u.status] ?? u.status,
     ] : [
-      u.unidade ?? '-',
-      u.pavimento ?? '-',
+      s(u.unidade ?? '-'),
+      s(u.pavimento ?? '-'),
       u.area_construida ? u.area_construida + 'm2' : '-',
       u.quartos ? String(u.quartos) : '-',
-      u.posicao?.replace(/_/g, ' ') ?? '-',
+      s(u.posicao?.replace(/_/g, ' ') ?? '-'),
       u.valor_imovel ? fmt(u.valor_imovel) : '-',
       u.valor_sinal ? fmt(u.valor_sinal) : '-',
       u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
