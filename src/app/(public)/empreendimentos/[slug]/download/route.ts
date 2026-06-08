@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 
 export async function GET(
   _request: NextRequest,
@@ -24,152 +25,190 @@ export async function GET(
     .order('pavimento')
     .order('unidade')
 
-  const fmt = (v: any) => v ? `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '—'
-
   const unidadesFiltradas = (unidades ?? []).filter(u => u.status !== 'bloqueada' && u.status !== 'indisponivel')
 
-  const statusLabel: Record<string, string> = { disponivel: 'Disponível', reservada: 'Reservada', vendida: 'Vendida' }
-  const statusColor: Record<string, string> = { disponivel: '#15803d', reservada: '#b45309', vendida: '#b91c1c' }
-  const statusBg: Record<string, string> = { disponivel: '#dcfce7', reservada: '#fef3c7', vendida: '#fee2e2' }
+  const fmt = (v: any) => v ? `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
 
-  const rows = unidadesFiltradas.map(u => `
-    <tr style="background:${u.status === 'reservada' ? '#fffbeb' : u.status === 'vendida' ? '#fef2f2' : 'white'}">
-      <td>${u.unidade}</td>
-      <td>${u.pavimento ?? '—'}</td>
-      <td style="text-align:right">${u.area_construida ? u.area_construida + 'm²' : '—'}</td>
-      <td style="text-align:center">${u.quartos ?? '—'}</td>
-      <td style="text-transform:capitalize">${u.posicao?.replace('_', ' ') ?? '—'}</td>
-      <td style="text-align:right;font-weight:600">${u.valor_imovel ? fmt(u.valor_imovel) : '—'}</td>
-      <td style="text-align:right">${u.valor_sinal ? fmt(u.valor_sinal) : '—'}</td>
-      <td style="text-align:right">${u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '—'}</td>
-      <td style="text-align:right">${u.quantidade_intercaladas && u.valor_intercalada ? `${u.quantidade_intercaladas}x ${fmt(u.valor_intercalada)}` : '—'}</td>
-      <td style="text-align:right">${u.valor_chaves ? fmt(u.valor_chaves) : '—'}</td>
-      <td style="text-align:center">
-        <span style="display:inline-block;padding:1px 6px;border-radius:20px;font-size:10px;font-weight:600;background:${statusBg[u.status] ?? '#f3f4f6'};color:${statusColor[u.status] ?? '#6b7280'}">
-          ${statusLabel[u.status] ?? u.status}
-        </span>
-      </td>
-    </tr>
-  `).join('')
+  const statusLabel: Record<string, string> = { disponivel: 'Disponivel', reservada: 'Reservada', vendida: 'Vendida' }
+  const statusColor: Record<string, any> = {
+    disponivel: rgb(0.08, 0.5, 0.24),
+    reservada: rgb(0.7, 0.28, 0.04),
+    vendida: rgb(0.73, 0.07, 0.07),
+  }
+  const statusBg: Record<string, any> = {
+    disponivel: rgb(0.86, 0.99, 0.9),
+    reservada: rgb(1, 0.98, 0.86),
+    vendida: rgb(1, 0.95, 0.95),
+  }
 
+  // PDF em paisagem A4
+  const pdfDoc = await PDFDocument.create()
+  const fontR = await pdfDoc.embedFont(StandardFonts.Helvetica)
+  const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+
+  const preto = rgb(0.07, 0.07, 0.07)
+  const cinza = rgb(0.62, 0.62, 0.62)
+  const cinzaClaro = rgb(0.97, 0.97, 0.97)
+  const vermelho = rgb(0.91, 0.22, 0.055)
+  const branco = rgb(1, 1, 1)
+  const escuro = rgb(0.12, 0.12, 0.12)
+
+  // Logo
+  let logoImage: any = null
+  try {
+    const logoResp = await fetch('https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png')
+    const logoBytes = new Uint8Array(await logoResp.arrayBuffer())
+    logoImage = await pdfDoc.embedPng(logoBytes)
+  } catch (e) {}
+
+  // Dimensões A4 paisagem
+  const W = 841.89
+  const H = 595.28
+  const mL = 24, mR = 24, mT = 20, mB = 20
+
+  function novaPage() {
+    const p = pdfDoc.addPage([W, H])
+
+    // Header escuro
+    p.drawRectangle({ x: 0, y: H - 52, width: W, height: 52, color: escuro })
+    p.drawRectangle({ x: 0, y: H - 54, width: W, height: 2, color: vermelho })
+
+    if (logoImage) {
+      p.drawImage(logoImage, { x: mL, y: H - 46, width: 80, height: 30 })
+    } else {
+      p.drawText('CASA FORTE', { x: mL, y: H - 28, size: 14, font: fontB, color: branco })
+    }
+
+    p.drawText(empreendimento.nome, { x: mL + 90, y: H - 26, size: 13, font: fontB, color: branco })
+    p.drawText(`${empreendimento.cidade}, ${empreendimento.estado}`, { x: mL + 90, y: H - 40, size: 9, font: fontR, color: cinza })
+
+    const dataStr = `Tabela de Vendas  |  ${new Date().toLocaleDateString('pt-BR')}`
+    p.drawText(dataStr, { x: W - mR - fontR.widthOfTextAtSize(dataStr, 9), y: H - 32, size: 9, font: fontR, color: cinza })
+
+    // Rodapé
+    p.drawLine({ start: { x: mL, y: mB + 10 }, end: { x: W - mR, y: mB + 10 }, thickness: 0.5, color: cinza })
+    p.drawText('Casa Forte Construtora e Incorporadora  |  Os valores são de referência e podem sofrer alteração sem aviso prévio.', { x: mL, y: mB, size: 7, font: fontR, color: cinza })
+
+    return { p, y: H - 60 }
+  }
+
+  let { p: page, y } = novaPage()
+  const contentW = W - mL - mR
+
+  // Resumo rápido
   const disponiveis = unidadesFiltradas.filter(u => u.status === 'disponivel').length
   const reservadas = unidadesFiltradas.filter(u => u.status === 'reservada').length
   const vendidas = unidadesFiltradas.filter(u => u.status === 'vendida').length
 
-  const html = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Tabela de Vendas — ${empreendimento.nome}</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: white; color: #111; font-size: 11px; }
+  y -= 8
+  const boxW = (contentW - 24) / 4
+  const boxes = [
+    { label: 'Total', val: String(unidadesFiltradas.length), cor: preto },
+    { label: 'Disponiveis', val: String(disponiveis), cor: rgb(0.08, 0.5, 0.24) },
+    { label: 'Reservadas', val: String(reservadas), cor: rgb(0.7, 0.28, 0.04) },
+    { label: 'Vendidas', val: String(vendidas), cor: rgb(0.73, 0.07, 0.07) },
+  ]
+  boxes.forEach((b, i) => {
+    const bx = mL + i * (boxW + 8)
+    page.drawRectangle({ x: bx, y: y - 28, width: boxW, height: 32, color: cinzaClaro, borderColor: rgb(0.88, 0.88, 0.88), borderWidth: 0.5 })
+    page.drawText(b.label, { x: bx + 6, y: y + 0, size: 7, font: fontR, color: cinza })
+    page.drawText(b.val, { x: bx + 6, y: y - 18, size: 14, font: fontB, color: b.cor })
+  })
+  y -= 38
 
-    @page { size: A4 landscape; margin: 8mm 10mm; }
+  // Condições
+  y -= 6
+  const conds = [
+    `Correcao ate entrega: ${empreendimento.indice_ate_entrega ?? '-'}`,
+    `Correcao apos entrega: ${empreendimento.indice_apos_entrega ?? '-'}`,
+    `Parcelamento: ate ${empreendimento.parcelas_padrao ?? 60}x mensais`,
+    empreendimento.data_prevista_entrega ? `Entrega: ${new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR')}` : '',
+  ].filter(Boolean)
+  conds.forEach((c, i) => {
+    page.drawText(c, { x: mL + i * (contentW / 4), y, size: 8, font: fontR, color: preto })
+  })
+  y -= 14
 
-    @media print {
-      body { background: white; font-size: 10px; }
-      .no-print { display: none !important; }
-      table { page-break-inside: auto; }
-      tr { page-break-inside: avoid; page-break-after: auto; }
-      thead { display: table-header-group; }
+  // Colunas da tabela
+  const cols = [
+    { label: 'Unidade', w: 55, align: 'left' },
+    { label: 'Pavimento', w: 55, align: 'left' },
+    { label: 'Area', w: 40, align: 'right' },
+    { label: 'Qtos', w: 30, align: 'center' },
+    { label: 'Posicao', w: 55, align: 'left' },
+    { label: 'Valor Total', w: 90, align: 'right' },
+    { label: 'Entrada', w: 80, align: 'right' },
+    { label: 'Parcelas', w: 95, align: 'right' },
+    { label: 'Intercaladas', w: 95, align: 'right' },
+    { label: 'Chaves', w: 80, align: 'right' },
+    { label: 'Status', w: 55, align: 'center' },
+  ]
+
+  function drawHeader(yPos: number) {
+    page.drawRectangle({ x: mL, y: yPos - 4, width: contentW, height: 16, color: cinzaClaro })
+    page.drawRectangle({ x: mL, y: yPos - 4, width: contentW, height: 1.5, color: rgb(0.85, 0.85, 0.85) })
+    let x = mL
+    cols.forEach(col => {
+      page.drawText(col.label.toUpperCase(), { x: col.align === 'right' ? x + col.w - fontB.widthOfTextAtSize(col.label.toUpperCase(), 7) : x + 3, y: yPos + 6, size: 7, font: fontB, color: cinza })
+      x += col.w
+    })
+    return yPos - 18
+  }
+
+  y = drawHeader(y)
+
+  // Linhas da tabela
+  let alternate = false
+  for (const u of unidadesFiltradas) {
+    if (y < mB + 30) {
+      const np = novaPage()
+      page = np.p
+      y = np.y - 8
+      y = drawHeader(y)
     }
 
-    .header { background: #1E1E1E; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-    .resumo { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
-    .resumo-item { background: white; border-radius: 8px; border: 1px solid #e5e7eb; padding: 8px; text-align: center; }
-    .condicoes { background: white; border-radius: 8px; border: 1px solid #e5e7eb; padding: 10px 14px; margin-bottom: 12px; display: flex; gap: 24px; flex-wrap: wrap; }
+    const rowBg = u.status === 'reservada' ? rgb(1, 0.98, 0.93) : u.status === 'vendida' ? rgb(1, 0.96, 0.96) : alternate ? rgb(0.98, 0.98, 0.98) : branco
+    page.drawRectangle({ x: mL, y: y - 3, width: contentW, height: 14, color: rowBg })
 
-    table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
-    thead tr { background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
-    th { padding: 6px 8px; text-align: left; font-size: 9px; font-weight: 600; color: #6b7280; text-transform: uppercase; white-space: nowrap; }
-    td { padding: 5px 8px; border-bottom: 1px solid #f3f4f6; white-space: nowrap; }
-    .table-wrapper { background: white; border-radius: 8px; border: 1px solid #e5e7eb; overflow: hidden; }
+    const vals = [
+      u.unidade ?? '-',
+      u.pavimento ?? '-',
+      u.area_construida ? u.area_construida + 'm2' : '-',
+      u.quartos ? String(u.quartos) : '-',
+      u.posicao?.replace('_', ' ') ?? '-',
+      u.valor_imovel ? fmt(u.valor_imovel) : '-',
+      u.valor_sinal ? fmt(u.valor_sinal) : '-',
+      u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
+      u.quantidade_intercaladas && u.valor_intercalada ? `${u.quantidade_intercaladas}x ${fmt(u.valor_intercalada)}` : '-',
+      u.valor_chaves ? fmt(u.valor_chaves) : '-',
+      statusLabel[u.status] ?? u.status,
+    ]
 
-    .footer { margin-top: 12px; text-align: center; font-size: 9px; color: #9ca3af; }
-  </style>
-</head>
-<body>
+    let x = mL
+    vals.forEach((val, i) => {
+      const col = cols[i]
+      const isStatus = i === vals.length - 1
+      const color = isStatus ? (statusColor[u.status] ?? preto) : i === 5 ? preto : cinza
+      const font = i === 0 || i === 5 ? fontB : fontR
+      const size = 8
+      const tw = font.widthOfTextAtSize(val, size)
+      const tx = col.align === 'right' ? x + col.w - tw - 3 : col.align === 'center' ? x + (col.w - tw) / 2 : x + 3
+      page.drawText(val, { x: tx, y: y + 2, size, font, color })
+      x += col.w
+    })
 
-  <div class="header">
-    <div style="display:flex;align-items:center;gap:12px">
-      <img src="https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png" style="height:32px;filter:brightness(0) invert(1)" alt="Casa Forte" />
-      <div>
-        <div style="color:white;font-size:15px;font-weight:700">${empreendimento.nome}</div>
-        <div style="color:rgba(255,255,255,0.5);font-size:11px">${empreendimento.cidade}, ${empreendimento.estado}</div>
-      </div>
-    </div>
-    <div style="text-align:right">
-      <div style="color:rgba(255,255,255,0.5);font-size:10px">Tabela de Vendas</div>
-      <div style="color:white;font-size:11px">${new Date().toLocaleDateString('pt-BR')}</div>
-    </div>
-  </div>
+    page.drawLine({ start: { x: mL, y: y - 3 }, end: { x: W - mR, y: y - 3 }, thickness: 0.3, color: rgb(0.92, 0.92, 0.92) })
 
-  <div class="resumo">
-    <div class="resumo-item">
-      <div style="font-size:10px;color:#9ca3af;margin-bottom:2px">Total</div>
-      <div style="font-size:20px;font-weight:700">${unidadesFiltradas.length}</div>
-    </div>
-    <div class="resumo-item" style="background:#f0fdf4;border-color:#bbf7d0">
-      <div style="font-size:10px;color:#15803d;margin-bottom:2px">Disponíveis</div>
-      <div style="font-size:20px;font-weight:700;color:#15803d">${disponiveis}</div>
-    </div>
-    <div class="resumo-item" style="background:#fffbeb;border-color:#fde68a">
-      <div style="font-size:10px;color:#b45309;margin-bottom:2px">Reservadas</div>
-      <div style="font-size:20px;font-weight:700;color:#b45309">${reservadas}</div>
-    </div>
-    <div class="resumo-item" style="background:#fef2f2;border-color:#fecaca">
-      <div style="font-size:10px;color:#b91c1c;margin-bottom:2px">Vendidas</div>
-      <div style="font-size:20px;font-weight:700;color:#b91c1c">${vendidas}</div>
-    </div>
-  </div>
+    alternate = !alternate
+    y -= 14
+  }
 
-  <div class="condicoes">
-    <div><span style="font-size:9px;color:#9ca3af">Correção até entrega</span><br><strong>${empreendimento.indice_ate_entrega ?? '—'}</strong></div>
-    <div><span style="font-size:9px;color:#9ca3af">Correção após entrega</span><br><strong>${empreendimento.indice_apos_entrega ?? '—'}</strong></div>
-    <div><span style="font-size:9px;color:#9ca3af">Parcelamento</span><br><strong>Até ${empreendimento.parcelas_padrao ?? 60}x mensais</strong></div>
-    ${empreendimento.data_prevista_entrega ? `<div><span style="font-size:9px;color:#9ca3af">Previsão de entrega</span><br><strong>${new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR')}</strong></div>` : ''}
-  </div>
+  const pdfBytes = await pdfDoc.save()
 
-  <div class="table-wrapper">
-    <table>
-      <thead>
-        <tr>
-          <th>Unidade</th>
-          <th>Pavimento</th>
-          <th style="text-align:right">Área</th>
-          <th style="text-align:center">Qtos</th>
-          <th>Posição</th>
-          <th style="text-align:right">Valor Total</th>
-          <th style="text-align:right">Entrada</th>
-          <th style="text-align:right">Parcelas</th>
-          <th style="text-align:right">Intercaladas</th>
-          <th style="text-align:right">Chaves</th>
-          <th style="text-align:center">Status</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-  </div>
-
-  ${empreendimento.observacoes_publicas ? `
-  <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:11px;color:#92400e">
-    <strong>Observações:</strong> ${empreendimento.observacoes_publicas}
-  </div>` : ''}
-
-  <div class="footer">
-    © ${new Date().getFullYear()} Casa Forte Construtora e Incorporadora. Os valores são de referência e podem sofrer alteração sem aviso prévio.
-  </div>
-
-  <script>
-    window.onload = function() {
-      window.print()
-    }
-  </script>
-</body>
-</html>`
-
-  return new NextResponse(html, {
-    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  return new NextResponse(Buffer.from(pdfBytes), {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `inline; filename="tabela-${slug}.pdf"`,
+    },
   })
 }
