@@ -9,33 +9,38 @@ export default function AuthCallbackPage() {
     const code = params.get('code')
     const type = params.get('type')
     const next = params.get('next')
+    const tokenHash = params.get('token_hash')
 
-    if (code) {
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+    async function process() {
+      // Token hash direto (generateLink)
+      if (tokenHash) {
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: 'recovery',
+        })
         if (!error) {
+          window.location.href = '/obras/nova-senha'
+          return
+        }
+      }
+
+      // Authorization code (PKCE)
+      if (code) {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+        if (!error && data.session) {
           if (type === 'recovery' || next === 'nova-senha') {
             window.location.href = '/obras/nova-senha'
           } else {
             window.location.href = '/obras'
           }
-        } else {
-          window.location.href = '/obras/login'
+          return
         }
-      })
-    } else {
-      // Tenta pegar sessão do hash (implicit flow)
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          if (type === 'recovery' || next === 'nova-senha') {
-            window.location.href = '/obras/nova-senha'
-          } else {
-            window.location.href = '/obras'
-          }
-        } else {
-          window.location.href = '/obras/login'
-        }
-      })
+      }
+
+      window.location.href = '/obras/login'
     }
+
+    process()
   }, [])
 
   return (
