@@ -3,21 +3,29 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
+const SERGIO = '5582996146487'
+
 export default function AprovarRecusarRDO({ rdoId }: { rdoId: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [recusando, setRecusando] = useState(false)
   const [motivo, setMotivo] = useState('')
 
+  async function enviarWhats(numero: string, mensagem: string) {
+    await fetch('/api/whatsapp-rdo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ numero, mensagem }),
+    })
+  }
+
   async function aprovar() {
     setLoading(true)
     const supabase = createClient()
 
-    // Atualiza status
     await supabase.from('relatorios').update({ status: 'aprovado', aprovado_em: new Date().toISOString() }).eq('id', rdoId)
     await supabase.from('relatorio_historico').insert({ relatorio_id: rdoId, acao: 'aprovacao', observacao: 'RDO aprovado pela diretoria' })
 
-    // Busca dados do RDO e engenheiro para WhatsApp
     const { data: rdo } = await supabase
       .from('relatorios')
       .select('numero, data_relatorio, obras(nome), engenheiros(nome, telefone)')
@@ -28,18 +36,21 @@ export default function AprovarRecusarRDO({ rdoId }: { rdoId: string }) {
     const nomeEngenheiro = (rdo?.engenheiros as any)?.nome
     const nomeObra = (rdo?.obras as any)?.nome
     const dataRdo = rdo?.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '—'
-    const linkRdo = `https://tabelas.casaforteinc.com.br/obras/rdos/${rdoId}`
+    const linkRdo = `https://obras.casaforteinc.com.br/obras/rdos/${rdoId}`
 
+    // Mensagem para o engenheiro
     if (telefone) {
-      const numero = telefone.replace(/\D/g, '')
-      const mensagem = `✅ *RDO #${rdo?.numero} Aprovado*\n\nOlá, ${nomeEngenheiro}!\n\nSeu Relatório Diário de Obra foi *aprovado* pela diretoria.\n\n📋 *Obra:* ${nomeObra}\n📅 *Data:* ${dataRdo}\n\nAcesse o relatório pelo link:\n${linkRdo}`
-
-      await fetch('/api/whatsapp-rdo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numero, mensagem }),
-      })
+      await enviarWhats(
+        telefone.replace(/\D/g, ''),
+        `✅ *RDO #${rdo?.numero} Aprovado*\n\nOlá, ${nomeEngenheiro}!\n\nSeu Relatório Diário de Obra foi *aprovado* pela diretoria.\n\n📋 *Obra:* ${nomeObra}\n📅 *Data:* ${dataRdo}\n\nAcesse o relatório:\n${linkRdo}`
+      )
     }
+
+    // Notificação para Sérgio
+    await enviarWhats(
+      SERGIO,
+      `✅ *RDO #${rdo?.numero} Aprovado*\n\n📋 *Obra:* ${nomeObra}\n👷 *Engenheiro:* ${nomeEngenheiro}\n📅 *Data:* ${dataRdo}\n\n🔗 ${linkRdo}`
+    )
 
     router.refresh()
     setLoading(false)
@@ -53,7 +64,6 @@ export default function AprovarRecusarRDO({ rdoId }: { rdoId: string }) {
     await supabase.from('relatorios').update({ status: 'recusado', recusado_em: new Date().toISOString(), motivo_recusa: motivo }).eq('id', rdoId)
     await supabase.from('relatorio_historico').insert({ relatorio_id: rdoId, acao: 'recusa', observacao: motivo })
 
-    // Busca dados do RDO e engenheiro para WhatsApp
     const { data: rdo } = await supabase
       .from('relatorios')
       .select('numero, data_relatorio, obras(nome), engenheiros(nome, telefone)')
@@ -65,16 +75,19 @@ export default function AprovarRecusarRDO({ rdoId }: { rdoId: string }) {
     const nomeObra = (rdo?.obras as any)?.nome
     const dataRdo = rdo?.data_relatorio ? new Date(rdo.data_relatorio).toLocaleDateString('pt-BR') : '—'
 
+    // Mensagem para o engenheiro
     if (telefone) {
-      const numero = telefone.replace(/\D/g, '')
-      const mensagem = `❌ *RDO #${rdo?.numero} Recusado*\n\nOlá, ${nomeEngenheiro}!\n\nSeu Relatório Diário de Obra foi *recusado* pela diretoria.\n\n📋 *Obra:* ${nomeObra}\n📅 *Data:* ${dataRdo}\n\n📝 *Motivo:* ${motivo}\n\nAcesse o portal para corrigir e reenviar:\nhttps://tabelas.casaforteinc.com.br/obras`
-      
-      await fetch('/api/whatsapp-rdo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ numero, mensagem }),
-      })
+      await enviarWhats(
+        telefone.replace(/\D/g, ''),
+        `❌ *RDO #${rdo?.numero} Recusado*\n\nOlá, ${nomeEngenheiro}!\n\nSeu Relatório Diário de Obra foi *recusado* pela diretoria.\n\n📋 *Obra:* ${nomeObra}\n📅 *Data:* ${dataRdo}\n\n📝 *Motivo:* ${motivo}\n\nAcesse o portal para corrigir e reenviar:\nhttps://obras.casaforteinc.com.br`
+      )
     }
+
+    // Notificação para Sérgio
+    await enviarWhats(
+      SERGIO,
+      `❌ *RDO #${rdo?.numero} Recusado*\n\n📋 *Obra:* ${nomeObra}\n👷 *Engenheiro:* ${nomeEngenheiro}\n📅 *Data:* ${dataRdo}\n\n📝 *Motivo:* ${motivo}`
+    )
 
     router.refresh()
     setLoading(false)
