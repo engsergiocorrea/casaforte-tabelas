@@ -16,7 +16,9 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 })
 
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback?type=recovery',
+    await supabase.auth.resetPasswordForEmail(email, {
+  redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback?type=recovery&next=nova-senha',
+})
     })
 
     return NextResponse.json({ ok: true, usuario_id: data.user.id })
