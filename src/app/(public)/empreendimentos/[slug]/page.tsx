@@ -71,8 +71,7 @@ export default async function EmpreendimentoPage({ params }: Props) {
               </div>
               <span style={{fontSize:'14px',color:'#6b7280'}}>← Todos os empreendimentos</span>
             </Link>
-            <a href={`/empreendimentos/${slug}/download`} style={{display:'flex',alignItems:'center',gap:'8px',padding:'6px 16px',background:'#1e293b',color:'white',fontSize:'14px',fontWeight:'500',borderRadius:'8px',textDecoration:'none'}}>
-              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+<a href={`/empreendimentos/${slug}/download`} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:'8px',padding:'6px 16px',background:'#1e293b',color:'white',fontSize:'14px',fontWeight:'500',borderRadius:'8px',textDecoration:'none'}}>              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
                 <path d="M7.5 1v9m0 0l-3-3m3 3l3-3M1 11v1a2 2 0 002 2h9a2 2 0 002-2v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               Baixar PDF
