@@ -18,7 +18,9 @@ export async function POST(req: NextRequest) {
 
     // Envia email de recuperação para o engenheiro definir a senha
     await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback',
+     await supabase.auth.resetPasswordForEmail(email, {
+  redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback?type=recovery',
+})
     })
 
     return NextResponse.json({ ok: true, usuario_id: data.user.id })
