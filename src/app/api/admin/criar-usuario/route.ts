@@ -15,16 +15,9 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ ok: false, erro: error.message }, { status: 400 })
 
-    // Gera e envia o link de recuperação com redirect correto
-    const { error: linkError } = await supabase.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-      options: {
-        redirectTo: 'https://obras.casaforteinc.com.br/obras/nova-senha',
-      },
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://obras.casaforteinc.com.br/obras/auth/callback?type=recovery',
     })
-
-    if (linkError) console.error('[criar-usuario] generateLink error:', linkError.message)
 
     return NextResponse.json({ ok: true, usuario_id: data.user.id })
   } catch (err: any) {
