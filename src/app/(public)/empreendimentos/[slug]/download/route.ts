@@ -29,6 +29,18 @@ export async function GET(
 
   const fmt = (v: any) => v ? `R$${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
 
+  const indiceLabel: Record<string, string> = {
+    'incc_m': 'INCC-M',
+    'incc': 'INCC',
+    'igpm': 'IGP-M',
+    'ipca': 'IPCA',
+    '1_mais_igpm': '1% + IGP-M',
+    '1_mais_ipca': '1% + IPCA',
+    '1_mais_incc': '1% + INCC',
+    'pre_fixado': 'Pré-fixado',
+    'sem_correcao': 'Sem correção',
+  }
+
   const statusLabel: Record<string, string> = { disponivel: 'Disponivel', reservada: 'Reservada', vendida: 'Vendida' }
   const statusColor: Record<string, any> = {
     disponivel: rgb(0.08, 0.5, 0.24),
@@ -41,11 +53,12 @@ export async function GET(
   const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
 
   const preto = rgb(0.07, 0.07, 0.07)
-  const cinza = rgb(0.62, 0.62, 0.62)
+  const cinza = rgb(0.55, 0.55, 0.55)
   const cinzaClaro = rgb(0.96, 0.96, 0.96)
   const vermelho = rgb(0.91, 0.22, 0.055)
   const branco = rgb(1, 1, 1)
   const escuro = rgb(0.12, 0.12, 0.12)
+  const headerCor = rgb(0.18, 0.18, 0.18)
 
   let logoImage: any = null
   try {
@@ -54,10 +67,9 @@ export async function GET(
     logoImage = await pdfDoc.embedPng(logoBytes)
   } catch (e) {}
 
-  // A4 paisagem
   const W = 841.89
   const H = 595.28
-  const mL = 20, mR = 20, mB = 20
+  const mL = 20, mR = 20, mB = 18
 
   function novaPage() {
     const p = pdfDoc.addPage([W, H])
@@ -66,10 +78,10 @@ export async function GET(
     if (logoImage) {
       p.drawImage(logoImage, { x: mL, y: H - 44, width: 75, height: 28 })
     }
-    p.drawText(empreendimento.nome, { x: mL + 85, y: H - 24, size: 12, font: fontB, color: branco })
+    p.drawText(empreendimento.nome, { x: mL + 85, y: H - 24, size: 13, font: fontB, color: branco })
     p.drawText(`${empreendimento.cidade}, ${empreendimento.estado}  |  Tabela de Vendas  |  ${new Date().toLocaleDateString('pt-BR')}`, { x: mL + 85, y: H - 38, size: 8, font: fontR, color: cinza })
     p.drawLine({ start: { x: mL, y: mB + 8 }, end: { x: W - mR, y: mB + 8 }, thickness: 0.4, color: cinza })
-    p.drawText('Casa Forte Construtora e Incorporadora  |  Valores de referência sujeitos a alteração.', { x: mL, y: mB, size: 7, font: fontR, color: cinza })
+    p.drawText('Casa Forte Construtora e Incorporadora  |  Valores de referencia sujeitos a alteracao.', { x: mL, y: mB, size: 7, font: fontR, color: cinza })
     return { p, y: H - 58 }
   }
 
@@ -96,51 +108,63 @@ export async function GET(
   })
   y -= 36
 
-  // Condições
+  // Condições com labels corretos
   y -= 4
   const conds = [
-    `Correcao ate entrega: ${empreendimento.indice_ate_entrega ?? '-'}`,
-    `Correcao apos entrega: ${empreendimento.indice_apos_entrega ?? '-'}`,
+    `Correcao ate entrega: ${indiceLabel[empreendimento.indice_ate_entrega] ?? empreendimento.indice_ate_entrega ?? '-'}`,
+    `Correcao apos entrega: ${indiceLabel[empreendimento.indice_apos_entrega] ?? empreendimento.indice_apos_entrega ?? '-'}`,
     `Parcelamento: ate ${empreendimento.parcelas_padrao ?? 60}x mensais`,
     empreendimento.data_prevista_entrega ? `Entrega prev.: ${new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR')}` : '',
   ].filter(Boolean)
   conds.forEach((c, i) => {
     page.drawText(c, { x: mL + i * (contentW / 4), y, size: 7.5, font: fontR, color: preto })
   })
-  y -= 12
+  y -= 14
 
-  // Colunas — ajustadas para caber em A4 paisagem
-  const cols = [
-    { label: 'Unidade',     w: 48,  align: 'left'   },
-    { label: 'Pavimento',   w: 100, align: 'left'   },
-    { label: 'Area',        w: 38,  align: 'right'  },
+  // Verifica se há área externa em alguma unidade
+  const temAreaExt = unidadesFiltradas.some(u => u.area_privativa_externa)
+
+  // Colunas dinâmicas
+  const cols = temAreaExt ? [
+    { label: 'Unidade',     w: 46,  align: 'left'   },
+    { label: 'Pavimento',   w: 98,  align: 'left'   },
+    { label: 'Area Priv.',  w: 44,  align: 'right'  },
+    { label: 'Area Ext.',   w: 44,  align: 'right'  },
+    { label: 'Qtos',        w: 26,  align: 'center' },
+    { label: 'Posicao',     w: 52,  align: 'left'   },
+    { label: 'Valor Total', w: 82,  align: 'right'  },
+    { label: 'Entrada',     w: 72,  align: 'right'  },
+    { label: 'Parcelas',    w: 86,  align: 'right'  },
+    { label: 'Intercalad.', w: 86,  align: 'right'  },
+    { label: 'Chaves',      w: 72,  align: 'right'  },
+    { label: 'Status',      w: 55,  align: 'center' },
+  ] : [
+    { label: 'Unidade',     w: 50,  align: 'left'   },
+    { label: 'Pavimento',   w: 108, align: 'left'   },
+    { label: 'Area',        w: 44,  align: 'right'  },
     { label: 'Qtos',        w: 28,  align: 'center' },
     { label: 'Posicao',     w: 55,  align: 'left'   },
     { label: 'Valor Total', w: 88,  align: 'right'  },
     { label: 'Entrada',     w: 78,  align: 'right'  },
     { label: 'Parcelas',    w: 92,  align: 'right'  },
-    { label: 'Intercaladas',w: 92,  align: 'right'  },
+    { label: 'Intercalad.', w: 92,  align: 'right'  },
     { label: 'Chaves',      w: 78,  align: 'right'  },
-    { label: 'Status',      w: 56,  align: 'center' },
+    { label: 'Status',      w: 50,  align: 'center' },
   ]
-  // Garante que as colunas preenchem exatamente contentW
-  const totalW = cols.reduce((a, c) => a + c.w, 0)
-  if (totalW !== contentW) {
-    cols[1].w += contentW - totalW
-  }
 
-  // Função para truncar texto
+  // Ajusta última coluna para preencher exato
+  const totalW = cols.reduce((a, c) => a + c.w, 0)
+  cols[cols.length - 1].w += contentW - totalW
+
   function truncate(text: string, font: any, size: number, maxW: number): string {
     if (font.widthOfTextAtSize(text, size) <= maxW) return text
     let t = text
-    while (t.length > 0 && font.widthOfTextAtSize(t + '...', size) > maxW) {
-      t = t.slice(0, -1)
-    }
-    return t + '...'
+    while (t.length > 0 && font.widthOfTextAtSize(t + '..', size) > maxW) t = t.slice(0, -1)
+    return t + '..'
   }
 
   function drawHeader(yPos: number) {
-    page.drawRectangle({ x: mL, y: yPos - 4, width: contentW, height: 15, color: rgb(0.2, 0.2, 0.2) })
+    page.drawRectangle({ x: mL, y: yPos - 4, width: contentW, height: 15, color: headerCor })
     let x = mL
     cols.forEach(col => {
       const txt = col.label.toUpperCase()
@@ -166,7 +190,20 @@ export async function GET(
     const rowBg = u.status === 'reservada' ? rgb(1, 0.97, 0.88) : u.status === 'vendida' ? rgb(1, 0.95, 0.95) : alternate ? rgb(0.975, 0.975, 0.975) : branco
     page.drawRectangle({ x: mL, y: y - 2, width: contentW, height: 13, color: rowBg })
 
-    const vals = [
+    const vals = temAreaExt ? [
+      u.unidade ?? '-',
+      u.pavimento ?? '-',
+      u.area_construida ? u.area_construida + 'm2' : '-',
+      u.area_privativa_externa ? u.area_privativa_externa + 'm2' : '-',
+      u.quartos ? String(u.quartos) : '-',
+      u.posicao?.replace(/_/g, ' ') ?? '-',
+      u.valor_imovel ? fmt(u.valor_imovel) : '-',
+      u.valor_sinal ? fmt(u.valor_sinal) : '-',
+      u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
+      u.quantidade_intercaladas && u.valor_intercalada ? `${u.quantidade_intercaladas}x ${fmt(u.valor_intercalada)}` : '-',
+      u.valor_chaves ? fmt(u.valor_chaves) : '-',
+      statusLabel[u.status] ?? u.status,
+    ] : [
       u.unidade ?? '-',
       u.pavimento ?? '-',
       u.area_construida ? u.area_construida + 'm2' : '-',
@@ -183,11 +220,12 @@ export async function GET(
     let x = mL
     vals.forEach((val, i) => {
       const col = cols[i]
-      const isStatus = i === 10
-      const font = (i === 0 || i === 5) ? fontB : fontR
-      const color = isStatus ? (statusColor[u.status] ?? preto) : i === 5 ? preto : cinza
+      const isStatus = i === vals.length - 1
+      const isValor = temAreaExt ? i === 6 : i === 5
+      const font = (i === 0 || isValor) ? fontB : fontR
+      const color = isStatus ? (statusColor[u.status] ?? preto) : isValor ? preto : cinza
       const size = 8
-      const maxW = col.w - 6
+      const maxW = col.w - 5
       const txt = truncate(String(val), font, size, maxW)
       const tw = font.widthOfTextAtSize(txt, size)
       const tx = col.align === 'right' ? x + col.w - tw - 3 : col.align === 'center' ? x + (col.w - tw) / 2 : x + 3
