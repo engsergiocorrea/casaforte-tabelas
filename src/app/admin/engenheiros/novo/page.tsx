@@ -28,8 +28,7 @@ export default function NovoEngenheiroPage() {
     const res = await fetch('/api/admin/criar-usuario', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: form.email, nome: form.nome }),
-    })
+body: JSON.stringify({ email: form.email, nome: form.nome, telefone: form.telefone }),    })
     const result = await res.json()
 
     if (!result.ok) {
