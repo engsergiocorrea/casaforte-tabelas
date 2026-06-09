@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
+import fontkit from '@pdf-lib/fontkit'
 
 export async function GET(
   _request: NextRequest,
@@ -29,18 +30,13 @@ export async function GET(
 
   const fmt = (v: any) => v ? `R$${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
 
-  // Remove acentos para pdf-lib
-  function s(text: string): string {
-    return (text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\x00-\x7F]/g, '')
-  }
-
   const indiceLabel: Record<string, string> = {
     'incc_m': 'INCC-M', 'incc': 'INCC', 'igpm': 'IGP-M', 'ipca': 'IPCA',
     '1_mais_igpm': '1% + IGP-M', '1_mais_ipca': '1% + IPCA', '1_mais_incc': '1% + INCC',
-    'pre_fixado': 'Pre-fixado', 'sem_correcao': 'Sem correcao',
+    'pre_fixado': 'Pré-fixado', 'sem_correcao': 'Sem correção',
   }
 
-  const statusLabel: Record<string, string> = { disponivel: 'Disponivel', reservada: 'Reservada', vendida: 'Vendida' }
+  const statusLabel: Record<string, string> = { disponivel: 'Disponível', reservada: 'Reservada', vendida: 'Vendida' }
   const statusColor: Record<string, any> = {
     disponivel: rgb(0.08, 0.5, 0.24),
     reservada: rgb(0.7, 0.28, 0.04),
@@ -48,8 +44,22 @@ export async function GET(
   }
 
   const pdfDoc = await PDFDocument.create()
-  const fontR = await pdfDoc.embedFont(StandardFonts.Helvetica)
-  const fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  pdfDoc.registerFontkit(fontkit)
+
+  // Fonte com suporte a UTF-8/português
+  let fontR: any, fontB: any
+  try {
+    const [fontRBytes, fontBBytes] = await Promise.all([
+      fetch('https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNr5TRA.woff2').then(r => r.arrayBuffer()),
+      fetch('https://fonts.gstatic.com/s/notosans/v36/o-0NIpQlx3QUlC5A4PNjXhFVadyB1Wk.woff2').then(r => r.arrayBuffer()),
+    ])
+    fontR = await pdfDoc.embedFont(new Uint8Array(fontRBytes))
+    fontB = await pdfDoc.embedFont(new Uint8Array(fontBBytes))
+  } catch (e) {
+    console.error('[PDF] Erro ao carregar fonte, usando fallback:', e)
+    fontR = await pdfDoc.embedFont(StandardFonts.Helvetica)
+    fontB = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
+  }
 
   const preto = rgb(0.07, 0.07, 0.07)
   const cinza = rgb(0.55, 0.55, 0.55)
@@ -76,10 +86,10 @@ export async function GET(
     p.drawRectangle({ x: 0, y: H - 50, width: W, height: 50, color: escuro })
     p.drawRectangle({ x: 0, y: H - 52, width: W, height: 2, color: vermelho })
     if (logoImage) p.drawImage(logoImage, { x: mL, y: H - 44, width: 75, height: 28 })
-    p.drawText(s(empreendimento.nome), { x: mL + 85, y: H - 24, size: 13, font: fontB, color: branco })
-    p.drawText(s(`${empreendimento.cidade}, ${empreendimento.estado}  |  Tabela de Vendas  |  ${new Date().toLocaleDateString('pt-BR')}`), { x: mL + 85, y: H - 38, size: 8, font: fontR, color: cinza })
+    p.drawText(empreendimento.nome, { x: mL + 85, y: H - 24, size: 13, font: fontB, color: branco })
+    p.drawText(`${empreendimento.cidade}, ${empreendimento.estado}  |  Tabela de Vendas  |  ${new Date().toLocaleDateString('pt-BR')}`, { x: mL + 85, y: H - 38, size: 8, font: fontR, color: cinza })
     p.drawLine({ start: { x: mL, y: mB + 8 }, end: { x: W - mR, y: mB + 8 }, thickness: 0.4, color: cinza })
-    p.drawText('Casa Forte Construtora e Incorporadora  |  Valores de referencia sujeitos a alteracao.', { x: mL, y: mB, size: 7, font: fontR, color: cinza })
+    p.drawText('Casa Forte Construtora e Incorporadora  |  Valores de referência sujeitos a alteração.', { x: mL, y: mB, size: 7, font: fontR, color: cinza })
     return { p, y: H - 58 }
   }
 
@@ -94,7 +104,7 @@ export async function GET(
   const bw = (contentW - 18) / 4
   ;[
     { l: 'Total', v: String(unidadesFiltradas.length), c: preto },
-    { l: 'Disponiveis', v: String(disponiveis), c: rgb(0.08, 0.5, 0.24) },
+    { l: 'Disponíveis', v: String(disponiveis), c: rgb(0.08, 0.5, 0.24) },
     { l: 'Reservadas', v: String(reservadas), c: rgb(0.7, 0.28, 0.04) },
     { l: 'Vendidas', v: String(vendidas), c: rgb(0.73, 0.07, 0.07) },
   ].forEach((b, i) => {
@@ -110,9 +120,9 @@ export async function GET(
   page.drawRectangle({ x: mL, y: y - 6, width: contentW, height: 18, color: escuro })
   page.drawRectangle({ x: mL, y: y - 6, width: 3, height: 18, color: vermelho })
   const conds = [
-    { label: 'Correcao ate entrega:', value: indiceLabel[empreendimento.indice_ate_entrega] ?? s(empreendimento.indice_ate_entrega ?? '-') },
-    { label: 'Correcao apos entrega:', value: indiceLabel[empreendimento.indice_apos_entrega] ?? s(empreendimento.indice_apos_entrega ?? '-') },
-    { label: 'Parcelamento:', value: `ate ${empreendimento.parcelas_padrao ?? 60}x mensais` },
+    { label: 'Correção até entrega:', value: indiceLabel[empreendimento.indice_ate_entrega] ?? empreendimento.indice_ate_entrega ?? '-' },
+    { label: 'Correção após entrega:', value: indiceLabel[empreendimento.indice_apos_entrega] ?? empreendimento.indice_apos_entrega ?? '-' },
+    { label: 'Parcelamento:', value: `até ${empreendimento.parcelas_padrao ?? 60}x mensais` },
     empreendimento.data_prevista_entrega ? { label: 'Entrega prev.:', value: new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR') } : null,
   ].filter(Boolean) as { label: string, value: string }[]
   conds.forEach((c, i) => {
@@ -127,10 +137,10 @@ export async function GET(
   const cols = temAreaExt ? [
     { label: 'Unidade',    w: 44,  align: 'left'   },
     { label: 'Pavimento',  w: 92,  align: 'left'   },
-    { label: 'Area Priv.', w: 42,  align: 'right'  },
-    { label: 'Area Ext.',  w: 42,  align: 'right'  },
+    { label: 'Área Priv.', w: 42,  align: 'right'  },
+    { label: 'Área Ext.',  w: 42,  align: 'right'  },
     { label: 'Qtos',       w: 24,  align: 'center' },
-    { label: 'Posicao',    w: 50,  align: 'left'   },
+    { label: 'Posição',    w: 50,  align: 'left'   },
     { label: 'Valor',      w: 82,  align: 'right'  },
     { label: 'Entrada',    w: 72,  align: 'right'  },
     { label: 'Parcelas',   w: 84,  align: 'right'  },
@@ -140,9 +150,9 @@ export async function GET(
   ] : [
     { label: 'Unidade',    w: 48,  align: 'left'   },
     { label: 'Pavimento',  w: 102, align: 'left'   },
-    { label: 'Area',       w: 42,  align: 'right'  },
+    { label: 'Área',       w: 42,  align: 'right'  },
     { label: 'Qtos',       w: 26,  align: 'center' },
-    { label: 'Posicao',    w: 54,  align: 'left'   },
+    { label: 'Posição',    w: 54,  align: 'left'   },
     { label: 'Valor',      w: 88,  align: 'right'  },
     { label: 'Entrada',    w: 76,  align: 'right'  },
     { label: 'Parcelas',   w: 90,  align: 'right'  },
@@ -151,7 +161,6 @@ export async function GET(
     { label: 'Status',     w: 53,  align: 'center' },
   ]
 
-  // Ajusta para preencher exato
   const totalW = cols.reduce((a, c) => a + c.w, 0)
   cols[1].w += contentW - totalW
 
@@ -190,12 +199,12 @@ export async function GET(
     page.drawRectangle({ x: mL, y: y - 2, width: contentW, height: 13, color: rowBg })
 
     const vals = temAreaExt ? [
-      s(u.unidade ?? '-'),
-      s(u.pavimento ?? '-'),
-      u.area_construida ? u.area_construida + 'm2' : '-',
-      u.area_privativa_externa ? u.area_privativa_externa + 'm2' : '-',
+      u.unidade ?? '-',
+      u.pavimento ?? '-',
+      u.area_construida ? u.area_construida + 'm²' : '-',
+      u.area_privativa_externa ? u.area_privativa_externa + 'm²' : '-',
       u.quartos ? String(u.quartos) : '-',
-      s(u.posicao?.replace(/_/g, ' ') ?? '-'),
+      u.posicao?.replace(/_/g, ' ') ?? '-',
       u.valor_imovel ? fmt(u.valor_imovel) : '-',
       u.valor_sinal ? fmt(u.valor_sinal) : '-',
       u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
@@ -203,11 +212,11 @@ export async function GET(
       u.valor_chaves ? fmt(u.valor_chaves) : '-',
       statusLabel[u.status] ?? u.status,
     ] : [
-      s(u.unidade ?? '-'),
-      s(u.pavimento ?? '-'),
-      u.area_construida ? u.area_construida + 'm2' : '-',
+      u.unidade ?? '-',
+      u.pavimento ?? '-',
+      u.area_construida ? u.area_construida + 'm²' : '-',
       u.quartos ? String(u.quartos) : '-',
-      s(u.posicao?.replace(/_/g, ' ') ?? '-'),
+      u.posicao?.replace(/_/g, ' ') ?? '-',
       u.valor_imovel ? fmt(u.valor_imovel) : '-',
       u.valor_sinal ? fmt(u.valor_sinal) : '-',
       u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
