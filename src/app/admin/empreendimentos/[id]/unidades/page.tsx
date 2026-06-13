@@ -53,10 +53,12 @@ export default async function UnidadesPage({
             style={{padding:"8px 16px",border:"1px solid #DDD9D3",borderRadius:"8px",fontSize:"14px",color:"#374151",textDecoration:"none",background:"white"}}>
             Ver tabela pública
           </Link>
-<Link href={`/admin/empreendimentos/${id}/reajuste`}
-  style={{padding:"8px 16px",border:"1px solid #DDD9D3",borderRadius:"8px",fontSize:"14px",color:"#374151",textDecoration:"none",background:"white"}}>
-  📈 Reajuste
-</Link>            style={{padding:"8px 16px",border:"1px solid #DDD9D3",borderRadius:"8px",fontSize:"14px",color:"#374151",textDecoration:"none",background:"white"}}>
+          <Link href={`/admin/empreendimentos/${id}/reajuste`}
+            style={{padding:"8px 16px",border:"1px solid #DDD9D3",borderRadius:"8px",fontSize:"14px",color:"#374151",textDecoration:"none",background:"white"}}>
+            📈 Reajuste
+          </Link>
+          <Link href={`/admin/empreendimentos/${id}/unidades/importar`}
+            style={{padding:"8px 16px",border:"1px solid #DDD9D3",borderRadius:"8px",fontSize:"14px",color:"#374151",textDecoration:"none",background:"white"}}>
             📂 Importar CSV
           </Link>
           <Link href={`/admin/empreendimentos/${id}/unidades/nova`}
