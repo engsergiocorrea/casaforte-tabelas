@@ -48,6 +48,18 @@ export default function EditarEmpreendimentoPage({
     e.preventDefault();
     setSaving(true);
     setError("");
+
+    // Valida soma dos percentuais
+    const somaPerc = (Number(form.percentual_sinal_padrao) || 0) +
+      (Number(form.percentual_mensais_padrao) || 0) +
+      (Number(form.percentual_intercaladas_padrao) || 0) +
+      (Number(form.percentual_chaves_padrao) || 0)
+    if (somaPerc > 0 && somaPerc !== 100) {
+      setError(`A soma dos percentuais deve ser 100%. Atual: ${somaPerc}%`)
+      setSaving(false)
+      return
+    }
+
     const supabase = createClient();
     const { error: err } = await supabase.from("empreendimentos").update(form).eq("id", id);
     if (err) { setError(err.message); setSaving(false); return; }
@@ -57,12 +69,12 @@ export default function EditarEmpreendimentoPage({
   if (!form) return <div style={{ padding: "2rem", color: "#6b7280" }}>Carregando...</div>;
 
   const S = { label: { display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" } as React.CSSProperties };
-  
+
   const inp = (name: string, type = "text", placeholder = "") => (
     <input name={name} type={type} placeholder={placeholder} value={form[name] ?? ""} onChange={handleChange}
       style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
   );
-  
+
   const sel = (name: string, opts: { value: string; label: string }[]) => (
     <select name={name} value={form[name] ?? ""} onChange={handleChange}
       style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", background: "white" }}>
@@ -74,15 +86,14 @@ export default function EditarEmpreendimentoPage({
     <div style={{ gridColumn: "1/-1" }}>
       <label style={S.label}>{label}</label>
       {form[field] && (
-        <div style={{ marginBottom: "8px", position: "relative" }}>
+        <div style={{ marginBottom: "8px" }}>
           <img src={form[field]} alt={label} style={{ width: "100%", maxHeight: "180px", objectFit: "cover", borderRadius: "8px", border: "1px solid #DDD9D3" }} />
         </div>
       )}
       <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
         <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "#f9fafb", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", cursor: "pointer", color: "#374151" }}>
           {uploading ? "Enviando..." : "📁 Fazer upload"}
-          <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, field)}
-            style={{ display: "none" }} disabled={uploading} />
+          <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, field)} style={{ display: "none" }} disabled={uploading} />
         </label>
         <span style={{ fontSize: "12px", color: "#9ca3af" }}>ou</span>
         <input name={field} type="url" placeholder="Cole a URL da imagem" value={form[field] ?? ""} onChange={handleChange}
@@ -96,6 +107,11 @@ export default function EditarEmpreendimentoPage({
       </div>
     </div>
   );
+
+  const somaPerc = (Number(form.percentual_sinal_padrao) || 0) +
+    (Number(form.percentual_mensais_padrao) || 0) +
+    (Number(form.percentual_intercaladas_padrao) || 0) +
+    (Number(form.percentual_chaves_padrao) || 0)
 
   return (
     <div>
@@ -111,6 +127,8 @@ export default function EditarEmpreendimentoPage({
       )}
 
       <form onSubmit={handleSubmit}>
+
+        {/* Informações básicas */}
         <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
           <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Informações básicas</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
@@ -135,56 +153,132 @@ export default function EditarEmpreendimentoPage({
               <textarea name="descricao_curta" value={form.descricao_curta ?? ""} onChange={handleChange} rows={2}
                 style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
             </div>
-
             {imageField("imagem_capa_url", "🖼️ Imagem de capa")}
             {imageField("logo_url", "🏷️ Logo do empreendimento")}
           </div>
         </div>
 
+        {/* Configuração Comercial */}
         <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
-          <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Condições comerciais</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-            <div><label style={S.label}>Índice até entrega</label>{sel("indice_ate_entrega", [
-              { value: "INCC", label: "INCC" }, { value: "INCC-M", label: "INCC-M" },
-              { value: "IPCA", label: "IPCA" }, { value: "IGP-M", label: "IGP-M" }, { value: "outro", label: "Outro" },
-            ])}</div>
-            <div><label style={S.label}>Índice após entrega</label>{sel("indice_apos_entrega", [
-              { value: "1_mais_igpm", label: "1% + IGP-M" }, { value: "1_mais_ipca", label: "1% + IPCA" },
-              { value: "IPCA", label: "IPCA" }, { value: "IGP-M", label: "IGP-M" }, { value: "outro", label: "Outro" },
-            ])}</div>
+          <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "4px" }}>⚙️ Configuração Comercial</h2>
+          <p style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "16px" }}>Define as regras de cálculo automático para todas as unidades deste empreendimento.</p>
+
+          {/* Tipo de cálculo */}
+          <div style={{ background: "#f8fafc", borderRadius: "8px", padding: "14px 16px", marginBottom: "16px", border: "1px solid #e5e7eb" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
+              <input type="checkbox" name="considerar_area_externa_no_calculo" checked={form.considerar_area_externa_no_calculo ?? false} onChange={handleChange}
+                style={{ width: "16px", height: "16px", accentColor: "#E8390E" }} />
+              <div>
+                <div style={{ fontSize: "14px", fontWeight: "600", color: "#111" }}>Considerar área privativa externa no cálculo</div>
+                <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "2px" }}>
+                  Se marcado: valor = área construída × preço/m² + área externa × preço/m² externo
+                </div>
+                <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                  Se desmarcado: valor = área construída × preço/m²
+                </div>
+              </div>
+            </label>
+          </div>
+
+          {/* Índices */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
             <div>
-              <label style={S.label}>Parcelas padrão</label>
-              <input name="parcelas_padrao" type="number" value={form.parcelas_padrao ?? ""} onChange={handleChange}
+              <label style={S.label}>Índice até entrega</label>
+              {sel("indice_ate_entrega", [
+                { value: "incc_m", label: "INCC-M" }, { value: "incc", label: "INCC" },
+                { value: "ipca", label: "IPCA" }, { value: "igpm", label: "IGP-M" }, { value: "outro", label: "Outro" },
+              ])}
+            </div>
+            <div>
+              <label style={S.label}>Índice após entrega</label>
+              {sel("indice_apos_entrega", [
+                { value: "1_mais_igpm", label: "1% + IGP-M" }, { value: "1_mais_ipca", label: "1% + IPCA" },
+                { value: "1_mais_incc", label: "1% + INCC" }, { value: "ipca", label: "IPCA" },
+                { value: "igpm", label: "IGP-M" }, { value: "outro", label: "Outro" },
+              ])}
+            </div>
+            <div><label style={S.label}>Data prevista de entrega</label>{inp("data_prevista_entrega", "date")}</div>
+          </div>
+
+          {/* Percentuais */}
+          <div style={{ marginBottom: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <label style={{ fontSize: "13px", fontWeight: "600", color: "#374151" }}>Fluxo de pagamento padrão</label>
+              <span style={{
+                fontSize: "12px", fontWeight: "600", padding: "2px 10px", borderRadius: "20px",
+                background: somaPerc === 100 ? "#dcfce7" : somaPerc === 0 ? "#f3f4f6" : "#fee2e2",
+                color: somaPerc === 100 ? "#15803d" : somaPerc === 0 ? "#6b7280" : "#b91c1c"
+              }}>
+                {somaPerc === 0 ? "Não configurado" : `Total: ${somaPerc}%${somaPerc === 100 ? " ✓" : " — deve ser 100%"}`}
+              </span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: "12px" }}>
+              <div>
+                <label style={S.label}>% Sinal/Entrada</label>
+                <input name="percentual_sinal_padrao" type="number" min="0" max="100" value={form.percentual_sinal_padrao ?? ""} onChange={handleChange}
+                  style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+              </div>
+              <div>
+                <label style={S.label}>% Mensais</label>
+                <input name="percentual_mensais_padrao" type="number" min="0" max="100" value={form.percentual_mensais_padrao ?? ""} onChange={handleChange}
+                  style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+              </div>
+              <div>
+                <label style={S.label}>% Intercaladas</label>
+                <input name="percentual_intercaladas_padrao" type="number" min="0" max="100" value={form.percentual_intercaladas_padrao ?? ""} onChange={handleChange}
+                  style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+              </div>
+              <div>
+                <label style={S.label}>% Chaves</label>
+                <input name="percentual_chaves_padrao" type="number" min="0" max="100" value={form.percentual_chaves_padrao ?? ""} onChange={handleChange}
+                  style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+              </div>
+            </div>
+          </div>
+
+          {/* Quantidades */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginTop: "12px" }}>
+            <div>
+              <label style={S.label}>Qtd. parcelas mensais</label>
+              <input name="quantidade_mensais_padrao" type="number" min="1" value={form.quantidade_mensais_padrao ?? ""} onChange={handleChange}
                 style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
             </div>
             <div>
-              <label style={S.label}>% Sinal padrão</label>
-              <input name="percentual_sinal_padrao" type="number" value={form.percentual_sinal_padrao ?? ""} onChange={handleChange}
+              <label style={S.label}>Qtd. intercaladas</label>
+              <input name="quantidade_intercaladas_padrao" type="number" min="1" value={form.quantidade_intercaladas_padrao ?? ""} onChange={handleChange}
                 style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
             </div>
             <div>
-              <label style={S.label}>% Chaves padrão</label>
-              <input name="percentual_chaves_padrao" type="number" value={form.percentual_chaves_padrao ?? ""} onChange={handleChange}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+              <label style={S.label}>Periodicidade intercaladas</label>
+              {sel("periodicidade_intercaladas_padrao", [
+                { value: "mensal", label: "Mensal" },
+                { value: "semestral", label: "Semestral" },
+                { value: "anual", label: "Anual" },
+                { value: "personalizada", label: "Personalizada" },
+              ])}
             </div>
-            <div><label style={S.label}>Data prevista entrega</label>{inp("data_prevista_entrega", "date")}</div>
-            <div style={{ gridColumn: "1/-1" }}>
+          </div>
+        </div>
+
+        {/* Observações */}
+        <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
+          <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Observações</h2>
+          <div style={{ display: "grid", gap: "16px" }}>
+            <div>
               <label style={S.label}>Observações públicas</label>
               <textarea name="observacoes_publicas" value={form.observacoes_publicas ?? ""} onChange={handleChange} rows={3}
                 style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
             </div>
-            <div style={{ gridColumn: "1/-1" }}>
+            <div>
               <label style={S.label}>Observações internas</label>
               <textarea name="observacoes_internas" value={form.observacoes_internas ?? ""} onChange={handleChange} rows={2}
                 style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
             </div>
-            <div>
-              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
-                <input type="checkbox" name="ativo_publico" checked={form.ativo_publico ?? false} onChange={handleChange}
-                  style={{ width: "16px", height: "16px", accentColor: "#E8390E" }} />
-                Exibir no site público
-              </label>
-            </div>
+            <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
+              <input type="checkbox" name="ativo_publico" checked={form.ativo_publico ?? false} onChange={handleChange}
+                style={{ width: "16px", height: "16px", accentColor: "#E8390E" }} />
+              Exibir no site público
+            </label>
           </div>
         </div>
 
