@@ -13,10 +13,44 @@ export default function PropostaAcoes({ propostaId, statusAtual }: { propostaId:
   async function executarAcao(novoStatus: string) {
     setLoading(true)
     const supabase = createClient()
+
+    // Busca a unidade_id da proposta
+    const { data: proposta } = await supabase
+      .from('propostas')
+      .select('unidade_id, comprador1_nome, comprador1_cpf')
+      .eq('id', propostaId)
+      .single()
+
+    // Atualiza status da proposta
     const { error } = await supabase
       .from('propostas')
       .update({ status_proposta: novoStatus, observacoes: motivo || undefined })
       .eq('id', propostaId)
+
+    if (!error && proposta?.unidade_id) {
+      if (novoStatus === 'aprovada') {
+        // Reserva a unidade e zera os valores visíveis
+        await supabase.from('unidades').update({
+          status: 'reservada',
+          valor_imovel: null,
+          valor_sinal: null,
+          valor_parcela: null,
+          valor_intercalada: null,
+          valor_chaves: null,
+          comprador_nome: proposta.comprador1_nome,
+          comprador_documento: proposta.comprador1_cpf,
+        }).eq('id', proposta.unidade_id)
+
+      } else if (novoStatus === 'cancelada') {
+        // Libera a unidade e restaura os valores — precisará ser feito manualmente
+        // ou podemos só mudar o status de volta para disponivel
+        await supabase.from('unidades').update({
+          status: 'disponivel',
+          comprador_nome: null,
+          comprador_documento: null,
+        }).eq('id', proposta.unidade_id)
+      }
+    }
 
     if (!error) {
       router.refresh()
