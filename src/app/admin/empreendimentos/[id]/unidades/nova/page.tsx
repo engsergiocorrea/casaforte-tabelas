@@ -127,8 +127,8 @@ export default function NovaUnidadePage({
       percentual_chaves: form.percentual_chaves
         ? Number(form.percentual_chaves)
         : null,
-      posicao: form.posicao || null,
-    };
+posicao: form.posicao || null,
+      periodicidade_intercaladas: form.quantidade_intercaladas ? form.periodicidade_intercaladas : null,    };
     const { error: err } = await supabase.from("unidades").insert([data]);
     if (err) {
       setError(err.message);
