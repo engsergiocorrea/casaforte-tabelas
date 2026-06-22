@@ -19,7 +19,11 @@ export default function EditarUnidadePage({
     const supabase = createClient();
     supabase.from("unidades").select("*").eq("id", id).single()
       .then(async ({ data }) => {
-        if (data) {
+       if (data) {
+          const validPeriods = ['semestrais', 'anuais', 'personalizada']
+          if (!validPeriods.includes(data.periodicidade_intercaladas)) {
+            data.periodicidade_intercaladas = null
+          }
           setForm(data);
           // Busca configuração do empreendimento
           const { data: emp } = await supabase
