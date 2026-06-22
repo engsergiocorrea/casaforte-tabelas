@@ -76,8 +76,9 @@ export default function ImportarUnidadesPage({
         quantidade_intercaladas: row.quantidade_intercaladas
           ? Number(row.quantidade_intercaladas)
           : null,
-        periodicidade_intercaladas: row.periodicidade_intercaladas || null,
-        valor_intercalada: row.valor_intercalada
+periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row.periodicidade_intercaladas) 
+  ? row.periodicidade_intercaladas 
+  : null,        valor_intercalada: row.valor_intercalada
           ? Number(row.valor_intercalada)
           : null,
         percentual_chaves: row.percentual_chaves
