@@ -109,8 +109,16 @@ export default function EditarUnidadePage({
     setSaving(true);
     setError("");
     const supabase = createClient();
-    const { error: err } = await supabase.from("unidades").update(form).eq("id", id);
-    if (err) { setError(err.message); setSaving(false); return; }
+const dataToSave = {
+  ...form,
+  periodicidade_intercaladas: form.quantidade_intercaladas 
+    ? (form.periodicidade_intercaladas === 'mensais' ? 'personalizada' : form.periodicidade_intercaladas)
+    : null,
+  posicao: form.posicao || null,
+  data_reserva: form.data_reserva || null,
+  data_venda: form.data_venda || null,
+}
+const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id", id);    if (err) { setError(err.message); setSaving(false); return; }
     router.push(`/admin/empreendimentos/${form.empreendimento_id}/unidades`);
   }
 
@@ -297,7 +305,6 @@ export default function EditarUnidadePage({
               {sel("periodicidade_intercaladas", [
                 { value: "semestrais", label: "Semestrais" },
                 { value: "anuais", label: "Anuais" },
-                { value: "mensais", label: "Mensais" },
                 { value: "personalizada", label: "Personalizada" },
               ])}
             </div>
