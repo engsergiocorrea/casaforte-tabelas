@@ -4,6 +4,14 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Transição para o Portal Casa Forte (sistemas.casaforteinc.com.br):
+// "Engenheiros", "Clientes", "Usuários" e "RDOs" saíram deste menu porque
+// pessoas, engenheiros, clientes e permissões passam a ser centralizados
+// no Portal. As rotas (/admin/engenheiros, /admin/clientes,
+// /admin/usuarios, /admin/rdos), as tabelas e o código por trás continuam
+// existindo sem alteração — nada foi apagado, só deixou de aparecer no
+// menu. O Tabelas foca em empreendimentos, unidades, tabelas de preço,
+// reajustes, bloqueios, propostas e relatórios comerciais.
 const NAV = [
   { href: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
   { href: '/admin/empreendimentos', label: 'Empreendimentos', icon: '🏗️' },
@@ -12,10 +20,6 @@ const NAV = [
   { href: '/admin/relatorios', label: 'Relatórios', icon: '📈' },
   { href: '/admin/propostas', label: 'Propostas', icon: '📋' },
   { href: '/admin/obras', label: 'Obras', icon: '🔨' },
-  { href: '/admin/engenheiros', label: 'Engenheiros', icon: '👷' },
-  { href: '/admin/clientes', label: 'Clientes', icon: '👤' },
-  { href: '/admin/usuarios', label: 'Usuários', icon: '👥' },
-  { href: '/admin/rdos', label: 'RDOs', icon: '📝' },
 ]
 
 function Sidebar({ onSignOut }: { onSignOut: () => void }) {
