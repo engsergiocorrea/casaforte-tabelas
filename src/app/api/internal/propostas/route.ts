@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) {
-    return NextResponse.json({ error: 'Falha ao consultar propostas.' }, { status: 500 })
+    return NextResponse.json({ error: 'Falha ao consultar propostas.', detalhe: error.message, code: (error as any).code ?? null }, { status: 500 })
   }
 
   const propostas = (data ?? []).map((p: any) => ({
