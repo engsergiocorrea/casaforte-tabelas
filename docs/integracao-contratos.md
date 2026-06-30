@@ -40,11 +40,11 @@ ausente`). Validados em `src/lib/internal-api/auth.ts`; leitura via service role
 ### Campos retornados (detalhe da proposta)
 - **empreendimento**: id, nome, slug.
 - **unidade**: id, codigo, tipologia, area_privativa, area_externa, valor_imovel, status.
-- **comprador**: `nome`, `documento` (reais). Os demais (`email`, `telefone`,
-  `endereco`, `estado_civil`, `profissao`, `identidade`, `data_nascimento`,
-  `regime_bens`, …) vêm **`null`** — não existem no Tabelas; serão completados
-  pelo Contratos.
-- **conjuge**: nome, cpf, rg, email, telefone, nascimento, profissao.
+- **comprador_principal** (`comprador1_*`): nome, cpf, rg, profissao, email,
+  telefone, nascimento, estado_civil.
+- **comprador_adicional** (`comprador2_*`): mesmos campos (segundo comprador,
+  quando houver).
+- **conjuge**: nome, cpf, rg, profissao, email, telefone, nascimento.
 - **corretor**: nome, cpf_cnpj, creci, email, telefone, imobiliaria_nome.
 - **pagamento**: valor_imovel, valor_proposto, segue_tabela, valor_sinal,
   mensais_quantidade/valor/total, intercaladas_quantidade/valor/total/periodicidade,

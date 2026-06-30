@@ -4,9 +4,8 @@ import { createServiceClient } from '@/lib/internal-api/db'
 
 // GET /api/internal/propostas/[id]
 // Detalhe completo da proposta para gerar o contrato. Somente leitura.
-// O comprador na proposta tem apenas nome/documento — os demais campos do
-// comprador vêm como null (não existem no Tabelas; serão completados pelo
-// Contratos/Portal). Não expõe observações internas da proposta.
+// Não expõe `observacoes` (internas). valor_imovel vem da unidade (a proposta
+// não tem essa coluna).
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const auth = requireTabelasInternalKey(request)
   if (!auth.ok) return auth.response
@@ -29,17 +28,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   if (!data) {
     return NextResponse.json({ error: 'Proposta não encontrada.' }, { status: 404 })
   }
-  const p: any = data
 
+  const p: any = data
   const emp: any = p.empreendimentos ?? {}
   const uni: any = p.unidades ?? {}
   const mensaisTotal = (Number(p.quantidade_parcelas) || 0) * (Number(p.valor_parcela) || 0)
-  const intercaladasTotal = (Number(p.quantidade_intercaladas) || 0) * (Number(p.valor_intercalada) || 0)
+  const intercaladasTotal =
+    p.valor_total_intercaladas ?? (Number(p.quantidade_intercaladas) || 0) * (Number(p.valor_intercalada) || 0)
 
   return NextResponse.json({
     proposta: {
       id: p.id,
       status_proposta: p.status_proposta,
+      status: p.status,
       empreendimento: { id: emp.id ?? p.empreendimento_id, nome: emp.nome ?? null, slug: emp.slug ?? null },
       unidade: {
         id: uni.id ?? p.unidade_id,
@@ -50,30 +51,34 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         valor_imovel: uni.valor_imovel ?? null,
         status: uni.status ?? null,
       },
-      comprador: {
-        nome: p.comprador_nome ?? null,
-        documento: p.comprador_documento ?? null,
-        // Campos não existentes na proposta do Tabelas — completados depois
-        // pelo Contratos (e eventualmente cruzando com o cliente do Portal).
-        email: null,
-        telefone: null,
-        endereco: null,
-        nacionalidade: null,
-        estado_civil: null,
-        profissao: null,
-        identidade: null,
-        naturalidade: null,
-        data_nascimento: null,
-        regime_bens: null,
+      comprador_principal: {
+        nome: p.comprador1_nome ?? null,
+        cpf: p.comprador1_cpf ?? null,
+        rg: p.comprador1_rg ?? null,
+        profissao: p.comprador1_profissao ?? null,
+        email: p.comprador1_email ?? null,
+        telefone: p.comprador1_telefone ?? null,
+        nascimento: p.comprador1_nascimento ?? null,
+        estado_civil: p.comprador1_estado_civil ?? null,
+      },
+      comprador_adicional: {
+        nome: p.comprador2_nome ?? null,
+        cpf: p.comprador2_cpf ?? null,
+        rg: p.comprador2_rg ?? null,
+        profissao: p.comprador2_profissao ?? null,
+        email: p.comprador2_email ?? null,
+        telefone: p.comprador2_telefone ?? null,
+        nascimento: p.comprador2_nascimento ?? null,
+        estado_civil: p.comprador2_estado_civil ?? null,
       },
       conjuge: {
         nome: p.conjuge_nome ?? null,
         cpf: p.conjuge_cpf ?? null,
         rg: p.conjuge_rg ?? null,
+        profissao: p.conjuge_profissao ?? null,
         email: p.conjuge_email ?? null,
         telefone: p.conjuge_telefone ?? null,
         nascimento: p.conjuge_nascimento ?? null,
-        profissao: p.conjuge_profissao ?? null,
       },
       corretor: {
         nome: p.corretor_nome ?? null,
@@ -84,9 +89,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         imobiliaria_nome: p.imobiliaria_nome ?? null,
       },
       pagamento: {
-        valor_imovel: p.valor_imovel ?? null,
-        valor_proposto: p.valor_proposto ?? null,
         segue_tabela: p.segue_tabela ?? null,
+        valor_proposto: p.valor_proposto ?? null,
         valor_sinal: p.valor_sinal ?? null,
         mensais_quantidade: p.quantidade_parcelas ?? null,
         mensais_valor: p.valor_parcela ?? null,
