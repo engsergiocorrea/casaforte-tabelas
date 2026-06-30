@@ -12,37 +12,6 @@ export async function GET(request: Request) {
   if (!auth.ok) return auth.response
 
   const { searchParams } = new URL(request.url)
-
-  // Diagnóstico temporário: ?_role=1 informa o TIPO da SUPABASE_SERVICE_ROLE_KEY
-  // (sem expor o valor) para confirmar se está como service_role do projeto certo.
-  if (searchParams.get('_role') === '1') {
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
-    let info = 'AUSENTE'
-    if (key.startsWith('eyJ')) {
-      try {
-        const j = JSON.parse(Buffer.from(key.split('.')[1], 'base64').toString('utf-8'))
-        info = `JWT legacy: role=${j.role}, ref=${j.ref}`
-      } catch { info = 'JWT indecifrável' }
-    } else if (key.startsWith('sb_secret_')) info = 'sb_secret (service role nova) — OK'
-    else if (key.startsWith('sb_publishable_')) info = 'sb_publishable (ANON nova) — ERRADA'
-    else if (key) info = `desconhecido (prefixo ${key.slice(0, 6)}…)`
-    const urlRef = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').match(/https:\/\/([a-z0-9]+)\.supabase/)?.[1] ?? null
-    const sb = createServiceClient()
-    const testar = async (t: string) => {
-      const { error } = await sb.from(t).select('id').limit(1)
-      return error ? error.message : 'ok'
-    }
-    return NextResponse.json({
-      service_role_tipo: info,
-      url_ref: urlRef,
-      leitura: {
-        propostas: await testar('propostas'),
-        unidades: await testar('unidades'),
-        empreendimentos: await testar('empreendimentos'),
-      },
-    })
-  }
-
   const status = searchParams.get('status')
   const empreendimentoId = searchParams.get('empreendimento_id')
   const unidadeId = searchParams.get('unidade_id')
@@ -66,7 +35,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await query
   if (error) {
-    return NextResponse.json({ error: 'Falha ao consultar propostas.', detalhe: error.message, code: (error as any).code ?? null }, { status: 500 })
+    return NextResponse.json({ error: 'Falha ao consultar propostas.' }, { status: 500 })
   }
 
   const propostas = (data ?? []).map((p: any) => ({
