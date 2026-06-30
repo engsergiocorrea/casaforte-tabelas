@@ -198,10 +198,10 @@ export async function GET(
     const rowBg = u.status === 'reservada' ? rgb(1, 0.97, 0.88) : u.status === 'vendida' ? rgb(1, 0.95, 0.95) : alternate ? rgb(0.975, 0.975, 0.975) : branco
     page.drawRectangle({ x: mL, y: y - 2, width: contentW, height: 13, color: rowBg })
 
-    // Valores comerciais (preço, entrada, parcelas, intercaladas, chaves) só
-    // aparecem para unidades disponíveis. Reservadas e vendidas mostram só o
+    // Valores comerciais (preço, entrada, parcelas, intercaladas, chaves)
+    // aparecem para unidades disponíveis e reservadas. Vendidas mostram só o
     // status, sem expor o valor negociado.
-    const mostrarValor = u.status === 'disponivel'
+    const mostrarValor = u.status === 'disponivel' || u.status === 'reservada'
 
     const vals = temAreaExt ? [
       u.unidade ?? '-',
