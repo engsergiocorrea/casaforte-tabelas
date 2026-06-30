@@ -198,6 +198,11 @@ export async function GET(
     const rowBg = u.status === 'reservada' ? rgb(1, 0.97, 0.88) : u.status === 'vendida' ? rgb(1, 0.95, 0.95) : alternate ? rgb(0.975, 0.975, 0.975) : branco
     page.drawRectangle({ x: mL, y: y - 2, width: contentW, height: 13, color: rowBg })
 
+    // Valores comerciais (preço, entrada, parcelas, intercaladas, chaves) só
+    // aparecem para unidades disponíveis. Reservadas e vendidas mostram só o
+    // status, sem expor o valor negociado.
+    const mostrarValor = u.status === 'disponivel'
+
     const vals = temAreaExt ? [
       u.unidade ?? '-',
       u.pavimento ?? '-',
@@ -205,11 +210,11 @@ export async function GET(
       u.area_privativa_externa ? u.area_privativa_externa + 'm²' : '-',
       u.quartos ? String(u.quartos) : '-',
       u.posicao?.replace(/_/g, ' ') ?? '-',
-      u.valor_imovel ? fmt(u.valor_imovel) : '-',
-      u.valor_sinal ? fmt(u.valor_sinal) : '-',
-      u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
-      u.quantidade_intercaladas && u.valor_intercalada ? `${u.quantidade_intercaladas}x ${fmt(u.valor_intercalada)}` : '-',
-      u.valor_chaves ? fmt(u.valor_chaves) : '-',
+      mostrarValor && u.valor_imovel ? fmt(u.valor_imovel) : '-',
+      mostrarValor && u.valor_sinal ? fmt(u.valor_sinal) : '-',
+      mostrarValor && u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
+      mostrarValor && u.quantidade_intercaladas && u.valor_intercalada ? `${u.quantidade_intercaladas}x ${fmt(u.valor_intercalada)}` : '-',
+      mostrarValor && u.valor_chaves ? fmt(u.valor_chaves) : '-',
       statusLabel[u.status] ?? u.status,
     ] : [
       u.unidade ?? '-',
@@ -217,11 +222,11 @@ export async function GET(
       u.area_construida ? u.area_construida + 'm²' : '-',
       u.quartos ? String(u.quartos) : '-',
       u.posicao?.replace(/_/g, ' ') ?? '-',
-      u.valor_imovel ? fmt(u.valor_imovel) : '-',
-      u.valor_sinal ? fmt(u.valor_sinal) : '-',
-      u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
-      u.quantidade_intercaladas && u.valor_intercalada ? `${u.quantidade_intercaladas}x ${fmt(u.valor_intercalada)}` : '-',
-      u.valor_chaves ? fmt(u.valor_chaves) : '-',
+      mostrarValor && u.valor_imovel ? fmt(u.valor_imovel) : '-',
+      mostrarValor && u.valor_sinal ? fmt(u.valor_sinal) : '-',
+      mostrarValor && u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${fmt(u.valor_parcela)}` : '-',
+      mostrarValor && u.quantidade_intercaladas && u.valor_intercalada ? `${u.quantidade_intercaladas}x ${fmt(u.valor_intercalada)}` : '-',
+      mostrarValor && u.valor_chaves ? fmt(u.valor_chaves) : '-',
       statusLabel[u.status] ?? u.status,
     ]
 
