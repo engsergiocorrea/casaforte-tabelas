@@ -12,6 +12,16 @@ export async function GET(request: Request) {
   if (!auth.ok) return auth.response
 
   const { searchParams } = new URL(request.url)
+
+  // Diagnóstico temporário: ?_cols=1 retorna apenas os NOMES das colunas reais
+  // da tabela propostas (sem dados), para alinhar o mapeamento.
+  if (searchParams.get('_cols') === '1') {
+    const sb = createServiceClient()
+    const { data, error } = await sb.from('propostas').select('*').limit(1)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ colunas: data && data[0] ? Object.keys(data[0]).sort() : [] })
+  }
+
   const status = searchParams.get('status')
   const empreendimentoId = searchParams.get('empreendimento_id')
   const unidadeId = searchParams.get('unidade_id')
