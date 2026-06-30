@@ -27,7 +27,20 @@ export async function GET(request: Request) {
     else if (key.startsWith('sb_publishable_')) info = 'sb_publishable (ANON nova) — ERRADA'
     else if (key) info = `desconhecido (prefixo ${key.slice(0, 6)}…)`
     const urlRef = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').match(/https:\/\/([a-z0-9]+)\.supabase/)?.[1] ?? null
-    return NextResponse.json({ service_role_tipo: info, url_ref: urlRef })
+    const sb = createServiceClient()
+    const testar = async (t: string) => {
+      const { error } = await sb.from(t).select('id').limit(1)
+      return error ? error.message : 'ok'
+    }
+    return NextResponse.json({
+      service_role_tipo: info,
+      url_ref: urlRef,
+      leitura: {
+        propostas: await testar('propostas'),
+        unidades: await testar('unidades'),
+        empreendimentos: await testar('empreendimentos'),
+      },
+    })
   }
 
   const status = searchParams.get('status')
