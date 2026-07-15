@@ -3,6 +3,26 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 
+// Periodicidade textual (ex.: "semestrais") → nº de meses, e o inverso.
+const MESES_POR_TEXTO: Record<string, number> = {
+  mensais: 1, bimestrais: 2, trimestrais: 3, quadrimestrais: 4, semestrais: 6, anuais: 12,
+}
+function mesesDaPeriodicidade(txt: any): string {
+  const t = String(txt ?? '').toLowerCase().trim()
+  if (MESES_POR_TEXTO[t]) return String(MESES_POR_TEXTO[t])
+  const n = parseInt(t, 10)
+  return isFinite(n) && n > 0 ? String(n) : ''
+}
+// A coluna periodicidade_intercaladas é um enum ('semestrais'|'anuais'|
+// 'personalizada'); o nº de meses real vai na coluna própria. Aqui só
+// mapeamos para um valor válido do enum.
+function enumPeriodicidade(meses: any): 'semestrais' | 'anuais' | 'personalizada' {
+  const n = parseInt(String(meses ?? ''), 10)
+  if (n === 6) return 'semestrais'
+  if (n === 12) return 'anuais'
+  return 'personalizada'
+}
+
 export default function PropostaPage() {
   const params = useParams()
   const slug = params.slug as string
@@ -31,6 +51,7 @@ export default function PropostaPage() {
     corretor_email: '', corretor_telefone: '', imobiliaria_nome: '',
     valor_proposto: '', valor_sinal: '', quantidade_parcelas: '',
     valor_parcela: '', quantidade_intercaladas: '', periodicidade_intercaladas: 'semestrais',
+    periodicidade_meses_intercaladas: '6', data_primeira_intercalada: '',
     valor_intercalada: '', valor_chaves: '',
     observacoes_pagamento: '', observacoes: '',
   })
@@ -53,6 +74,7 @@ export default function PropostaPage() {
           valor_parcela: uni.valor_parcela ?? '',
           quantidade_intercaladas: uni.quantidade_intercaladas ?? '',
           periodicidade_intercaladas: uni.periodicidade_intercaladas ?? 'semestrais',
+          periodicidade_meses_intercaladas: mesesDaPeriodicidade(uni.periodicidade_intercaladas) || '6',
           valor_intercalada: uni.valor_intercalada ?? '',
           valor_chaves: uni.valor_chaves ?? '',
         }))
@@ -111,6 +133,9 @@ export default function PropostaPage() {
       quantidade_intercaladas: Number(form.quantidade_intercaladas) || null,
       valor_intercalada: Number(form.valor_intercalada) || null,
       valor_total_intercaladas: (Number(form.quantidade_intercaladas) || 0) * (Number(form.valor_intercalada) || 0),
+      periodicidade_meses_intercaladas: Number(form.periodicidade_meses_intercaladas) || null,
+      periodicidade_intercaladas: enumPeriodicidade(form.periodicidade_meses_intercaladas),
+      data_primeira_intercalada: form.data_primeira_intercalada || null,
       valor_chaves: Number(form.valor_chaves) || null,
       conjuge_nome: temConjuge ? form.conjuge_nome : null,
       conjuge_cpf: temConjuge ? form.conjuge_cpf : null,
@@ -312,7 +337,8 @@ export default function PropostaPage() {
                 <div>{lbl('Qtd. parcelas mensais')}{inp('quantidade_parcelas', 'number')}</div>
                 <div>{lbl('Valor da parcela (R$)')}{inp('valor_parcela', 'number')}</div>
                 <div>{lbl('Qtd. intercaladas')}{inp('quantidade_intercaladas', 'number')}</div>
-                <div>{lbl('Periodicidade')}{sel('periodicidade_intercaladas', [{ value: 'semestrais', label: 'Semestrais' }, { value: 'anuais', label: 'Anuais' }, { value: 'personalizada', label: 'Personalizada' }])}</div>
+                <div>{lbl('Periodicidade (meses)')}{inp('periodicidade_meses_intercaladas', 'number', 'ex.: 6 = semestral')}</div>
+                <div>{lbl('Data da 1ª intercalada')}{inp('data_primeira_intercalada', 'date')}</div>
                 <div>{lbl('Valor por intercalada (R$)')}{inp('valor_intercalada', 'number')}</div>
                 <div>{lbl('Valor das chaves (R$)')}{inp('valor_chaves', 'number')}</div>
               </div>

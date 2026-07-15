@@ -99,6 +99,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         intercaladas_valor: p.valor_intercalada ?? null,
         intercaladas_total: intercaladasTotal,
         intercaladas_periodicidade: p.periodicidade_intercaladas ?? null,
+        intercaladas_periodicidade_meses: p.periodicidade_meses_intercaladas ?? null,
+        intercaladas_primeira_data: p.data_primeira_intercalada ?? null,
         chaves_valor: p.valor_chaves ?? null,
         observacoes_pagamento: p.observacoes_pagamento ?? null,
       },
