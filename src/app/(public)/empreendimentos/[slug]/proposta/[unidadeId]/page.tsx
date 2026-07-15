@@ -35,7 +35,6 @@ export default function PropostaPage() {
   const [unidade, setUnidade] = useState<any>(null)
   const [empreendimento, setEmpreendimento] = useState<any>(null)
   const [segueTabela, setSegueTabela] = useState(true)
-  const [temConjuge, setTemConjuge] = useState(false)
   const [sinalParcelado, setSinalParcelado] = useState(false)
   const [temSegundoComprador, setTemSegundoComprador] = useState(false)
   const [propostaId, setPropostaId] = useState('')
@@ -87,9 +86,6 @@ export default function PropostaPage() {
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
     setForm(f => ({ ...f, [name]: value }))
-    if (name === 'comprador1_estado_civil') {
-      setTemConjuge(value === 'casado' || value === 'uniao_estavel')
-    }
   }
 
   function calcSomatorio() {
@@ -121,6 +117,10 @@ export default function PropostaPage() {
       ...restForm
     } = form
 
+    // Salva o cônjuge a partir do valor real do estado civil (não do state
+    // temConjuge, que pode dessincronizar e gravar null indevidamente).
+    const casadoOuUniao = form.comprador1_estado_civil === 'casado' || form.comprador1_estado_civil === 'uniao_estavel'
+
     const data = {
       unidade_id: unidadeId,
       empreendimento_id: empreendimento.id,
@@ -140,13 +140,13 @@ export default function PropostaPage() {
       sinal_parcelado: sinalParcelado,
       sinal_quantidade_parcelas: sinalParcelado ? (Number(form.sinal_quantidade_parcelas) || null) : null,
       valor_chaves: Number(form.valor_chaves) || null,
-      conjuge_nome: temConjuge ? form.conjuge_nome : null,
-      conjuge_cpf: temConjuge ? form.conjuge_cpf : null,
-      conjuge_rg: temConjuge ? form.conjuge_rg : null,
-      conjuge_profissao: temConjuge ? form.conjuge_profissao : null,
-      conjuge_email: temConjuge ? form.conjuge_email : null,
-      conjuge_telefone: temConjuge ? form.conjuge_telefone : null,
-      conjuge_nascimento: temConjuge && conjuge_nascimento ? conjuge_nascimento : null,
+      conjuge_nome: casadoOuUniao ? form.conjuge_nome : null,
+      conjuge_cpf: casadoOuUniao ? form.conjuge_cpf : null,
+      conjuge_rg: casadoOuUniao ? form.conjuge_rg : null,
+      conjuge_profissao: casadoOuUniao ? form.conjuge_profissao : null,
+      conjuge_email: casadoOuUniao ? form.conjuge_email : null,
+      conjuge_telefone: casadoOuUniao ? form.conjuge_telefone : null,
+      conjuge_nascimento: casadoOuUniao && conjuge_nascimento ? conjuge_nascimento : null,
       comprador2_nome: temSegundoComprador ? form.comprador2_nome : null,
       comprador2_cpf: temSegundoComprador ? form.comprador2_cpf : null,
       comprador2_rg: temSegundoComprador ? form.comprador2_rg : null,
