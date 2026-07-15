@@ -36,6 +36,7 @@ export default function PropostaPage() {
   const [empreendimento, setEmpreendimento] = useState<any>(null)
   const [segueTabela, setSegueTabela] = useState(true)
   const [temConjuge, setTemConjuge] = useState(false)
+  const [sinalParcelado, setSinalParcelado] = useState(false)
   const [temSegundoComprador, setTemSegundoComprador] = useState(false)
   const [propostaId, setPropostaId] = useState('')
   const [form, setForm] = useState({
@@ -49,7 +50,7 @@ export default function PropostaPage() {
     comprador2_nascimento: '', comprador2_estado_civil: 'solteiro',
     corretor_nome: '', corretor_cpf_cnpj: '', corretor_creci: '',
     corretor_email: '', corretor_telefone: '', imobiliaria_nome: '',
-    valor_proposto: '', valor_sinal: '', quantidade_parcelas: '',
+    valor_proposto: '', valor_sinal: '', sinal_quantidade_parcelas: '', quantidade_parcelas: '',
     valor_parcela: '', quantidade_intercaladas: '', periodicidade_intercaladas: 'semestrais',
     periodicidade_meses_intercaladas: '6', data_primeira_intercalada: '',
     valor_intercalada: '', valor_chaves: '',
@@ -136,6 +137,8 @@ export default function PropostaPage() {
       periodicidade_meses_intercaladas: Number(form.periodicidade_meses_intercaladas) || null,
       periodicidade_intercaladas: enumPeriodicidade(form.periodicidade_meses_intercaladas),
       data_primeira_intercalada: form.data_primeira_intercalada || null,
+      sinal_parcelado: sinalParcelado,
+      sinal_quantidade_parcelas: sinalParcelado ? (Number(form.sinal_quantidade_parcelas) || null) : null,
       valor_chaves: Number(form.valor_chaves) || null,
       conjuge_nome: temConjuge ? form.conjuge_nome : null,
       conjuge_cpf: temConjuge ? form.conjuge_cpf : null,
@@ -334,6 +337,13 @@ export default function PropostaPage() {
                     style={{ width: '100%', padding: '8px 12px', border: '2px solid #E8390E', borderRadius: '8px', fontSize: '16px', fontWeight: '600', outline: 'none', color: '#E8390E', boxSizing: 'border-box' }} />
                 </div>
                 <div>{lbl('Valor do sinal (R$)')}{inp('valor_sinal', 'number')}</div>
+                <div style={full}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#374151' }}>
+                    <input type="checkbox" checked={sinalParcelado} onChange={e => setSinalParcelado(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: '#E8390E' }} />
+                    Sinal parcelado?
+                  </label>
+                </div>
+                {sinalParcelado && <div>{lbl('Qtd. parcelas do sinal (mensais)')}{inp('sinal_quantidade_parcelas', 'number')}</div>}
                 <div>{lbl('Qtd. parcelas mensais')}{inp('quantidade_parcelas', 'number')}</div>
                 <div>{lbl('Valor da parcela (R$)')}{inp('valor_parcela', 'number')}</div>
                 <div>{lbl('Qtd. intercaladas')}{inp('quantidade_intercaladas', 'number')}</div>

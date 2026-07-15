@@ -92,6 +92,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         segue_tabela: p.segue_tabela ?? null,
         valor_proposto: p.valor_proposto ?? null,
         valor_sinal: p.valor_sinal ?? null,
+        sinal_parcelado: p.sinal_parcelado ?? false,
+        sinal_quantidade: p.sinal_quantidade_parcelas ?? null,
         mensais_quantidade: p.quantidade_parcelas ?? null,
         mensais_valor: p.valor_parcela ?? null,
         mensais_total: mensaisTotal,
