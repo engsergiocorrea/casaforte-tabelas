@@ -66,9 +66,8 @@ export default async function EmpreendimentoPage({ params }: Props) {
         <div style={{maxWidth:'80rem',margin:'0 auto',padding:'0 1.5rem'}}>
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',height:'56px'}}>
             <Link href="/" style={{display:'flex',alignItems:'center',gap:'8px',textDecoration:'none'}}>
-              <div style={{width:'28px',height:'28px',background:'#1e293b',borderRadius:'6px',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                <span style={{color:'white',fontWeight:'bold',fontSize:'11px'}}>CF</span>
-              </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/icon.png" alt="Casa Forte" style={{width:'28px',height:'28px',objectFit:'contain'}} />
               <span style={{fontSize:'14px',color:'#6b7280'}}>← Todos os empreendimentos</span>
             </Link>
 <a href={`/empreendimentos/${slug}/download`} target="_blank" rel="noreferrer" style={{display:'flex',alignItems:'center',gap:'8px',padding:'6px 16px',background:'#1e293b',color:'white',fontSize:'14px',fontWeight:'500',borderRadius:'8px',textDecoration:'none'}}>              <svg width="15" height="15" viewBox="0 0 15 15" fill="none">

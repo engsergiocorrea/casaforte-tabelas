@@ -7,6 +7,7 @@ export const metadata: Metadata = {
     template: '%s | Casa Forte',
   },
   description: 'Plataforma de tabelas de vendas da Casa Forte Construtora e Incorporadora.',
+  icons: { icon: '/icon.png', apple: '/apple-icon.png' },
 }
 
 export default function RootLayout({

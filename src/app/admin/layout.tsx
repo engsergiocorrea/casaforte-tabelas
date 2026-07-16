@@ -22,7 +22,7 @@ function Sidebar({ onSignOut }: { onSignOut: () => void }) {
     <div style={{width:'220px',background:'#2A2A2A',display:'flex',flexDirection:'column',flexShrink:0,height:'100vh'}}>
       <div style={{padding:'16px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
         <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-          <img src="https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png" alt="Casa Forte" style={{width:'36px',height:'36px',objectFit:'contain',filter:'brightness(0) invert(1)'}} />
+          <img src="/apple-icon.png" alt="Casa Forte" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius:'8px'}} />
           <div>
             <div style={{color:'white',fontSize:'13px',fontWeight:'600'}}>Casa Forte</div>
             <div style={{color:'rgba(255,255,255,0.4)',fontSize:'11px'}}>Tabelas de Vendas</div>

@@ -81,9 +81,8 @@ export function AdminSidebar({ profile }: Props) {
     >
       {/* Logo / Brand */}
       <div className="h-16 flex items-center px-4 border-b border-slate-700/50">
-        <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center shrink-0">
-          <span className="text-white font-bold text-sm">CF</span>
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/apple-icon.png" alt="Casa Forte" className="w-8 h-8 rounded-lg object-contain shrink-0" />
         {!collapsed && (
           <div className="ml-3 min-w-0">
             <div className="text-sm font-semibold text-white truncate">Casa Forte</div>

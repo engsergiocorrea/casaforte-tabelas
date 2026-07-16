@@ -33,7 +33,8 @@ export default function LoginPage() {
     <div style={{minHeight:'100vh',background:'#1E1E1E',display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}}>
       <div style={{width:'100%',maxWidth:'24rem'}}>
         <div style={{textAlign:'center',marginBottom:'2rem'}}>
-          <div style={{width:'64px',height:'64px',background:'#E8390E',borderRadius:'16px',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 1rem',fontSize:'24px',fontWeight:'bold',color:'white'}}>CF</div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/apple-icon.png" alt="Casa Forte" style={{width:'64px',height:'64px',objectFit:'contain',borderRadius:'16px',margin:'0 auto 1rem',display:'block'}} />
           <h1 style={{color:'white',fontSize:'1.5rem',fontWeight:'bold'}}>Casa Forte</h1>
           <p style={{color:'rgba(255,255,255,0.5)',fontSize:'0.875rem',marginTop:'0.25rem'}}>Tabelas de Vendas — Área Interna</p>
         </div>
