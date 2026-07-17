@@ -1,14 +1,32 @@
 // src/app/(public)/page.tsx
 import Link from 'next/link'
 import Image from 'next/image'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import type { ResumoEmpreendimento } from '@/types'
 import { formatCurrency, formatPercent } from '@/lib/utils'
 import { EMPREENDIMENTO_STATUS_LABELS } from '@/types'
+import { CORRETOR_COOKIE, decodeCorretor } from '@/lib/corretor'
+import CorretorGate from './CorretorGate'
+import AcessoTracker from './AcessoTracker'
 
-export const revalidate = 60
+// Lê cookie do corretor → renderização dinâmica.
+export const dynamic = 'force-dynamic'
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>
+}) {
+  // Gate: sem identificação do corretor, mostra a tela de identificação e NÃO
+  // consulta/renderiza os empreendimentos (não vazam nem no HTML).
+  const cookieStore = await cookies()
+  const corretor = decodeCorretor(cookieStore.get(CORRETOR_COOKIE)?.value)
+  if (!corretor) {
+    const { next } = await searchParams
+    return <CorretorGate next={next} />
+  }
+
   const supabase = await createClient()
 
   const { data: empreendimentos } = await supabase
@@ -24,6 +42,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <AcessoTracker />
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,8 +58,11 @@ export default async function HomePage() {
                 </div>
               </div>
             </div>
-            <div className="text-xs text-gray-400">
-              Atualizado automaticamente
+            <div className="text-right">
+              <div className="text-xs font-medium text-gray-700 leading-tight">{corretor.nome}</div>
+              <div className="text-[11px] text-gray-400 leading-tight">
+                {corretor.creci ? `CRECI ${corretor.creci}` : 'Corretor'}
+              </div>
             </div>
           </div>
         </div>

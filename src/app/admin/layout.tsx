@@ -14,6 +14,7 @@ const NAV = [
   { href: '/admin/vendas', label: 'Vendas', icon: '💼' },
   { href: '/admin/relatorios', label: 'Relatórios', icon: '📈' },
   { href: '/admin/propostas', label: 'Propostas', icon: '📋' },
+  { href: '/admin/acessos', label: 'Acessos', icon: '👣' },
 ]
 
 function Sidebar({ onSignOut }: { onSignOut: () => void }) {

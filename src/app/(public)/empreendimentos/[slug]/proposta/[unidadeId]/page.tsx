@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
+import { lerCorretorDoNavegador } from '@/lib/corretor'
 
 // Periodicidade textual (ex.: "semestrais") → nº de meses, e o inverso.
 const MESES_POR_TEXTO: Record<string, number> = {
@@ -82,6 +83,17 @@ export default function PropostaPage() {
       setLoading(false)
     })
   }, [slug, unidadeId])
+
+  // Pré-preenche corretor/CRECI com o que foi informado no acesso (editável).
+  useEffect(() => {
+    const info = lerCorretorDoNavegador()
+    if (!info) return
+    setForm(f => ({
+      ...f,
+      corretor_nome: f.corretor_nome || info.nome,
+      corretor_creci: f.corretor_creci || info.creci,
+    }))
+  }, [])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
