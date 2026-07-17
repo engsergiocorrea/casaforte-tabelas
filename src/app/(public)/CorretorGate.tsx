@@ -6,6 +6,9 @@ import {
   encodeCorretor,
 } from '@/lib/corretor'
 
+const LARANJA = '#E8390E'
+const BORDA = '#DDD9D3'
+
 // Tela de identificação exibida ANTES de mostrar os empreendimentos.
 // Ao confirmar: grava o cookie do corretor, registra o acesso e libera a
 // navegação (voltando para `next`, se houver).
@@ -14,6 +17,7 @@ export default function CorretorGate({ next }: { next?: string }) {
   const [creci, setCreci] = useState('')
   const [saving, setSaving] = useState(false)
   const [erro, setErro] = useState('')
+  const [foco, setFoco] = useState<'' | 'nome' | 'creci'>('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -51,78 +55,137 @@ export default function CorretorGate({ next }: { next?: string }) {
     window.location.href = next && next.startsWith('/') ? next : '/'
   }
 
+  const inputStyle = (campo: 'nome' | 'creci'): React.CSSProperties => ({
+    width: '100%',
+    padding: '11px 13px',
+    border: `1.5px solid ${foco === campo ? LARANJA : BORDA}`,
+    borderRadius: 10,
+    fontSize: 14,
+    outline: 'none',
+    boxSizing: 'border-box',
+    transition: 'border-color .15s',
+    background: '#fff',
+  })
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 h-16">
-            <img
-              src="https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png"
-              alt="Casa Forte"
-              style={{ width: '36px', height: '36px', objectFit: 'contain' }}
-            />
-            <div>
-              <div className="font-semibold text-gray-900 text-sm leading-tight">Casa Forte</div>
-              <div className="text-xs text-gray-500 leading-tight">Tabelas de Vendas</div>
-            </div>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(180deg,#F7F5F2 0%,#EDE8E2 100%)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '24px 16px',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 360,
+          background: '#fff',
+          borderRadius: 16,
+          border: '1px solid #ECE7E1',
+          boxShadow: '0 12px 40px rgba(30,20,10,0.10)',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Faixa superior com a marca */}
+        <div
+          style={{
+            background: '#1E1E1E',
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}
+        >
+          <img
+            src="https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png"
+            alt="Casa Forte"
+            style={{ width: 30, height: 30, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+          />
+          <div>
+            <div style={{ color: '#fff', fontSize: 13, fontWeight: 600, lineHeight: 1.2 }}>Casa Forte</div>
+            <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11, lineHeight: 1.2 }}>Tabelas de Vendas</div>
           </div>
         </div>
-      </header>
 
-      <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-7 sm:p-9">
-            <div className="text-center mb-6">
-              <div className="text-4xl mb-3">🔑</div>
-              <h1 className="text-xl font-bold text-gray-900">Acesso às tabelas</h1>
-              <p className="text-sm text-gray-500 mt-2">
-                Para visualizar os empreendimentos e valores, identifique-se abaixo.
-              </p>
+        <div style={{ padding: '24px 22px 20px' }}>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: '#1E1E1E', margin: 0 }}>Acesso às tabelas</h1>
+          <p style={{ fontSize: 13, color: '#6b7280', margin: '6px 0 18px', lineHeight: 1.4 }}>
+            Identifique-se para ver os empreendimentos e valores.
+          </p>
+
+          {erro && (
+            <div
+              style={{
+                marginBottom: 14,
+                borderRadius: 9,
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                padding: '9px 11px',
+                fontSize: 13,
+                color: '#b91c1c',
+              }}
+            >
+              {erro}
             </div>
+          )}
 
-            {erro && (
-              <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-3 py-2 text-sm text-red-700">
-                {erro}
-              </div>
-            )}
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 13 }}>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#374151', marginBottom: 5 }}>
+                Corretor ou imobiliária *
+              </label>
+              <input
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                onFocus={() => setFoco('nome')}
+                onBlur={() => setFoco('')}
+                placeholder="Seu nome ou o da imobiliária"
+                style={inputStyle('nome')}
+                autoFocus
+              />
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#374151', marginBottom: 5 }}>
+                CRECI *
+              </label>
+              <input
+                value={creci}
+                onChange={(e) => setCreci(e.target.value)}
+                onFocus={() => setFoco('creci')}
+                onBlur={() => setFoco('')}
+                placeholder="Ex.: CRECI 12345-F"
+                style={inputStyle('creci')}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={saving}
+              style={{
+                width: '100%',
+                padding: '12px',
+                background: LARANJA,
+                color: '#fff',
+                border: 'none',
+                borderRadius: 10,
+                fontSize: 14.5,
+                fontWeight: 600,
+                cursor: saving ? 'wait' : 'pointer',
+                opacity: saving ? 0.7 : 1,
+                boxShadow: '0 2px 8px rgba(232,57,14,0.28)',
+              }}
+            >
+              {saving ? 'Entrando…' : 'Ver empreendimentos →'}
+            </button>
+          </form>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Corretor ou imobiliária *
-                </label>
-                <input
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  placeholder="Seu nome ou o da imobiliária"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#E8390E] focus:ring-1 focus:ring-[#E8390E]"
-                  autoFocus
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">CRECI *</label>
-                <input
-                  value={creci}
-                  onChange={(e) => setCreci(e.target.value)}
-                  placeholder="Ex.: CRECI 12345-F"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-[#E8390E] focus:ring-1 focus:ring-[#E8390E]"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={saving}
-                className="w-full rounded-lg bg-[#E8390E] py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60"
-              >
-                {saving ? 'Entrando…' : 'Ver empreendimentos →'}
-              </button>
-            </form>
-
-            <p className="mt-5 text-center text-xs text-gray-400">
-              Seus dados são usados apenas para acompanhamento comercial da Casa Forte.
-            </p>
-          </div>
+          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 11, color: '#9ca3af', lineHeight: 1.4 }}>
+            Seus dados são usados apenas para acompanhamento comercial da Casa Forte.
+          </p>
         </div>
-      </main>
+      </div>
     </div>
   )
 }
