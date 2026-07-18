@@ -7,19 +7,29 @@
 export const CORRETOR_COOKIE = 'cf_corretor'
 export const CORRETOR_COOKIE_MAX_AGE = 60 * 60 * 24 * 180 // 180 dias
 
+// Versão da identificação. Para forçar TODOS os corretores a se identificarem
+// de novo (ex.: limpar identificações antigas em cache), basta incrementar
+// este número e publicar: os cookies com versão diferente passam a valer como
+// "não identificado" e o gate reaparece.
+export const CORRETOR_VERSION = 2
+
 export interface CorretorInfo {
   nome: string
   creci: string
 }
 
 export function encodeCorretor(info: CorretorInfo): string {
-  return encodeURIComponent(JSON.stringify({ n: info.nome, c: info.creci }))
+  return encodeURIComponent(
+    JSON.stringify({ v: CORRETOR_VERSION, n: info.nome, c: info.creci })
+  )
 }
 
 export function decodeCorretor(raw: string | undefined | null): CorretorInfo | null {
   if (!raw) return null
   try {
     const obj = JSON.parse(decodeURIComponent(raw))
+    // Cookie de versão antiga (ou sem versão) → tratar como não identificado.
+    if (Number(obj?.v) !== CORRETOR_VERSION) return null
     const nome = String(obj?.n ?? obj?.nome ?? '').trim()
     const creci = String(obj?.c ?? obj?.creci ?? '').trim()
     if (!nome) return null
