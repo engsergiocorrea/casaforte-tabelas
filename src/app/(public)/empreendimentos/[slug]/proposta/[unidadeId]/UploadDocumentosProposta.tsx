@@ -9,13 +9,16 @@ const MAX_MB = 40
 // para o formulário via onPreencher.
 export default function UploadDocumentosProposta({
   onPreencher,
+  onDocumentos,
 }: {
   onPreencher: (campos: Record<string, string>) => void
+  onDocumentos?: (docs: { nome: string; path: string; mime: string; tamanho: number }[]) => void
 }) {
   const [files, setFiles] = useState<File[]>([])
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [ok, setOk] = useState('')
+  const [anexados, setAnexados] = useState(0)
 
   function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const novos = Array.from(e.target.files ?? [])
@@ -35,13 +38,20 @@ export default function UploadDocumentosProposta({
       const supabase = createClient()
       const folder = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now())
       const paths: string[] = []
+      const meta: { nome: string; path: string; mime: string; tamanho: number }[] = []
       for (const f of files) {
         const safe = f.name.replace(/[^\w.\-]+/g, '_').slice(-90)
         const path = `documentos/${folder}/${Date.now()}_${safe}`
         const { error } = await supabase.storage.from('proposta-documentos').upload(path, f, { contentType: f.type || undefined })
         if (error) { setErro(`Falha ao enviar "${f.name}": ${error.message}`); setLoading(false); return }
         paths.push(path)
+        meta.push({ nome: f.name, path, mime: f.type || 'application/octet-stream', tamanho: f.size })
       }
+
+      // Anexa os documentos à proposta (independe da leitura pela IA): a
+      // diretoria terá acesso a eles no admin, mesmo se a extração falhar.
+      onDocumentos?.(meta)
+      setAnexados((prev) => prev + meta.length)
 
       const resp = await fetch('/api/extrair-documentos', {
         method: 'POST',
@@ -51,14 +61,17 @@ export default function UploadDocumentosProposta({
       let j: any = null
       try { j = await resp.json() } catch {}
       if (!resp.ok || !j) {
-        setErro('Não foi possível ler os documentos. Tente novamente.')
+        setErro('Documentos anexados, mas não consegui ler com a IA. Preencha os campos manualmente.')
+        setFiles([])
       } else if (!j.ok) {
-        setErro(j.error || 'Não foi possível ler os documentos.')
+        setErro('Documentos anexados, mas a leitura por IA falhou. Preencha os campos manualmente.')
+        setFiles([])
       } else {
         const campos: Record<string, string> = j.campos || {}
         const n = Object.keys(campos).length
-        if (n === 0) setErro('A IA não encontrou dados legíveis nos documentos. Tente fotos mais nítidas.')
-        else { onPreencher(campos); setOk(`✅ ${n} campo(s) preenchido(s) a partir dos documentos. Confira e ajuste abaixo.`); setFiles([]) }
+        if (n === 0) setOk('Documentos anexados à proposta. A IA não encontrou dados legíveis — preencha os campos abaixo.')
+        else { onPreencher(campos); setOk(`✅ ${n} campo(s) preenchido(s) pelos documentos. Confira e ajuste abaixo.`) }
+        setFiles([])
       }
     } catch (e: any) {
       setErro('Falha ao enviar/ler os documentos. ' + (e?.message || ''))
@@ -89,6 +102,7 @@ export default function UploadDocumentosProposta({
 
       {erro && <div style={{ marginTop: 12, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 12px', color: '#b91c1c', fontSize: 13 }}>⚠️ {erro}</div>}
       {ok && <div style={{ marginTop: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 12px', color: '#15803d', fontSize: 13 }}>{ok}</div>}
+      {anexados > 0 && <div style={{ marginTop: 8, fontSize: 12.5, color: '#6b7280' }}>📎 {anexados} documento(s) anexado(s) — serão enviados junto com a proposta.</div>}
 
       <button
         type="button"

@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createSbClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import PropostaAcoes from './PropostaAcoes'
@@ -13,6 +14,19 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
     .single()
 
   if (!p) notFound()
+
+  // Documentos do cliente anexados pelo corretor (bucket privado) → links de
+  // download temporários (URL assinada), gerados com service role.
+  const docs = Array.isArray((p as any).documentos) ? (p as any).documentos : []
+  let docLinks: { nome: string; url?: string; tamanho?: number; mime?: string }[] = []
+  if (docs.length) {
+    const admin = createSbClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { auth: { persistSession: false } })
+    docLinks = await Promise.all(docs.map(async (d: any) => {
+      const { data: sg } = await admin.storage.from('proposta-documentos').createSignedUrl(d.path, 3600)
+      return { nome: d.nome, mime: d.mime, tamanho: d.tamanho, url: sg?.signedUrl }
+    }))
+  }
+  const fmtTam = (n?: number) => (n == null ? '' : n < 1048576 ? `${Math.round(n / 1024)} KB` : `${(n / 1048576).toFixed(1)} MB`)
 
   const emp = p.empreendimentos as any
   const uni = p.unidades as any
@@ -71,6 +85,24 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
 
       {/* Botões de ação */}
       <PropostaAcoes propostaId={id} statusAtual={p.status_proposta ?? 'pendente'} />
+
+      {/* Documentos do cliente */}
+      {docLinks.length > 0 && (
+        <Section title={`📎 Documentos do cliente (${docLinks.length})`}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {docLinks.map((d, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, border: '1px solid #eee', borderRadius: 8, padding: '8px 12px' }}>
+                <span style={{ fontSize: 13, color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {d.mime === 'application/pdf' ? '📄' : '🖼️'} {d.nome}{d.tamanho ? <span style={{ color: '#9ca3af' }}> · {fmtTam(d.tamanho)}</span> : null}
+                </span>
+                {d.url
+                  ? <a href={d.url} target="_blank" rel="noreferrer" style={{ padding: '5px 12px', background: '#E8390E', color: 'white', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>Baixar</a>
+                  : <span style={{ fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>indisponível</span>}
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
 
       {/* Unidade */}
       <Section title="🏠 Unidade">

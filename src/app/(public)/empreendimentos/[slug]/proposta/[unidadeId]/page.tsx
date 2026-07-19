@@ -40,6 +40,7 @@ export default function PropostaPage() {
   const [sinalParcelado, setSinalParcelado] = useState(false)
   const [temSegundoComprador, setTemSegundoComprador] = useState(false)
   const [propostaId, setPropostaId] = useState('')
+  const [documentos, setDocumentos] = useState<{ nome: string; path: string; mime: string; tamanho: number }[]>([])
   const [form, setForm] = useState({
     comprador1_nome: '', comprador1_cpf: '', comprador1_rg: '',
     comprador1_profissao: '', comprador1_email: '', comprador1_telefone: '',
@@ -138,6 +139,7 @@ export default function PropostaPage() {
       unidade_id: unidadeId,
       empreendimento_id: empreendimento.id,
       ...restForm,
+      documentos: documentos.length ? documentos : null,
       comprador1_nascimento: comprador1_nascimento || null,
       segue_tabela: segueTabela,
       valor_proposto: valorProposto,
@@ -276,6 +278,7 @@ export default function PropostaPage() {
               setForm((f) => ({ ...f, ...campos }))
               if (Object.keys(campos).some((k) => k.startsWith('comprador2_'))) setTemSegundoComprador(true)
             }}
+            onDocumentos={(docs) => setDocumentos((prev) => [...prev, ...docs])}
           />
 
           {card('👤 Dados do Comprador',
