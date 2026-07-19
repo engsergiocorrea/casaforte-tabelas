@@ -405,7 +405,11 @@ export default function PropostaPage() {
           <button type="submit" disabled={saving} style={{ width: '100%', padding: '14px', background: '#E8390E', color: 'white', border: 'none', borderRadius: '10px', fontSize: '16px', fontWeight: '600', cursor: 'pointer' }}>
             {saving ? 'Enviando...' : '📤 Enviar proposta'}
           </button>
-          <p style={{ textAlign: 'center', fontSize: '12px', color: '#9ca3af', marginTop: '12px' }}>Ao enviar, a equipe Casa Forte será notificada automaticamente via WhatsApp.</p>
+          <p style={{ textAlign: 'center', fontSize: '12px', color: '#9ca3af', marginTop: '12px', lineHeight: 1.5 }}>
+            Ao enviar, a equipe Casa Forte será notificada via WhatsApp. Os dados informados são tratados para
+            elaboração da proposta/contrato, conforme a{' '}
+            <a href="/privacidade" target="_blank" rel="noreferrer" style={{ color: '#9ca3af', textDecoration: 'underline' }}>Política de Privacidade</a>.
+          </p>
         </form>
       </div>
     </div>

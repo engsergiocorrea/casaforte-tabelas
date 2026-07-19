@@ -19,6 +19,7 @@ export default function UploadDocumentosProposta({
   const [erro, setErro] = useState('')
   const [ok, setOk] = useState('')
   const [anexados, setAnexados] = useState(0)
+  const [consentido, setConsentido] = useState(false)
 
   function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const novos = Array.from(e.target.files ?? [])
@@ -31,6 +32,7 @@ export default function UploadDocumentosProposta({
 
   async function ler() {
     if (files.length === 0) { setErro('Selecione ao menos um documento (RG/CNH, CPF, comprovante, certidão…).'); return }
+    if (!consentido) { setErro('Confirme que você tem autorização do cliente para enviar os documentos dele.'); return }
     setLoading(true)
     setErro('')
     setOk('')
@@ -84,8 +86,10 @@ export default function UploadDocumentosProposta({
     <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E8390E55', padding: 20, marginBottom: 16 }}>
       <h2 style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 4 }}>📄 Preencher com documentos (IA)</h2>
       <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 14 }}>
-        Envie RG/CNH, CPF, comprovante e/ou certidão de casamento (imagem ou PDF). A IA lê e preenche os dados do
-        comprador automaticamente — você confere e ajusta antes de enviar.
+        Envie RG/CNH, CPF, comprovante e/ou certidão de casamento (imagem ou PDF). Os documentos são lidos por
+        inteligência artificial para pré-preencher a proposta e ficam armazenados de forma privada. A leitura pode ser
+        processada por serviço no exterior. Veja a{' '}
+        <a href="/privacidade" target="_blank" rel="noreferrer" style={{ color: '#E8390E', textDecoration: 'underline' }}>Política de Privacidade</a>.
       </p>
 
       <input type="file" accept="image/*,application/pdf" multiple onChange={onPick} style={{ fontSize: 14 }} />
@@ -103,6 +107,11 @@ export default function UploadDocumentosProposta({
       {erro && <div style={{ marginTop: 12, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 12px', color: '#b91c1c', fontSize: 13 }}>⚠️ {erro}</div>}
       {ok && <div style={{ marginTop: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 12px', color: '#15803d', fontSize: 13 }}>{ok}</div>}
       {anexados > 0 && <div style={{ marginTop: 8, fontSize: 12.5, color: '#6b7280' }}>📎 {anexados} documento(s) anexado(s) — serão enviados junto com a proposta.</div>}
+
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 14, fontSize: 12.5, color: '#374151', cursor: 'pointer', lineHeight: 1.5 }}>
+        <input type="checkbox" checked={consentido} onChange={(e) => setConsentido(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, accentColor: '#E8390E', flexShrink: 0 }} />
+        <span>Confirmo que tenho autorização do cliente para enviar e tratar os documentos dele nesta proposta.</span>
+      </label>
 
       <button
         type="button"

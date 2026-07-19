@@ -181,8 +181,10 @@ export default function CorretorGate({ next }: { next?: string }) {
             </button>
           </form>
 
-          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 11, color: '#9ca3af', lineHeight: 1.4 }}>
-            Seus dados são usados apenas para acompanhamento comercial da Casa Forte.
+          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 11, color: '#9ca3af', lineHeight: 1.5 }}>
+            Registramos seu nome, CRECI e acesso (data, hora e IP) para acompanhamento comercial e segurança.
+            Veja a{' '}
+            <a href="/privacidade" target="_blank" rel="noreferrer" style={{ color: '#9ca3af', textDecoration: 'underline' }}>Política de Privacidade</a>.
           </p>
         </div>
       </div>
