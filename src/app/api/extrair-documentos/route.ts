@@ -73,7 +73,7 @@ export async function POST(req: Request) {
   } catch (e: any) {
     console.error('[extrair-documentos]', e?.message)
     return NextResponse.json(
-      { ok: false, error: 'Não foi possível ler os documentos. Tente novamente.', detalhe: String(e?.message ?? '').slice(0, 300) },
+      { ok: false, error: 'Não foi possível ler os documentos. Tente novamente.' },
       { status: 500 }
     )
   }

@@ -51,9 +51,9 @@ export default function UploadDocumentosProposta({
       let j: any = null
       try { j = await resp.json() } catch {}
       if (!resp.ok || !j) {
-        setErro(`Falha na leitura (HTTP ${resp.status})${j?.detalhe ? ` — ${j.detalhe}` : ''}`)
+        setErro('Não foi possível ler os documentos. Tente novamente.')
       } else if (!j.ok) {
-        setErro((j.error || 'Não foi possível ler os documentos.') + (j.detalhe ? ` [${j.detalhe}]` : ''))
+        setErro(j.error || 'Não foi possível ler os documentos.')
       } else {
         const campos: Record<string, string> = j.campos || {}
         const n = Object.keys(campos).length
