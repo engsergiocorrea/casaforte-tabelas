@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 import { lerCorretorDoNavegador } from '@/lib/corretor'
+import UploadDocumentosProposta from './UploadDocumentosProposta'
 
 // Periodicidade textual (ex.: "semestrais") → nº de meses, e o inverso.
 const MESES_POR_TEXTO: Record<string, number> = {
@@ -270,6 +271,13 @@ export default function PropostaPage() {
         {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#b91c1c', fontSize: '14px' }}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
+          <UploadDocumentosProposta
+            onPreencher={(campos) => {
+              setForm((f) => ({ ...f, ...campos }))
+              if (Object.keys(campos).some((k) => k.startsWith('comprador2_'))) setTemSegundoComprador(true)
+            }}
+          />
+
           {card('👤 Dados do Comprador',
             <div>
               <div style={g2}>
