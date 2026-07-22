@@ -146,6 +146,27 @@ export default async function EmpreendimentoPage({ params }: Props) {
               </p>
             )}
 
+            {/* Folder do empreendimento — destaque para o corretor */}
+            {empreendimento.folder_url && (
+              <a
+                href={empreendimento.folder_url}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:'10px',
+                  width:'100%', padding:'14px 20px', marginBottom:'16px',
+                  background:'#E8390E', color:'white', fontSize:'16px', fontWeight:'700',
+                  borderRadius:'12px', textDecoration:'none',
+                  boxShadow:'0 4px 14px rgba(232,57,14,0.35)',
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 15 15" fill="none">
+                  <path d="M7.5 1v9m0 0l-3-3m3 3l3-3M1 11v1a2 2 0 002 2h9a2 2 0 002-2v-1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Baixar folder do empreendimento
+              </a>
+            )}
+
             {/* Condições comerciais */}
             <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',gap:'12px',padding:'16px',background:'#f8fafc',borderRadius:'12px'}}>
               <div>

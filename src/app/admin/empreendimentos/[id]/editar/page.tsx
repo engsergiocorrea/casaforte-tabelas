@@ -44,6 +44,25 @@ export default function EditarEmpreendimentoPage({
     setUploading(false);
   }
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, field: string) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const supabase = createClient();
+    const ext = (file.name.split('.').pop() || 'pdf').toLowerCase();
+    const path = `${id}-${field}.${ext}`;
+    const { error: uploadError } = await supabase.storage
+      .from('empreendimentos')
+      .upload(path, file, { upsert: true, contentType: file.type || 'application/pdf' });
+    if (!uploadError) {
+      const { data } = supabase.storage.from('empreendimentos').getPublicUrl(path);
+      // cache-busting para o novo arquivo aparecer na hora (URL pública é estável)
+      setForm((f: any) => ({ ...f, [field]: `${data.publicUrl}?v=${Date.now()}` }));
+    }
+    e.target.value = '';
+    setUploading(false);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -108,6 +127,32 @@ export default function EditarEmpreendimentoPage({
     </div>
   );
 
+  const fileField = (field: string, label: string) => (
+    <div style={{ gridColumn: "1/-1" }}>
+      <label style={S.label}>{label}</label>
+      {form[field] && (
+        <div style={{ marginBottom: "8px" }}>
+          <a href={form[field]} target="_blank" rel="noreferrer" style={{ fontSize: "13px", color: "#E8390E", fontWeight: 600, textDecoration: "none" }}>📄 Ver arquivo atual</a>
+        </div>
+      )}
+      <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "#f9fafb", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", cursor: "pointer", color: "#374151" }}>
+          {uploading ? "Enviando..." : "📁 Enviar folder (PDF)"}
+          <input type="file" accept="application/pdf,image/*" onChange={(e) => handleFileUpload(e, field)} style={{ display: "none" }} disabled={uploading} />
+        </label>
+        <span style={{ fontSize: "12px", color: "#9ca3af" }}>ou</span>
+        <input name={field} type="url" placeholder="Cole a URL do folder" value={form[field] ?? ""} onChange={handleChange}
+          style={{ flex: 1, minWidth: "200px", padding: "7px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", outline: "none" }} />
+        {form[field] && (
+          <button type="button" onClick={() => setForm((f: any) => ({ ...f, [field]: "" }))}
+            style={{ padding: "7px 12px", border: "1px solid #fecaca", borderRadius: "8px", fontSize: "13px", color: "#b91c1c", background: "white", cursor: "pointer" }}>
+            ✕ Remover
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
   const somaPerc = (Number(form.percentual_sinal_padrao) || 0) +
     (Number(form.percentual_mensais_padrao) || 0) +
     (Number(form.percentual_intercaladas_padrao) || 0) +
@@ -155,6 +200,7 @@ export default function EditarEmpreendimentoPage({
             </div>
             {imageField("imagem_capa_url", "🖼️ Imagem de capa")}
             {imageField("logo_url", "🏷️ Logo do empreendimento")}
+            {fileField("folder_url", "📄 Folder do empreendimento (PDF) — aparece destacado na tabela pública")}
           </div>
         </div>
 
