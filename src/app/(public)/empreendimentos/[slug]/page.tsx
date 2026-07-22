@@ -149,7 +149,7 @@ export default async function EmpreendimentoPage({ params }: Props) {
             {/* Folder do empreendimento — destaque para o corretor */}
             {empreendimento.folder_url && (
               <a
-                href={empreendimento.folder_url}
+                href={`/f/${slug}`}
                 target="_blank"
                 rel="noreferrer"
                 style={{
