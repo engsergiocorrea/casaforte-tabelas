@@ -12,6 +12,9 @@ export default function EditarEmpreendimentoPage({
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [uploadPct, setUploadPct] = useState<number>(0);
+  const [uploadOkField, setUploadOkField] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [form, setForm] = useState<any>(null);
 
@@ -27,47 +30,61 @@ export default function EditarEmpreendimentoPage({
     setForm((f: any) => ({ ...f, [name]: val }));
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>, field: string) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
+  // Sobe o arquivo direto para o Storage do Supabase por XHR (mesmo formato do
+  // supabase-js: FormData com cacheControl + arquivo), para conseguir progresso
+  // real 0-100%. Usa o token da sessão do usuário logado (precisa da policy de
+  // Storage que permite authenticated escrever no bucket 'empreendimentos').
+  async function uploadComProgresso(file: File, field: string): Promise<string> {
     const supabase = createClient();
-    const ext = file.name.split('.').pop();
+    const { data: { session } } = await supabase.auth.getSession();
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+    const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
     const path = `${id}-${field}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from('empreendimentos')
-      .upload(path, file, { upsert: true });
-    if (uploadError) {
-      setError(`Falha ao enviar a imagem: ${uploadError.message}`);
-    } else {
-      const { data } = supabase.storage.from('empreendimentos').getPublicUrl(path);
-      setForm((f: any) => ({ ...f, [field]: data.publicUrl }));
-      setError('');
-    }
-    setUploading(false);
+    const fd = new FormData();
+    fd.append('cacheControl', '3600');
+    fd.append('', file, file.name);
+    return await new Promise<string>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', `${url}/storage/v1/object/empreendimentos/${path}`);
+      xhr.setRequestHeader('authorization', `Bearer ${session?.access_token ?? anon}`);
+      xhr.setRequestHeader('apikey', anon);
+      xhr.setRequestHeader('x-upsert', 'true');
+      xhr.upload.onprogress = (ev) => {
+        if (ev.lengthComputable) setUploadPct(Math.round((ev.loaded / ev.total) * 100));
+      };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const { data } = supabase.storage.from('empreendimentos').getPublicUrl(path);
+          resolve(`${data.publicUrl}?v=${Date.now()}`);
+        } else {
+          let msg = xhr.responseText;
+          try { msg = JSON.parse(xhr.responseText)?.message || msg; } catch {}
+          reject(new Error(msg || `HTTP ${xhr.status}`));
+        }
+      };
+      xhr.onerror = () => reject(new Error('Falha de rede durante o envio.'));
+      xhr.send(fd);
+    });
   }
 
-  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>, field: string) {
+  async function fazerUpload(e: React.ChangeEvent<HTMLInputElement>, field: string, rotulo: string) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    const supabase = createClient();
-    const ext = (file.name.split('.').pop() || 'pdf').toLowerCase();
-    const path = `${id}-${field}.${ext}`;
-    const { error: uploadError } = await supabase.storage
-      .from('empreendimentos')
-      .upload(path, file, { upsert: true, contentType: file.type || 'application/pdf' });
-    if (uploadError) {
-      setError(`Falha ao enviar o folder: ${uploadError.message}`);
-    } else {
-      const { data } = supabase.storage.from('empreendimentos').getPublicUrl(path);
-      // cache-busting para o novo arquivo aparecer na hora (URL pública é estável)
-      setForm((f: any) => ({ ...f, [field]: `${data.publicUrl}?v=${Date.now()}` }));
-      setError('');
+    setUploading(true); setUploadingField(field); setUploadPct(0); setUploadOkField(null); setError('');
+    try {
+      const publicUrl = await uploadComProgresso(file, field);
+      setForm((f: any) => ({ ...f, [field]: publicUrl }));
+      setUploadOkField(field);
+    } catch (err: any) {
+      setError(`Falha ao enviar ${rotulo}: ${err?.message ?? err}`);
+    } finally {
+      setUploading(false); setUploadingField(null); e.target.value = '';
     }
-    e.target.value = '';
-    setUploading(false);
   }
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: string) => fazerUpload(e, field, 'a imagem');
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: string) => fazerUpload(e, field, 'o folder');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -88,7 +105,9 @@ export default function EditarEmpreendimentoPage({
     const supabase = createClient();
     const { error: err } = await supabase.from("empreendimentos").update(form).eq("id", id);
     if (err) { setError(err.message); setSaving(false); return; }
-    router.push("/admin/empreendimentos");
+    // Recarga completa (não client-side) para evitar tela branca por "skew" de
+    // deploy e garantir que a lista venha com os dados atualizados.
+    window.location.assign("/admin/empreendimentos");
   }
 
   if (!form) return <div style={{ padding: "2rem", color: "#6b7280" }}>Carregando...</div>;
@@ -107,6 +126,25 @@ export default function EditarEmpreendimentoPage({
     </select>
   );
 
+  // Barra de progresso (durante o envio) + confirmação de "enviado" por campo.
+  const renderUploadStatus = (field: string) => (
+    <>
+      {uploadingField === field && (
+        <div style={{ marginTop: "8px" }}>
+          <div style={{ height: "8px", background: "#eee", borderRadius: "999px", overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${uploadPct}%`, background: "#E8390E", transition: "width .15s" }} />
+          </div>
+          <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>Enviando… {uploadPct}%</div>
+        </div>
+      )}
+      {uploadOkField === field && uploadingField !== field && (
+        <div style={{ marginTop: "8px", fontSize: "13px", color: "#15803d", fontWeight: 600 }}>
+          ✅ Enviado! Clique em <strong>Salvar</strong> para confirmar.
+        </div>
+      )}
+    </>
+  );
+
   const imageField = (field: string, label: string) => (
     <div style={{ gridColumn: "1/-1" }}>
       <label style={S.label}>{label}</label>
@@ -117,7 +155,7 @@ export default function EditarEmpreendimentoPage({
       )}
       <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
         <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "#f9fafb", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", cursor: "pointer", color: "#374151" }}>
-          {uploading ? "Enviando..." : "📁 Fazer upload"}
+          {uploadingField === field ? `Enviando… ${uploadPct}%` : "📁 Fazer upload"}
           <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, field)} style={{ display: "none" }} disabled={uploading} />
         </label>
         <span style={{ fontSize: "12px", color: "#9ca3af" }}>ou</span>
@@ -130,6 +168,7 @@ export default function EditarEmpreendimentoPage({
           </button>
         )}
       </div>
+      {renderUploadStatus(field)}
     </div>
   );
 
@@ -143,7 +182,7 @@ export default function EditarEmpreendimentoPage({
       )}
       <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
         <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "#f9fafb", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", cursor: "pointer", color: "#374151" }}>
-          {uploading ? "Enviando..." : "📁 Enviar folder (PDF)"}
+          {uploadingField === field ? `Enviando… ${uploadPct}%` : "📁 Enviar folder (PDF)"}
           <input type="file" accept="application/pdf,image/*" onChange={(e) => handleFileUpload(e, field)} style={{ display: "none" }} disabled={uploading} />
         </label>
         <span style={{ fontSize: "12px", color: "#9ca3af" }}>ou</span>
@@ -156,6 +195,7 @@ export default function EditarEmpreendimentoPage({
           </button>
         )}
       </div>
+      {renderUploadStatus(field)}
     </div>
   );
 
