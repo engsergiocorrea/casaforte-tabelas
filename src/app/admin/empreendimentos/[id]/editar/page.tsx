@@ -15,6 +15,7 @@ export default function EditarEmpreendimentoPage({
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [uploadPct, setUploadPct] = useState<number>(0);
   const [uploadOkField, setUploadOkField] = useState<string | null>(null);
+  const [uploadMB, setUploadMB] = useState<number | null>(null);
   const [linkCopiado, setLinkCopiado] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState<any>(null);
@@ -77,10 +78,11 @@ export default function EditarEmpreendimentoPage({
   async function fazerUpload(e: React.ChangeEvent<HTMLInputElement>, field: string, rotulo: string) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true); setUploadingField(field); setUploadPct(0); setUploadOkField(null); setError('');
+    setUploading(true); setUploadingField(field); setUploadPct(0); setUploadOkField(null); setUploadMB(null); setError('');
     try {
       const publicUrl = await uploadComProgresso(file, field);
       setForm((f: any) => ({ ...f, [field]: publicUrl }));
+      setUploadMB(file.size / (1024 * 1024));
       setUploadOkField(field);
     } catch (err: any) {
       setError(`Falha ao enviar ${rotulo}: ${err?.message ?? err}`);
@@ -145,7 +147,12 @@ export default function EditarEmpreendimentoPage({
       )}
       {uploadOkField === field && uploadingField !== field && (
         <div style={{ marginTop: "8px", fontSize: "13px", color: "#15803d", fontWeight: 600 }}>
-          ✅ Enviado! Clique em <strong>Salvar</strong> para confirmar.
+          ✅ Enviado{uploadMB != null ? ` (${uploadMB.toFixed(1)} MB)` : ""}! Clique em <strong>Salvar</strong> para confirmar.
+        </div>
+      )}
+      {uploadOkField === field && uploadingField !== field && uploadMB != null && uploadMB > 8 && (
+        <div style={{ marginTop: "6px", fontSize: "12px", color: "#92400e", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "6px", padding: "6px 10px" }}>
+          ⚠️ Arquivo pesado ({uploadMB.toFixed(1)} MB) — pode demorar para abrir no celular. Considere comprimir o PDF antes (ex.: Pré-visualização do Mac → Exportar → "Reduzir Tamanho do Arquivo", ou iLovePDF/Smallpdf "Comprimir PDF") e reenviar. Costuma cair para 3–6 MB sem perda visível.
         </div>
       )}
     </>
