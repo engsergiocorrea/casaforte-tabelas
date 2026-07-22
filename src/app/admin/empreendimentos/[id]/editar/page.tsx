@@ -30,24 +30,30 @@ export default function EditarEmpreendimentoPage({
     setForm((f: any) => ({ ...f, [name]: val }));
   }
 
-  // Sobe o arquivo direto para o Storage do Supabase por XHR (mesmo formato do
-  // supabase-js: FormData com cacheControl + arquivo), para conseguir progresso
-  // real 0-100%. Usa o token da sessão do usuário logado (precisa da policy de
-  // Storage que permite authenticated escrever no bucket 'empreendimentos').
+  // Sobe o arquivo com progresso real 0-100%, SEM depender de policy de RLS:
+  // 1) pede ao servidor uma URL assinada (gerada com service role);
+  // 2) sobe o arquivo do navegador direto para o Storage por essa URL (XHR),
+  //    no mesmo formato do supabase-js (FormData: cacheControl + arquivo).
   async function uploadComProgresso(file: File, field: string): Promise<string> {
-    const supabase = createClient();
-    const { data: { session } } = await supabase.auth.getSession();
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+    let ext = (file.name.split('.').pop() || '').toLowerCase();
+    if (!/^[a-z0-9]{2,5}$/.test(ext)) {
+      ext = file.type === 'application/pdf' ? 'pdf' : (file.type.split('/')[1] || 'bin');
+    }
+    const resp = await fetch('/api/admin/folder-upload-url', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ id, field, ext }),
+    });
+    const info = await resp.json();
+    if (!resp.ok) throw new Error(info?.erro || `HTTP ${resp.status}`);
+
     const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
-    const ext = (file.name.split('.').pop() || 'bin').toLowerCase();
-    const path = `${id}-${field}.${ext}`;
     const fd = new FormData();
     fd.append('cacheControl', '3600');
     fd.append('', file, file.name);
     return await new Promise<string>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open('POST', `${url}/storage/v1/object/empreendimentos/${path}`);
-      xhr.setRequestHeader('authorization', `Bearer ${session?.access_token ?? anon}`);
+      xhr.open('PUT', info.signedUrl);
       xhr.setRequestHeader('apikey', anon);
       xhr.setRequestHeader('x-upsert', 'true');
       xhr.upload.onprogress = (ev) => {
@@ -55,8 +61,7 @@ export default function EditarEmpreendimentoPage({
       };
       xhr.onload = () => {
         if (xhr.status >= 200 && xhr.status < 300) {
-          const { data } = supabase.storage.from('empreendimentos').getPublicUrl(path);
-          resolve(`${data.publicUrl}?v=${Date.now()}`);
+          resolve(`${info.publicUrl}?v=${Date.now()}`);
         } else {
           let msg = xhr.responseText;
           try { msg = JSON.parse(xhr.responseText)?.message || msg; } catch {}
