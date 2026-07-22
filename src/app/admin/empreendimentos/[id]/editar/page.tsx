@@ -15,6 +15,7 @@ export default function EditarEmpreendimentoPage({
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [uploadPct, setUploadPct] = useState<number>(0);
   const [uploadOkField, setUploadOkField] = useState<string | null>(null);
+  const [linkCopiado, setLinkCopiado] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState<any>(null);
 
@@ -177,12 +178,26 @@ export default function EditarEmpreendimentoPage({
     </div>
   );
 
+  const linkCurtoFolder = () =>
+    typeof window !== "undefined" && form.slug ? `${window.location.origin}/f/${form.slug}` : "";
+
   const fileField = (field: string, label: string) => (
     <div style={{ gridColumn: "1/-1" }}>
       <label style={S.label}>{label}</label>
       {form[field] && (
         <div style={{ marginBottom: "8px" }}>
           <a href={form[field]} target="_blank" rel="noreferrer" style={{ fontSize: "13px", color: "#E8390E", fontWeight: 600, textDecoration: "none" }}>📄 Ver arquivo atual</a>
+        </div>
+      )}
+      {field === "folder_url" && form.folder_url && form.slug && (
+        <div style={{ marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", padding: "8px 10px", background: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
+          <span style={{ fontSize: "12px", color: "#6b7280" }}>🔗 Link curto p/ compartilhar:</span>
+          <code style={{ fontSize: "13px", color: "#111", background: "white", border: "1px solid #e5e7eb", padding: "3px 8px", borderRadius: "6px" }}>{linkCurtoFolder()}</code>
+          <button type="button"
+            onClick={() => { navigator.clipboard.writeText(linkCurtoFolder()); setLinkCopiado(true); setTimeout(() => setLinkCopiado(false), 2000); }}
+            style={{ padding: "5px 12px", border: "1px solid #E8390E", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: linkCopiado ? "#15803d" : "#E8390E", background: "white", cursor: "pointer" }}>
+            {linkCopiado ? "✓ Copiado!" : "Copiar"}
+          </button>
         </div>
       )}
       <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
