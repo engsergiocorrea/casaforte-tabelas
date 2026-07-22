@@ -91,6 +91,10 @@ export interface Empreendimento {
   percentual_sinal_padrao: number
   percentual_chaves_padrao: number
   percentual_intercaladas_padrao?: number
+  // Preço por m² (modo "tabela por m²": valor do imóvel = área × valor_m2).
+  // Quando preenchido, o empreendimento é tratado como venda por m² + entrada
+  // + saldo em financiamento bancário (ex.: Villa Maui, já entregue).
+  valor_m2?: number
   ativo_publico: boolean
   data_prevista_entrega?: string
   created_by?: string
@@ -312,6 +316,7 @@ export const COLUNAS_DISPONIVEIS = [
   { key: 'posicao', label: 'Posição' },
   { key: 'valor_imovel', label: 'Valor do Imóvel' },
   { key: 'valor_sinal', label: 'Entrada / Sinal' },
+  { key: 'saldo_financiamento', label: 'Saldo (Financiamento)' },
   { key: 'quantidade_parcelas', label: 'Parcelas' },
   { key: 'valor_parcela', label: 'Valor Parcela' },
   { key: 'valor_intercalada', label: 'Intercaladas' },

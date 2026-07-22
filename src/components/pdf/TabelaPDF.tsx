@@ -285,22 +285,41 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
 
         {/* Info bar */}
         <View style={styles.infoBar}>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Correção até entrega</Text>
-            <Text style={styles.infoValue}>
-              {INDICE_LABELS[empreendimento.indice_ate_entrega]}
-            </Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Correção após entrega</Text>
-            <Text style={styles.infoValue}>
-              {INDICE_LABELS[empreendimento.indice_apos_entrega]}
-            </Text>
-          </View>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Parcelamento</Text>
-            <Text style={styles.infoValue}>Até {empreendimento.parcelas_padrao}x mensais</Text>
-          </View>
+          {empreendimento.valor_m2 ? (
+            <>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Valor do m²</Text>
+                <Text style={styles.infoValue}>{formatCurrency(empreendimento.valor_m2)}</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Entrada</Text>
+                <Text style={styles.infoValue}>20% do valor</Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Saldo</Text>
+                <Text style={styles.infoValue}>Financiamento bancário</Text>
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Correção até entrega</Text>
+                <Text style={styles.infoValue}>
+                  {INDICE_LABELS[empreendimento.indice_ate_entrega]}
+                </Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Correção após entrega</Text>
+                <Text style={styles.infoValue}>
+                  {INDICE_LABELS[empreendimento.indice_apos_entrega]}
+                </Text>
+              </View>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Parcelamento</Text>
+                <Text style={styles.infoValue}>Até {empreendimento.parcelas_padrao}x mensais</Text>
+              </View>
+            </>
+          )}
           {empreendimento.data_prevista_entrega && (
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Previsão de entrega</Text>
@@ -379,6 +398,9 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
               {colunas.includes('valor_sinal') && (
                 <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Entrada</Text>
               )}
+              {colunas.includes('saldo_financiamento') && (
+                <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Saldo (financ.)</Text>
+              )}
               {colunas.includes('quantidade_parcelas') && colunas.includes('valor_parcela') && (
                 <Text style={[styles.tableHeaderCell, { flex: 1, textAlign: 'right' }]}>Parcelas</Text>
               )}
@@ -441,6 +463,13 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
                   {colunas.includes('valor_sinal') && (
                     <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
                       {formatCurrency(u.valor_sinal)}
+                    </Text>
+                  )}
+                  {colunas.includes('saldo_financiamento') && (
+                    <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
+                      {u.valor_imovel != null && u.valor_sinal != null
+                        ? formatCurrency(Number(u.valor_imovel) - Number(u.valor_sinal))
+                        : '—'}
                     </Text>
                   )}
                   {colunas.includes('quantidade_parcelas') && colunas.includes('valor_parcela') && (

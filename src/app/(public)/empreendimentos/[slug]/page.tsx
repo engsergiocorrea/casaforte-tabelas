@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { TabelaPublica } from "@/components/public/TabelaPublica";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatCurrency } from "@/lib/utils";
 import { INDICE_LABELS, EMPREENDIMENTO_STATUS_LABELS } from "@/types";
 
 export const revalidate = 30;
@@ -168,28 +168,49 @@ export default async function EmpreendimentoPage({ params }: Props) {
             )}
 
             {/* Condições comerciais */}
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',gap:'12px',padding:'16px',background:'#f8fafc',borderRadius:'12px'}}>
-              <div>
-                <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Correção até a entrega</div>
-                <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>
-                  {INDICE_LABELS[empreendimento.indice_ate_entrega as keyof typeof INDICE_LABELS]}
-                </div>
-              </div>
-              <div>
-                <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Correção após entrega</div>
-                <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>
-                  {INDICE_LABELS[empreendimento.indice_apos_entrega as keyof typeof INDICE_LABELS]}
-                </div>
-              </div>
-              {empreendimento.parcelas_padrao > 0 && (
+            {empreendimento.valor_m2 ? (
+              // Modo "tabela por m²" (ex.: Villa Maui, entregue): m² + 20% de
+              // entrada + saldo em financiamento bancário.
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',gap:'12px',padding:'16px',background:'#f8fafc',borderRadius:'12px'}}>
                 <div>
-                  <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Parcelamento padrão</div>
+                  <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Valor do m²</div>
                   <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>
-                    Até {empreendimento.parcelas_padrao}x mensais
+                    {formatCurrency(empreendimento.valor_m2)}
                   </div>
                 </div>
-              )}
-            </div>
+                <div>
+                  <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Entrada</div>
+                  <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>20% do valor</div>
+                </div>
+                <div>
+                  <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Saldo</div>
+                  <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>Financiamento bancário</div>
+                </div>
+              </div>
+            ) : (
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',gap:'12px',padding:'16px',background:'#f8fafc',borderRadius:'12px'}}>
+                <div>
+                  <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Correção até a entrega</div>
+                  <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>
+                    {INDICE_LABELS[empreendimento.indice_ate_entrega as keyof typeof INDICE_LABELS]}
+                  </div>
+                </div>
+                <div>
+                  <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Correção após entrega</div>
+                  <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>
+                    {INDICE_LABELS[empreendimento.indice_apos_entrega as keyof typeof INDICE_LABELS]}
+                  </div>
+                </div>
+                {empreendimento.parcelas_padrao > 0 && (
+                  <div>
+                    <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Parcelamento padrão</div>
+                    <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>
+                      Até {empreendimento.parcelas_padrao}x mensais
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {empreendimento.observacoes_publicas && (
               <div style={{marginTop:'16px',padding:'12px',background:'#fffbeb',border:'1px solid #fde68a',borderRadius:'8px'}}>

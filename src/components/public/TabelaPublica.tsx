@@ -211,6 +211,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                   {colunasVisiveis.includes('posicao') && <th style={thStyle()}>Posição</th>}
                   {colunasVisiveis.includes('valor_imovel') && <th style={thStyle('right')}>Valor</th>}
                   {colunasVisiveis.includes('valor_sinal') && <th style={thStyle('right')}>Entrada</th>}
+                  {colunasVisiveis.includes('saldo_financiamento') && <th style={thStyle('right')}>Saldo (financ.)</th>}
                   {colunasVisiveis.includes('quantidade_parcelas') && colunasVisiveis.includes('valor_parcela') && <th style={thStyle('right')}>Parcelas</th>}
                   {colunasVisiveis.includes('valor_intercalada') && <th style={thStyle('right')}>Interc.</th>}
                   {colunasVisiveis.includes('valor_chaves') && <th style={thStyle('right')}>Chaves</th>}
@@ -275,6 +276,15 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                                 {unidade.percentual_sinal && <span style={{fontSize:'10px',color:'#9ca3af',marginLeft:'3px'}}>({unidade.percentual_sinal}%)</span>}
                               </>
                             )}
+                          </span>
+                        </td>
+                      )}
+                      {colunasVisiveis.includes('saldo_financiamento') && (
+                        <td style={tdStyle('right')}>
+                          <span style={{color:'#6b7280'}}>
+                            {ocultarValores || unidade.valor_imovel == null || unidade.valor_sinal == null
+                              ? '—'
+                              : fmtC(Number(unidade.valor_imovel) - Number(unidade.valor_sinal))}
                           </span>
                         </td>
                       )}

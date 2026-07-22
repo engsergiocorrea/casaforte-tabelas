@@ -233,9 +233,15 @@ export default function EditarEmpreendimentoPage({
 
   return (
     <div>
-      <div style={{ marginBottom: "1.5rem" }}>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111" }}>Editar Empreendimento</h1>
-        <p style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{form.nome}</p>
+      <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+        <div>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111" }}>Editar Empreendimento</h1>
+          <p style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{form.nome}</p>
+        </div>
+        <a href={`/admin/empreendimentos/${id}/tabela-m2`}
+          style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", background: "#111", color: "white", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
+          📐 Tabela por m² (m² + áreas)
+        </a>
       </div>
 
       {error && (
