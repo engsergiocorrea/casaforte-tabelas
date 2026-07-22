@@ -37,9 +37,12 @@ export default function EditarEmpreendimentoPage({
     const { error: uploadError } = await supabase.storage
       .from('empreendimentos')
       .upload(path, file, { upsert: true });
-    if (!uploadError) {
+    if (uploadError) {
+      setError(`Falha ao enviar a imagem: ${uploadError.message}`);
+    } else {
       const { data } = supabase.storage.from('empreendimentos').getPublicUrl(path);
       setForm((f: any) => ({ ...f, [field]: data.publicUrl }));
+      setError('');
     }
     setUploading(false);
   }
@@ -54,10 +57,13 @@ export default function EditarEmpreendimentoPage({
     const { error: uploadError } = await supabase.storage
       .from('empreendimentos')
       .upload(path, file, { upsert: true, contentType: file.type || 'application/pdf' });
-    if (!uploadError) {
+    if (uploadError) {
+      setError(`Falha ao enviar o folder: ${uploadError.message}`);
+    } else {
       const { data } = supabase.storage.from('empreendimentos').getPublicUrl(path);
       // cache-busting para o novo arquivo aparecer na hora (URL pública é estável)
       setForm((f: any) => ({ ...f, [field]: `${data.publicUrl}?v=${Date.now()}` }));
+      setError('');
     }
     e.target.value = '';
     setUploading(false);
