@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { TabelaPublica } from "@/components/public/TabelaPublica";
-import { formatDate, formatCurrency } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import { INDICE_LABELS, EMPREENDIMENTO_STATUS_LABELS } from "@/types";
 
 export const revalidate = 30;
@@ -172,12 +172,6 @@ export default async function EmpreendimentoPage({ params }: Props) {
               // Modo "tabela por m²" (ex.: Villa Maui, entregue): m² + 20% de
               // entrada + saldo em financiamento bancário.
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',gap:'12px',padding:'16px',background:'#f8fafc',borderRadius:'12px'}}>
-                <div>
-                  <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Valor do m²</div>
-                  <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>
-                    {formatCurrency(empreendimento.valor_m2)}
-                  </div>
-                </div>
                 <div>
                   <div style={{fontSize:'12px',color:'#9ca3af',marginBottom:'2px'}}>Entrada</div>
                   <div style={{fontSize:'14px',fontWeight:'600',color:'#374151'}}>20% do valor</div>

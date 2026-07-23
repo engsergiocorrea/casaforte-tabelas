@@ -288,10 +288,6 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
           {empreendimento.valor_m2 ? (
             <>
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Valor do m²</Text>
-                <Text style={styles.infoValue}>{formatCurrency(empreendimento.valor_m2)}</Text>
-              </View>
-              <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Entrada</Text>
                 <Text style={styles.infoValue}>20% do valor</Text>
               </View>
