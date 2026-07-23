@@ -58,7 +58,9 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
   const unidadesFiltradas = useMemo(() => {
     return unidades.filter(u => {
       if (!mostrarVendidas && u.status === 'vendida') return false
-      if (u.status === 'bloqueada' || u.status === 'indisponivel') return false
+      // Indisponíveis e vendidas aparecem (metragem + condições, sem valores);
+      // só as bloqueadas ficam ocultas.
+      if (u.status === 'bloqueada') return false
       if (filtroStatus !== 'todos' && u.status !== filtroStatus) return false
       if (filtroPavimento !== 'todos' && u.pavimento !== filtroPavimento) return false
       if (filtroBloco !== 'todos' && u.bloco !== filtroBloco) return false
@@ -223,11 +225,14 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                 {items.map(unidade => {
                   const isReservada = unidade.status === 'reservada'
                   const isVendida = unidade.status === 'vendida'
+                  const isIndisponivel = unidade.status === 'indisponivel'
+                  // Unidades não disponíveis mostram só metragem (valores ocultos).
                   const ocultarValores =
+                    isIndisponivel ||
                     (isReservada && !mostrarValoresReservadas) ||
                     (isVendida && !configuracao?.mostrar_valores_vendidas)
-                  const rowBg = isReservada ? '#fffbeb' : isVendida ? '#fef2f2' : 'transparent'
-                  const rowOpacity = isVendida ? 0.72 : 1
+                  const rowBg = isReservada ? '#fffbeb' : isVendida ? '#fef2f2' : isIndisponivel ? '#f9fafb' : 'transparent'
+                  const rowOpacity = (isVendida || isIndisponivel) ? 0.72 : 1
                   const linkProposta = '/empreendimentos/' + slugEmp + '/proposta/' + unidade.id
 
                   return (

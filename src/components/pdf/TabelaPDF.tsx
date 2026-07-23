@@ -243,7 +243,8 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
 
   const unidadesFiltradas = unidades.filter(u => {
     if (!mostrarVendidas && u.status === 'vendida') return false
-    if (u.status === 'bloqueada' || u.status === 'indisponivel') return false
+    // Indisponíveis/vendidas aparecem (só metragem); bloqueadas ficam ocultas.
+    if (u.status === 'bloqueada') return false
     return true
   })
 
@@ -415,6 +416,11 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
             {items.map((u, idx) => {
               const statusColor = STATUS_COLORS_PDF[u.status] ?? '#9ca3af'
               const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc'
+              // Não disponíveis: só metragem, sem valores.
+              const ocultarValores =
+                u.status === 'indisponivel' ||
+                (u.status === 'vendida' && !configuracao?.mostrar_valores_vendidas) ||
+                (u.status === 'reservada' && !configuracao?.mostrar_valores_reservadas)
 
               return (
                 <View
@@ -453,38 +459,38 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
                   )}
                   {colunas.includes('valor_imovel') && (
                     <Text style={[styles.tableCellBold, { flex: 1, textAlign: 'right' }]}>
-                      {formatCurrency(u.valor_imovel)}
+                      {ocultarValores ? '—' : formatCurrency(u.valor_imovel)}
                     </Text>
                   )}
                   {colunas.includes('valor_sinal') && (
                     <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
-                      {formatCurrency(u.valor_sinal)}
+                      {ocultarValores ? '—' : formatCurrency(u.valor_sinal)}
                     </Text>
                   )}
                   {colunas.includes('saldo_financiamento') && (
                     <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
-                      {u.valor_imovel != null && u.valor_sinal != null
+                      {!ocultarValores && u.valor_imovel != null && u.valor_sinal != null
                         ? formatCurrency(Number(u.valor_imovel) - Number(u.valor_sinal))
                         : '—'}
                     </Text>
                   )}
                   {colunas.includes('quantidade_parcelas') && colunas.includes('valor_parcela') && (
                     <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
-                      {u.quantidade_parcelas && u.valor_parcela
+                      {!ocultarValores && u.quantidade_parcelas && u.valor_parcela
                         ? `${u.quantidade_parcelas}x ${formatCurrency(u.valor_parcela)}`
                         : '—'}
                     </Text>
                   )}
                   {colunas.includes('valor_intercalada') && (
                     <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
-                      {u.quantidade_intercaladas && u.valor_intercalada
+                      {!ocultarValores && u.quantidade_intercaladas && u.valor_intercalada
                         ? `${u.quantidade_intercaladas}x ${formatCurrency(u.valor_intercalada)}`
                         : '—'}
                     </Text>
                   )}
                   {colunas.includes('valor_chaves') && (
                     <Text style={[styles.tableCell, { flex: 1, textAlign: 'right' }]}>
-                      {formatCurrency(u.valor_chaves)}
+                      {ocultarValores ? '—' : formatCurrency(u.valor_chaves)}
                     </Text>
                   )}
                   {colunas.includes('status') && (
