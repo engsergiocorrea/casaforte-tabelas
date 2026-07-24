@@ -74,6 +74,12 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
         )
       }
       return true
+    }).sort((a, b) => {
+      // Ordem numérica da unidade (ex.: 1, 2, 10, 101 — não 1, 10, 101, 2).
+      const na = parseInt(String(a.unidade).replace(/\D/g, ''), 10)
+      const nb = parseInt(String(b.unidade).replace(/\D/g, ''), 10)
+      if (isNaN(na) || isNaN(nb)) return String(a.unidade).localeCompare(String(b.unidade), 'pt-BR', { numeric: true })
+      return na - nb
     })
   }, [unidades, filtroStatus, filtroPavimento, filtroBloco, filtroQuartos, busca, mostrarVendidas])
 

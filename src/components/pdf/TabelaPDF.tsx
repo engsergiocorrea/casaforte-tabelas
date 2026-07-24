@@ -246,6 +246,12 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
     // Indisponíveis/vendidas aparecem (só metragem); bloqueadas ficam ocultas.
     if (u.status === 'bloqueada') return false
     return true
+  }).sort((a, b) => {
+    // Ordem numérica da unidade (1, 2, 10, 101 — não 1, 10, 101, 2).
+    const na = parseInt(String(a.unidade).replace(/\D/g, ''), 10)
+    const nb = parseInt(String(b.unidade).replace(/\D/g, ''), 10)
+    if (isNaN(na) || isNaN(nb)) return String(a.unidade).localeCompare(String(b.unidade), 'pt-BR', { numeric: true })
+    return na - nb
   })
 
   const grupos = agruparPor
