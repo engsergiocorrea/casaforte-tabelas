@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { exigirPapel } from '@/lib/auth/guard'
 
 // Salva a "tabela por m²": o valor do m² do empreendimento e a área de cada
 // unidade. A partir disso calcula e grava, por unidade:
@@ -11,9 +11,9 @@ const round2 = (n: number) => Math.round(n * 100) / 100
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ erro: 'Não autenticado.' }, { status: 401 })
+    const g = await exigirPapel()
+    if (g.erro) return g.erro
+    const { admin } = g
 
     const { empreendimento_id, valor_m2, unidades } = await req.json()
     if (!empreendimento_id || !Array.isArray(unidades)) {
@@ -23,8 +23,6 @@ export async function POST(req: NextRequest) {
     if (vm2 != null && (!isFinite(vm2) || vm2 < 0)) {
       return NextResponse.json({ erro: 'Valor do m² inválido.' }, { status: 400 })
     }
-
-    const admin = createAdminClient()
     const { error: empErr } = await admin
       .from('empreendimentos')
       .update({ valor_m2: vm2, percentual_sinal_padrao: 20 })

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { exigirPapel } from '@/lib/auth/guard'
 
 // Gera uma URL assinada para o navegador subir arquivos do empreendimento
 // (folder em PDF, imagem de capa, logo) direto para o Storage. A URL é criada
@@ -14,9 +14,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ erro: 'Não autenticado.' }, { status: 401 })
+    const g = await exigirPapel()
+    if (g.erro) return g.erro
+    const { admin } = g
 
     const { id, field, ext } = await req.json()
     const e = String(ext ?? '').toLowerCase()
@@ -25,7 +25,6 @@ export async function POST(req: NextRequest) {
     }
 
     const path = `${id}-${field}.${e}`
-    const admin = createAdminClient()
     const { data, error } = await admin.storage
       .from('empreendimentos')
       .createSignedUploadUrl(path, { upsert: true })
