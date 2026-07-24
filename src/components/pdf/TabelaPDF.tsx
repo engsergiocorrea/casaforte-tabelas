@@ -286,7 +286,7 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
 
         {/* Info bar */}
         <View style={styles.infoBar}>
-          {empreendimento.valor_m2 ? (
+          {(empreendimento.valor_m2 || colunas.includes('saldo_financiamento')) ? (
             <>
               <View style={styles.infoItem}>
                 <Text style={styles.infoLabel}>Entrada</Text>

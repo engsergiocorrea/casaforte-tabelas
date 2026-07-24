@@ -168,7 +168,7 @@ export default async function EmpreendimentoPage({ params }: Props) {
             )}
 
             {/* Condições comerciais */}
-            {empreendimento.valor_m2 ? (
+            {(empreendimento.valor_m2 || configuracao?.colunas_visiveis?.includes('saldo_financiamento')) ? (
               // Modo "tabela por m²" (ex.: Villa Maui, entregue): m² + 20% de
               // entrada + saldo em financiamento bancário.
               <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(160px, 1fr))',gap:'12px',padding:'16px',background:'#f8fafc',borderRadius:'12px'}}>
