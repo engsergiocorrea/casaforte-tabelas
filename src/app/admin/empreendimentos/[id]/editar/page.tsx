@@ -99,19 +99,29 @@ export default function EditarEmpreendimentoPage({
     setSaving(true);
     setError("");
 
-    // Valida soma dos percentuais
-    const somaPerc = (Number(form.percentual_sinal_padrao) || 0) +
-      (Number(form.percentual_mensais_padrao) || 0) +
-      (Number(form.percentual_intercaladas_padrao) || 0) +
-      (Number(form.percentual_chaves_padrao) || 0)
-    if (somaPerc > 0 && somaPerc !== 100) {
-      setError(`A soma dos percentuais deve ser 100%. Atual: ${somaPerc}%`)
-      setSaving(false)
-      return
+    // Valida soma dos percentuais — só no modelo padrão (parcelado). No modelo
+    // por m² (valor_m2 preenchido, ex.: Villa Maui) esses percentuais não se
+    // aplicam, então a soma não precisa fechar 100%.
+    if (!form.valor_m2) {
+      const somaPerc = (Number(form.percentual_sinal_padrao) || 0) +
+        (Number(form.percentual_mensais_padrao) || 0) +
+        (Number(form.percentual_intercaladas_padrao) || 0) +
+        (Number(form.percentual_chaves_padrao) || 0)
+      if (somaPerc > 0 && somaPerc !== 100) {
+        setError(`A soma dos percentuais deve ser 100%. Atual: ${somaPerc}%`)
+        setSaving(false)
+        return
+      }
     }
 
+    // Campos vazios ("") viram null — senão o Postgres recusa colunas numéricas
+    // ("invalid input syntax for type numeric: \"\"").
+    const payload = Object.fromEntries(
+      Object.entries(form).map(([k, v]) => [k, v === "" ? null : v])
+    );
+
     const supabase = createClient();
-    const { error: err } = await supabase.from("empreendimentos").update(form).eq("id", id);
+    const { error: err } = await supabase.from("empreendimentos").update(payload).eq("id", id);
     if (err) { setError(err.message); setSaving(false); return; }
     // Recarga completa (não client-side) para evitar tela branca por "skew" de
     // deploy e garantir que a lista venha com os dados atualizados.
