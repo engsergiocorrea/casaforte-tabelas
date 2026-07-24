@@ -123,7 +123,6 @@ export default function PropostaPage() {
       return
     }
 
-    const supabase = createClient()
     const {
       comprador1_nascimento,
       conjuge_nascimento,
@@ -171,8 +170,16 @@ export default function PropostaPage() {
       comprador2_nascimento: temSegundoComprador && comprador2_nascimento ? comprador2_nascimento : null,
     }
 
-    const { data: proposta, error: err } = await supabase.from('propostas').insert([data]).select().single()
-    if (err) { setError(err.message); setSaving(false); return }
+    // Envia via rota server-side (service role) — a chave pública não tem mais
+    // acesso à tabela de propostas, protegendo os dados dos clientes.
+    const resp = await fetch('/api/propostas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    const info = await resp.json().catch(() => ({}))
+    if (!resp.ok) { setError(info?.erro || 'Falha ao enviar a proposta.'); setSaving(false); return }
+    const proposta = { id: info.id as string }
 
     // Dispara WhatsApp sem bloquear o usuário
     fetch('/api/whatsapp', {
