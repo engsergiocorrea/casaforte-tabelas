@@ -7,7 +7,10 @@ import { TabelaPublica } from "@/components/public/TabelaPublica";
 import { formatDate } from "@/lib/utils";
 import { INDICE_LABELS, EMPREENDIMENTO_STATUS_LABELS } from "@/types";
 
-export const revalidate = 30;
+// Sempre renderiza no servidor com dados atuais e envia no-store, para o
+// navegador do corretor não exibir uma versão antiga (preços/unidades sempre
+// atualizados). Antes usava revalidate=30, que o navegador guardava.
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
