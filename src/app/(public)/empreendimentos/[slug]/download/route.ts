@@ -3,6 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 
+// Sempre gera o PDF com os dados atuais (nunca cacheia no servidor).
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -26,7 +29,13 @@ export async function GET(
     .order('pavimento')
     .order('unidade')
 
-  const unidadesFiltradas = (unidades ?? []).filter(u => u.status !== 'bloqueada' && u.status !== 'indisponivel')
+  const numUnidade = (u: any) => {
+    const n = parseInt(String(u.unidade).replace(/\D/g, ''), 10)
+    return isNaN(n) ? Infinity : n
+  }
+  const unidadesFiltradas = (unidades ?? [])
+    .filter(u => u.status !== 'bloqueada' && u.status !== 'indisponivel')
+    .sort((a, b) => numUnidade(a) - numUnidade(b)) // ordem numérica (1,2,10,101)
 
   const fmt = (v: any) => v ? `R$${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
 
@@ -257,6 +266,8 @@ export async function GET(
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `inline; filename="tabela-${slug}.pdf"`,
+      // Não deixa o navegador guardar o PDF antigo — sempre baixa o atual.
+      'Cache-Control': 'no-store, max-age=0, must-revalidate',
     },
   })
 }
