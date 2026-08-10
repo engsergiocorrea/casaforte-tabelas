@@ -29,12 +29,24 @@ export async function GET(
     .order('pavimento')
     .order('unidade')
 
+  // Configuração da tabela: define se o empreendimento usa o modelo de
+  // financiamento (20% entrada + saldo) — mesmo critério da página pública.
+  const { data: configuracao } = await supabase
+    .from('configuracoes_tabela')
+    .select('colunas_visiveis')
+    .eq('empreendimento_id', empreendimento.id)
+    .maybeSingle()
+  const modoFinanciamento = Boolean(
+    empreendimento.valor_m2 || (configuracao?.colunas_visiveis ?? []).includes('saldo_financiamento')
+  )
+
   const numUnidade = (u: any) => {
     const n = parseInt(String(u.unidade).replace(/\D/g, ''), 10)
     return isNaN(n) ? Infinity : n
   }
+  // Bloqueadas ficam ocultas; indisponíveis/vendidas aparecem (só metragem).
   const unidadesFiltradas = (unidades ?? [])
-    .filter(u => u.status !== 'bloqueada' && u.status !== 'indisponivel')
+    .filter(u => u.status !== 'bloqueada')
     .sort((a, b) => numUnidade(a) - numUnidade(b)) // ordem numérica (1,2,10,101)
 
   const fmt = (v: any) => v ? `R$${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
@@ -45,11 +57,12 @@ export async function GET(
     'pre_fixado': 'Pré-fixado', 'sem_correcao': 'Sem correção',
   }
 
-  const statusLabel: Record<string, string> = { disponivel: 'Disponível', reservada: 'Reservada', vendida: 'Vendida' }
+  const statusLabel: Record<string, string> = { disponivel: 'Disponível', reservada: 'Reservada', vendida: 'Vendida', indisponivel: 'Indisponível' }
   const statusColor: Record<string, any> = {
     disponivel: rgb(0.08, 0.5, 0.24),
     reservada: rgb(0.7, 0.28, 0.04),
     vendida: rgb(0.73, 0.07, 0.07),
+    indisponivel: rgb(0.42, 0.45, 0.5),
   }
 
   const pdfDoc = await PDFDocument.create()
@@ -128,12 +141,16 @@ export async function GET(
   y -= 4
   page.drawRectangle({ x: mL, y: y - 6, width: contentW, height: 18, color: escuro })
   page.drawRectangle({ x: mL, y: y - 6, width: 3, height: 18, color: vermelho })
-  const conds = [
+  const conds = (modoFinanciamento ? [
+    { label: 'Entrada:', value: '20% do valor' },
+    { label: 'Saldo:', value: 'Financiamento bancário' },
+    empreendimento.data_prevista_entrega ? { label: 'Entrega prev.:', value: new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR') } : null,
+  ] : [
     { label: 'Correção até entrega:', value: indiceLabel[empreendimento.indice_ate_entrega] ?? empreendimento.indice_ate_entrega ?? '-' },
     { label: 'Correção após entrega:', value: indiceLabel[empreendimento.indice_apos_entrega] ?? empreendimento.indice_apos_entrega ?? '-' },
     { label: 'Parcelamento:', value: `até ${empreendimento.parcelas_padrao ?? 60}x mensais` },
     empreendimento.data_prevista_entrega ? { label: 'Entrega prev.:', value: new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR') } : null,
-  ].filter(Boolean) as { label: string, value: string }[]
+  ]).filter(Boolean) as { label: string, value: string }[]
   conds.forEach((c, i) => {
     const lx = mL + 6 + i * (contentW / 4)
     page.drawText(c.label, { x: lx, y: y + 5, size: 7, font: fontR, color: cinza })
@@ -143,7 +160,15 @@ export async function GET(
 
   // Colunas
   const temAreaExt = unidadesFiltradas.some(u => u.area_privativa_externa)
-  const cols = temAreaExt ? [
+  const cols = modoFinanciamento ? [
+    { label: 'Unidade',        w: 60,  align: 'left'   },
+    { label: 'Pavimento',      w: 120, align: 'left'   },
+    { label: 'Área',           w: 70,  align: 'right'  },
+    { label: 'Valor',          w: 140, align: 'right'  },
+    { label: 'Entrada (20%)',  w: 130, align: 'right'  },
+    { label: 'Saldo (financ.)',w: 150, align: 'right'  },
+    { label: 'Status',         w: 90,  align: 'center' },
+  ] : temAreaExt ? [
     { label: 'Unidade',    w: 44,  align: 'left'   },
     { label: 'Pavimento',  w: 92,  align: 'left'   },
     { label: 'Área Priv.', w: 42,  align: 'right'  },
@@ -212,7 +237,15 @@ export async function GET(
     // status, sem expor o valor negociado.
     const mostrarValor = u.status === 'disponivel'
 
-    const vals = temAreaExt ? [
+    const vals = modoFinanciamento ? [
+      u.unidade ?? '-',
+      u.pavimento ?? '-',
+      u.area_construida ? u.area_construida + 'm²' : '-',
+      mostrarValor && u.valor_imovel ? fmt(u.valor_imovel) : '-',
+      mostrarValor && u.valor_sinal ? fmt(u.valor_sinal) : '-',
+      mostrarValor && u.valor_imovel != null && u.valor_sinal != null ? fmt(Number(u.valor_imovel) - Number(u.valor_sinal)) : '-',
+      statusLabel[u.status] ?? u.status,
+    ] : temAreaExt ? [
       u.unidade ?? '-',
       u.pavimento ?? '-',
       u.area_construida ? u.area_construida + 'm²' : '-',
@@ -243,7 +276,7 @@ export async function GET(
     vals.forEach((val, i) => {
       const col = cols[i]
       const isStatus = i === vals.length - 1
-      const isValor = temAreaExt ? i === 6 : i === 5
+      const isValor = modoFinanciamento ? i === 3 : temAreaExt ? i === 6 : i === 5
       const font = (i === 0 || isValor) ? fontB : fontR
       const color = isStatus ? (statusColor[u.status] ?? preto) : isValor ? preto : cinza
       const size = 8
