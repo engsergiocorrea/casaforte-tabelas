@@ -5,7 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { TabelaPublica } from "@/components/public/TabelaPublica";
 import { formatDate } from "@/lib/utils";
-import { INDICE_LABELS, EMPREENDIMENTO_STATUS_LABELS } from "@/types";
+import { INDICE_LABELS, EMPREENDIMENTO_STATUS_LABELS, type Unidade } from "@/types";
+import { COLUNAS_UNIDADE_PUBLICA } from "@/lib/unidades-publicas";
 
 // Sempre renderiza no servidor com dados atuais e envia no-store, para o
 // navegador do corretor não exibir uma versão antiga (preços/unidades sempre
@@ -51,10 +52,11 @@ export default async function EmpreendimentoPage({ params }: Props) {
 
   const { data: unidades } = await supabase
     .from("unidades")
-    .select("*")
+    .select(COLUNAS_UNIDADE_PUBLICA)
     .eq("empreendimento_id", empreendimento.id)
     .order("pavimento", { ascending: true })
-    .order("unidade", { ascending: true });
+    .order("unidade", { ascending: true })
+    .returns<Unidade[]>();
 
   const { data: configuracao } = await supabase
     .from("configuracoes_tabela")

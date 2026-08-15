@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
+import { COLUNAS_UNIDADE_PUBLICA } from '@/lib/unidades-publicas'
 
 // Sempre gera o PDF com os dados atuais (nunca cacheia no servidor).
 export const dynamic = 'force-dynamic'
@@ -24,10 +25,11 @@ export async function GET(
 
   const { data: unidades } = await supabase
     .from('unidades')
-    .select('*')
+    .select(COLUNAS_UNIDADE_PUBLICA)
     .eq('empreendimento_id', empreendimento.id)
     .order('pavimento')
     .order('unidade')
+    .returns<any[]>()
 
   // Configuração da tabela: define se o empreendimento usa o modelo de
   // financiamento (20% entrada + saldo) — mesmo critério da página pública.

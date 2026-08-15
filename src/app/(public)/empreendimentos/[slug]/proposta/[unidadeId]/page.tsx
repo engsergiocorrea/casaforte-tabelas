@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 import { lerCorretorDoNavegador } from '@/lib/corretor'
+import { COLUNAS_UNIDADE_PUBLICA } from '@/lib/unidades-publicas'
 import UploadDocumentosProposta from './UploadDocumentosProposta'
 
 // Periodicidade textual (ex.: "semestrais") → nº de meses, e o inverso.
@@ -64,8 +65,9 @@ export default function PropostaPage() {
     const supabase = createClient()
     Promise.all([
       supabase.from('empreendimentos').select('*').eq('slug', slug).single(),
-      supabase.from('unidades').select('*').eq('id', unidadeId).single(),
-    ]).then(([{ data: emp }, { data: uni }]) => {
+      supabase.from('unidades').select(COLUNAS_UNIDADE_PUBLICA).eq('id', unidadeId).single(),
+    ]).then(([{ data: emp }, uniRes]) => {
+      const uni = uniRes.data as any
       setEmpreendimento(emp)
       setUnidade(uni)
       if (uni) {
