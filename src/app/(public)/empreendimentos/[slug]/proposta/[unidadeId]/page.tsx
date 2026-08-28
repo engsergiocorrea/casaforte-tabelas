@@ -46,11 +46,15 @@ export default function PropostaPage() {
     comprador1_nome: '', comprador1_cpf: '', comprador1_rg: '',
     comprador1_profissao: '', comprador1_email: '', comprador1_telefone: '',
     comprador1_nascimento: '', comprador1_estado_civil: 'solteiro',
+    comprador1_cep: '', comprador1_endereco: '', comprador1_nacionalidade: 'Brasileiro(a)', comprador1_naturalidade: '',
     conjuge_nome: '', conjuge_cpf: '', conjuge_rg: '',
     conjuge_profissao: '', conjuge_email: '', conjuge_telefone: '', conjuge_nascimento: '',
+    conjuge_cep: '', conjuge_endereco: '', conjuge_nacionalidade: 'Brasileiro(a)', conjuge_naturalidade: '',
     comprador2_nome: '', comprador2_cpf: '', comprador2_rg: '',
     comprador2_profissao: '', comprador2_email: '', comprador2_telefone: '',
     comprador2_nascimento: '', comprador2_estado_civil: 'solteiro',
+    comprador2_cep: '', comprador2_endereco: '', comprador2_nacionalidade: 'Brasileiro(a)', comprador2_naturalidade: '',
+    data_primeira_parcela: '',
     corretor_nome: '', corretor_cpf_cnpj: '', corretor_creci: '',
     corretor_email: '', corretor_telefone: '', imobiliaria_nome: '',
     valor_proposto: '', valor_sinal: '', sinal_quantidade_parcelas: '', quantidade_parcelas: '',
@@ -163,6 +167,10 @@ export default function PropostaPage() {
       conjuge_email: casadoOuUniao ? form.conjuge_email : null,
       conjuge_telefone: casadoOuUniao ? form.conjuge_telefone : null,
       conjuge_nascimento: casadoOuUniao && conjuge_nascimento ? conjuge_nascimento : null,
+      conjuge_cep: casadoOuUniao ? form.conjuge_cep : null,
+      conjuge_endereco: casadoOuUniao ? form.conjuge_endereco : null,
+      conjuge_nacionalidade: casadoOuUniao ? form.conjuge_nacionalidade : null,
+      conjuge_naturalidade: casadoOuUniao ? form.conjuge_naturalidade : null,
       comprador2_nome: temSegundoComprador ? form.comprador2_nome : null,
       comprador2_cpf: temSegundoComprador ? form.comprador2_cpf : null,
       comprador2_rg: temSegundoComprador ? form.comprador2_rg : null,
@@ -170,6 +178,12 @@ export default function PropostaPage() {
       comprador2_email: temSegundoComprador ? form.comprador2_email : null,
       comprador2_telefone: temSegundoComprador ? form.comprador2_telefone : null,
       comprador2_nascimento: temSegundoComprador && comprador2_nascimento ? comprador2_nascimento : null,
+      comprador2_estado_civil: temSegundoComprador ? form.comprador2_estado_civil : null,
+      comprador2_cep: temSegundoComprador ? form.comprador2_cep : null,
+      comprador2_endereco: temSegundoComprador ? form.comprador2_endereco : null,
+      comprador2_nacionalidade: temSegundoComprador ? form.comprador2_nacionalidade : null,
+      comprador2_naturalidade: temSegundoComprador ? form.comprador2_naturalidade : null,
+      data_primeira_parcela: form.data_primeira_parcela || null,
     }
 
     // Envia via rota server-side (service role) — a chave pública não tem mais
@@ -216,6 +230,24 @@ export default function PropostaPage() {
   const inp = (name: string, type = 'text', placeholder = '', required = false) => (
     <input name={name} type={type} placeholder={placeholder} required={required}
       value={(form as any)[name] ?? ''} onChange={handleChange}
+      style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', background: 'white', boxSizing: 'border-box' }} />
+  )
+  // CEP → autofill do endereço (ViaCEP, espelha os Correios). Preenche rua,
+  // bairro e cidade/UF; o usuário completa o número.
+  async function buscarCep(prefixo: 'comprador1' | 'conjuge' | 'comprador2') {
+    const cep = String((form as any)[`${prefixo}_cep`] ?? '').replace(/\D/g, '')
+    if (cep.length !== 8) return
+    try {
+      const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      const j = await r.json()
+      if (!j || j.erro) return
+      const end = [j.logradouro, j.bairro, [j.localidade, j.uf].filter(Boolean).join(' - ')].filter(Boolean).join(', ')
+      if (end) setForm((f) => ({ ...f, [`${prefixo}_endereco`]: end }))
+    } catch { /* offline / cep inválido: ignora */ }
+  }
+  const cepInp = (prefixo: 'comprador1' | 'conjuge' | 'comprador2') => (
+    <input name={`${prefixo}_cep`} type="text" placeholder="00000-000"
+      value={(form as any)[`${prefixo}_cep`] ?? ''} onChange={handleChange} onBlur={() => buscarCep(prefixo)}
       style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', background: 'white', boxSizing: 'border-box' }} />
   )
   const sel = (name: string, opts: { value: string, label: string }[]) => (
@@ -301,6 +333,10 @@ export default function PropostaPage() {
                 <div>{lbl('E-mail')}{inp('comprador1_email', 'email')}</div>
                 <div>{lbl('Telefone/WhatsApp')}{inp('comprador1_telefone', 'tel')}</div>
                 <div>{lbl('Estado civil')}{sel('comprador1_estado_civil', [{ value: 'solteiro', label: 'Solteiro(a)' }, { value: 'casado', label: 'Casado(a)' }, { value: 'divorciado', label: 'Divorciado(a)' }, { value: 'viuvo', label: 'Viúvo(a)' }, { value: 'uniao_estavel', label: 'União estável' }])}</div>
+                <div>{lbl('Nacionalidade')}{inp('comprador1_nacionalidade')}</div>
+                <div>{lbl('Naturalidade')}{inp('comprador1_naturalidade')}</div>
+                <div>{lbl('CEP (preenche o endereço)')}{cepInp('comprador1')}</div>
+                <div style={full}>{lbl('Endereço (rua, nº, bairro, cidade/UF)')}{inp('comprador1_endereco', 'text', 'preenchido pelo CEP; complete o número')}</div>
               </div>
               {(form.comprador1_estado_civil === 'casado' || form.comprador1_estado_civil === 'uniao_estavel') && (
                 <div style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
@@ -313,6 +349,10 @@ export default function PropostaPage() {
                     <div>{lbl('Data de nascimento')}{inp('conjuge_nascimento', 'date')}</div>
                     <div>{lbl('E-mail')}{inp('conjuge_email', 'email')}</div>
                     <div>{lbl('Telefone')}{inp('conjuge_telefone', 'tel')}</div>
+                    <div>{lbl('Nacionalidade')}{inp('conjuge_nacionalidade')}</div>
+                    <div>{lbl('Naturalidade')}{inp('conjuge_naturalidade')}</div>
+                    <div>{lbl('CEP')}{cepInp('conjuge')}</div>
+                    <div style={full}>{lbl('Endereço (rua, nº, bairro, cidade/UF)')}{inp('conjuge_endereco', 'text', 'preenchido pelo CEP; complete o número')}</div>
                   </div>
                 </div>
               )}
@@ -333,6 +373,11 @@ export default function PropostaPage() {
                     <div>{lbl('Data de nascimento')}{inp('comprador2_nascimento', 'date')}</div>
                     <div>{lbl('E-mail')}{inp('comprador2_email', 'email')}</div>
                     <div>{lbl('Telefone')}{inp('comprador2_telefone', 'tel')}</div>
+                    <div>{lbl('Estado civil')}{sel('comprador2_estado_civil', [{ value: 'solteiro', label: 'Solteiro(a)' }, { value: 'casado', label: 'Casado(a)' }, { value: 'divorciado', label: 'Divorciado(a)' }, { value: 'viuvo', label: 'Viúvo(a)' }, { value: 'uniao_estavel', label: 'União estável' }])}</div>
+                    <div>{lbl('Nacionalidade')}{inp('comprador2_nacionalidade')}</div>
+                    <div>{lbl('Naturalidade')}{inp('comprador2_naturalidade')}</div>
+                    <div>{lbl('CEP')}{cepInp('comprador2')}</div>
+                    <div style={full}>{lbl('Endereço (rua, nº, bairro, cidade/UF)')}{inp('comprador2_endereco', 'text', 'preenchido pelo CEP; complete o número')}</div>
                   </div>
                 </div>
               )}
@@ -378,6 +423,7 @@ export default function PropostaPage() {
                 {sinalParcelado && <div>{lbl('Qtd. parcelas do sinal (mensais)')}{inp('sinal_quantidade_parcelas', 'number')}</div>}
                 <div>{lbl('Qtd. parcelas mensais')}{inp('quantidade_parcelas', 'number')}</div>
                 <div>{lbl('Valor da parcela (R$)')}{inp('valor_parcela', 'number')}</div>
+                <div>{lbl('Data da 1ª parcela mensal')}{inp('data_primeira_parcela', 'date')}</div>
                 <div>{lbl('Qtd. intercaladas')}{inp('quantidade_intercaladas', 'number')}</div>
                 <div>{lbl('Periodicidade (meses)')}{inp('periodicidade_meses_intercaladas', 'number', 'ex.: 6 = semestral')}</div>
                 <div>{lbl('Data da 1ª intercalada')}{inp('data_primeira_intercalada', 'date')}</div>
