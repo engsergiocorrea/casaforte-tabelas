@@ -27,7 +27,7 @@ export function SplashScreen({ style }: { style?: CSSProperties }) {
       <img
         src={SPLASH_LOGO}
         alt="Casa Forte"
-        style={{ height: '150px', maxWidth: '82vw', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+        style={{ height: '300px', maxWidth: '90vw', objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
       />
       <div style={{ position: 'absolute', left: 0, right: 0, bottom: '15%', display: 'flex', justifyContent: 'center', gap: '10px' }}>
         {[0, 1, 2].map((i) => (
