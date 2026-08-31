@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { WhatsAppConvite } from '@/components/WhatsAppConvite'
+import { Splash } from '@/components/Splash'
 
 export const metadata: Metadata = {
   title: {
@@ -19,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
+        <Splash />
         {children}
         <WhatsAppConvite />
       </body>
