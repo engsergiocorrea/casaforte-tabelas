@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation'
 import { lerCorretorDoNavegador } from '@/lib/corretor'
 import { COLUNAS_UNIDADE_PUBLICA } from '@/lib/unidades-publicas'
 import UploadDocumentosProposta from './UploadDocumentosProposta'
+import { SplashScreen } from '@/components/SplashScreen'
 
 // Periodicidade textual (ex.: "semestrais") → nº de meses, e o inverso.
 const MESES_POR_TEXTO: Record<string, number> = {
@@ -267,7 +268,7 @@ export default function PropostaPage() {
   const g2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' } as React.CSSProperties
   const full = { gridColumn: '1/-1' } as React.CSSProperties
 
-  if (loading) return <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6b7280' }}>Carregando...</div>
+  if (loading) return <SplashScreen />
 
   if (success) return (
     <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
