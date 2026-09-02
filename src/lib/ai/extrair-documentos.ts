@@ -36,9 +36,9 @@ const PROMPT = `Você lê documentos pessoais brasileiros (RG, CNH, CPF, comprov
 
 Analise TODOS os arquivos enviados (podem ser de uma ou mais pessoas) e retorne um JSON com esta estrutura exata:
 {
-  "comprador":  { "nome": "", "cpf": "", "rg": "", "orgao_rg": "", "data_nascimento": "", "profissao": "", "estado_civil": "", "email": "", "telefone": "" },
-  "conjuge":    { "nome": "", "cpf": "", "rg": "", "orgao_rg": "", "data_nascimento": "", "profissao": "", "email": "", "telefone": "" },
-  "comprador2": { "nome": "", "cpf": "", "rg": "", "orgao_rg": "", "data_nascimento": "", "profissao": "", "estado_civil": "", "email": "", "telefone": "" }
+  "comprador":  { "nome": "", "cpf": "", "rg": "", "orgao_rg": "", "data_nascimento": "", "nacionalidade": "", "naturalidade": "", "profissao": "", "estado_civil": "", "endereco": "", "email": "", "telefone": "" },
+  "conjuge":    { "nome": "", "cpf": "", "rg": "", "orgao_rg": "", "data_nascimento": "", "nacionalidade": "", "naturalidade": "", "profissao": "", "endereco": "", "email": "", "telefone": "" },
+  "comprador2": { "nome": "", "cpf": "", "rg": "", "orgao_rg": "", "data_nascimento": "", "nacionalidade": "", "naturalidade": "", "profissao": "", "estado_civil": "", "endereco": "", "email": "", "telefone": "" }
 }
 
 Regras:
@@ -46,6 +46,8 @@ Regras:
 - Datas no formato DD/MM/AAAA.
 - CPF no formato 000.000.000-00. Em "rg" ponha o número como está no documento; o órgão emissor (ex.: SSP/AL, SDS/PE) vai em "orgao_rg".
 - "estado_civil" deve ser exatamente um destes: "solteiro", "casado", "divorciado", "viuvo", "uniao_estavel".
+- "endereco": endereço residencial COMPLETO num único texto (logradouro, número, complemento, bairro, cidade/UF, CEP). Extraia principalmente do COMPROVANTE DE RESIDÊNCIA; se não houver, use o endereço do RG/CNH. Associe o endereço à pessoa cujo nome consta no comprovante.
+- "nacionalidade" (ex.: "Brasileiro(a)") e "naturalidade" (cidade/UF de nascimento) quando constarem no documento.
 - Preencha SOMENTE o que estiver nos documentos. Campo não encontrado: string vazia "". NÃO invente dados.
 - Havendo só uma pessoa, preencha só "comprador" e deixe os demais com campos vazios.
 Responda APENAS com o JSON, sem texto ao redor.`
@@ -193,6 +195,9 @@ export function camposProposta(d: DadosExtraidos): Record<string, string> {
   set('comprador1_telefone', cp.telefone)
   set('comprador1_nascimento', isoDate(cp.data_nascimento))
   set('comprador1_estado_civil', ec(cp.estado_civil))
+  set('comprador1_nacionalidade', cp.nacionalidade)
+  set('comprador1_naturalidade', cp.naturalidade)
+  set('comprador1_endereco', cp.endereco)
 
   const cj = d.conjuge ?? {}
   set('conjuge_nome', cj.nome)
@@ -202,6 +207,9 @@ export function camposProposta(d: DadosExtraidos): Record<string, string> {
   set('conjuge_email', cj.email)
   set('conjuge_telefone', cj.telefone)
   set('conjuge_nascimento', isoDate(cj.data_nascimento))
+  set('conjuge_nacionalidade', cj.nacionalidade)
+  set('conjuge_naturalidade', cj.naturalidade)
+  set('conjuge_endereco', cj.endereco)
 
   const c2 = d.comprador2 ?? {}
   set('comprador2_nome', c2.nome)
@@ -212,6 +220,9 @@ export function camposProposta(d: DadosExtraidos): Record<string, string> {
   set('comprador2_telefone', c2.telefone)
   set('comprador2_nascimento', isoDate(c2.data_nascimento))
   set('comprador2_estado_civil', ec(c2.estado_civil))
+  set('comprador2_nacionalidade', c2.nacionalidade)
+  set('comprador2_naturalidade', c2.naturalidade)
+  set('comprador2_endereco', c2.endereco)
 
   return out
 }
