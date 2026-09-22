@@ -16,6 +16,7 @@ import {
   POSICAO_LABELS,
 } from '@/lib/utils'
 import { STATUS_LABELS } from '@/types'
+import { STATUS_UNIDADE_PUBLICO } from '@/lib/unidades-publicas'
 
 interface Props {
   empreendimento: Empreendimento
@@ -32,7 +33,6 @@ const DEFAULT_COLUNAS = [
 
 export function TabelaPublica({ empreendimento, unidades, configuracao }: Props) {
   const colunasVisiveis = configuracao?.colunas_visiveis ?? DEFAULT_COLUNAS
-  const mostrarVendidas = configuracao?.mostrar_unidades_vendidas ?? true
   const mostrarValoresReservadas = configuracao?.mostrar_valores_reservadas ?? false
   const agruparPor = configuracao?.agrupar_por
 
@@ -57,10 +57,10 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
 
   const unidadesFiltradas = useMemo(() => {
     return unidades.filter(u => {
-      if (!mostrarVendidas && u.status === 'vendida') return false
-      // Indisponíveis e vendidas aparecem (metragem + condições, sem valores);
-      // só as bloqueadas ficam ocultas.
-      if (u.status === 'bloqueada') return false
+      // Só disponíveis e reservadas aparecem no público (já filtrado no
+      // servidor; reforço defensivo no cliente). Vendidas, bloqueadas e
+      // indisponíveis ficam ocultas — reaparecem só se voltarem a 'disponivel'.
+      if (!(STATUS_UNIDADE_PUBLICO as unknown as string[]).includes(u.status)) return false
       if (filtroStatus !== 'todos' && u.status !== filtroStatus) return false
       if (filtroPavimento !== 'todos' && u.pavimento !== filtroPavimento) return false
       if (filtroBloco !== 'todos' && u.bloco !== filtroBloco) return false
@@ -81,7 +81,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
       if (isNaN(na) || isNaN(nb)) return String(a.unidade).localeCompare(String(b.unidade), 'pt-BR', { numeric: true })
       return na - nb
     })
-  }, [unidades, filtroStatus, filtroPavimento, filtroBloco, filtroQuartos, busca, mostrarVendidas])
+  }, [unidades, filtroStatus, filtroPavimento, filtroBloco, filtroQuartos, busca])
 
   const ORDEM_PAVIMENTOS = [
     'Térreo',
@@ -113,7 +113,6 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
     total: unidades.length,
     disponiveis: unidades.filter(u => u.status === 'disponivel').length,
     reservadas: unidades.filter(u => u.status === 'reservada').length,
-    vendidas: unidades.filter(u => u.status === 'vendida').length,
   }), [unidades])
 
   const fmtC = (v: any) => v ? Number(v).toLocaleString('pt-BR', {style:'currency',currency:'BRL',minimumFractionDigits:2,maximumFractionDigits:2}) : '—'
@@ -156,10 +155,6 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                 <span style={{width:'7px',height:'7px',borderRadius:'50%',background:'#f59e0b',display:'inline-block'}} />
                 {resumo.reservadas} reservadas
               </span>
-              <span style={{display:'flex',alignItems:'center',gap:'4px'}}>
-                <span style={{width:'7px',height:'7px',borderRadius:'50%',background:'#f87171',display:'inline-block'}} />
-                {resumo.vendidas} vendidas
-              </span>
             </div>
           </div>
           <div style={{fontSize:'11px',color:'#9ca3af'}}>{unidadesFiltradas.length} de {unidades.length} unidades</div>
@@ -173,7 +168,6 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
             <option value="todos">Todos os status</option>
             <option value="disponivel">Disponíveis</option>
             <option value="reservada">Reservadas</option>
-            {mostrarVendidas && <option value="vendida">Vendidas</option>}
           </select>
           {pavimentos.length > 1 && (
             <select value={filtroPavimento} onChange={e => setFiltroPavimento(e.target.value)}

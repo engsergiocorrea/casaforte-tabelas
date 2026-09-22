@@ -13,3 +13,10 @@ export const COLUNAS_UNIDADE_PUBLICA = [
   'valor_intercalada', 'valor_total_intercaladas', 'valor_chaves', 'percentual_chaves',
   'status', 'destaque', 'cor_destaque', 'observacoes_publicas', 'created_at', 'updated_at',
 ].join(',')
+
+// Status de unidade que PODEM aparecer no sistema público (tabelas, PDF e
+// proposta). Só 'disponivel' e 'reservada' são exibidas. Vendidas, bloqueadas e
+// indisponíveis ficam OCULTAS do público — reaparecem apenas quando voltarem
+// para 'disponivel' (ou 'reservada'). Filtrado no servidor (o dado dessas
+// unidades nem sai do banco pela chave anon) e reforçado no cliente.
+export const STATUS_UNIDADE_PUBLICO = ['disponivel', 'reservada'] as const

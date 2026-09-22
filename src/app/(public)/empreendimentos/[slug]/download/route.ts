@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
-import { COLUNAS_UNIDADE_PUBLICA } from '@/lib/unidades-publicas'
+import { COLUNAS_UNIDADE_PUBLICA, STATUS_UNIDADE_PUBLICO } from '@/lib/unidades-publicas'
 
 // Sempre gera o PDF com os dados atuais (nunca cacheia no servidor).
 export const dynamic = 'force-dynamic'
@@ -26,6 +26,8 @@ export async function GET(
   const { data: unidades } = await supabase
     .from('unidades')
     .select(COLUNAS_UNIDADE_PUBLICA)
+    // Só disponíveis e reservadas no PDF público (vendidas/bloqueadas/indisponíveis ocultas).
+    .in('status', STATUS_UNIDADE_PUBLICO as unknown as string[])
     .eq('empreendimento_id', empreendimento.id)
     .order('pavimento')
     .order('unidade')
@@ -46,9 +48,9 @@ export async function GET(
     const n = parseInt(String(u.unidade).replace(/\D/g, ''), 10)
     return isNaN(n) ? Infinity : n
   }
-  // Bloqueadas ficam ocultas; indisponíveis/vendidas aparecem (só metragem).
+  // Só disponíveis e reservadas (já filtrado na query; reforço defensivo).
   const unidadesFiltradas = (unidades ?? [])
-    .filter(u => u.status !== 'bloqueada')
+    .filter(u => (STATUS_UNIDADE_PUBLICO as unknown as string[]).includes(u.status))
     .sort((a, b) => numUnidade(a) - numUnidade(b)) // ordem numérica (1,2,10,101)
 
   const fmt = (v: any) => v ? `R$${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
@@ -119,18 +121,16 @@ export async function GET(
 
   let { p: page, y } = novaPage()
 
-  // Resumo
+  // Resumo (só disponíveis e reservadas aparecem no público)
   const disponiveis = unidadesFiltradas.filter(u => u.status === 'disponivel').length
   const reservadas = unidadesFiltradas.filter(u => u.status === 'reservada').length
-  const vendidas = unidadesFiltradas.filter(u => u.status === 'vendida').length
 
   y -= 6
-  const bw = (contentW - 18) / 4
+  const bw = (contentW - 12) / 3
   ;[
     { l: 'Total', v: String(unidadesFiltradas.length), c: preto },
     { l: 'Disponíveis', v: String(disponiveis), c: rgb(0.08, 0.5, 0.24) },
     { l: 'Reservadas', v: String(reservadas), c: rgb(0.7, 0.28, 0.04) },
-    { l: 'Vendidas', v: String(vendidas), c: rgb(0.73, 0.07, 0.07) },
   ].forEach((b, i) => {
     const bx = mL + i * (bw + 6)
     page.drawRectangle({ x: bx, y: y - 26, width: bw, height: 30, color: cinzaClaro, borderColor: rgb(0.85, 0.85, 0.85), borderWidth: 0.5 })

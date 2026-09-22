@@ -186,25 +186,19 @@ function EmpreendimentoCard({
             </p>
           )}
 
-          {/* Stats */}
+          {/* Stats — só disponíveis e reservadas aparecem no público */}
           {resumo && (
-            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
+            <div className="grid grid-cols-2 gap-2 pt-3 border-t border-gray-100">
               <div className="text-center">
                 <div className="text-xs text-gray-400 mb-0.5">Disponíveis</div>
                 <div className="font-semibold text-green-600 text-sm">
                   {resumo.disponiveis}
                 </div>
               </div>
-              <div className="text-center border-x border-gray-100">
+              <div className="text-center border-l border-gray-100">
                 <div className="text-xs text-gray-400 mb-0.5">Reservadas</div>
                 <div className="font-semibold text-amber-600 text-sm">
                   {resumo.reservadas}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-xs text-gray-400 mb-0.5">Vendidas</div>
-                <div className="font-semibold text-red-600 text-sm">
-                  {resumo.vendidas}
                 </div>
               </div>
             </div>
@@ -214,7 +208,7 @@ function EmpreendimentoCard({
           <div className="mt-4 flex items-center justify-between">
             <span className="text-xs text-gray-400">
               {resumo
-                ? `${resumo.total_unidades} unidades`
+                ? `${(resumo.disponiveis ?? 0) + (resumo.reservadas ?? 0)} unidades`
                 : 'Ver tabela de vendas'}
             </span>
             <span className="text-xs font-semibold text-blue-700 group-hover:underline">

@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { TabelaPublica } from "@/components/public/TabelaPublica";
 import { formatDate } from "@/lib/utils";
 import { INDICE_LABELS, EMPREENDIMENTO_STATUS_LABELS, type Unidade } from "@/types";
-import { COLUNAS_UNIDADE_PUBLICA } from "@/lib/unidades-publicas";
+import { COLUNAS_UNIDADE_PUBLICA, STATUS_UNIDADE_PUBLICO } from "@/lib/unidades-publicas";
 
 // Sempre renderiza no servidor com dados atuais e envia no-store, para o
 // navegador do corretor não exibir uma versão antiga (preços/unidades sempre
@@ -53,6 +53,9 @@ export default async function EmpreendimentoPage({ params }: Props) {
   const { data: unidades } = await supabase
     .from("unidades")
     .select(COLUNAS_UNIDADE_PUBLICA)
+    // Só disponíveis e reservadas aparecem no público. Vendidas, bloqueadas e
+    // indisponíveis são filtradas no servidor — nem chegam ao navegador.
+    .in("status", STATUS_UNIDADE_PUBLICO as unknown as string[])
     .eq("empreendimento_id", empreendimento.id)
     .order("pavimento", { ascending: true })
     .order("unidade", { ascending: true })

@@ -10,6 +10,7 @@ import {
 import type { Empreendimento, Unidade, ConfiguracaoTabela } from '@/types'
 import { formatCurrency, formatArea, groupBy, POSICAO_LABELS } from '@/lib/utils'
 import { STATUS_LABELS, INDICE_LABELS } from '@/types'
+import { STATUS_UNIDADE_PUBLICO } from '@/lib/unidades-publicas'
 
 // Registrar fonte
 Font.register({
@@ -238,14 +239,11 @@ const DEFAULT_COLUNAS = [
 
 export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFProps) {
   const colunas = configuracao?.colunas_visiveis ?? DEFAULT_COLUNAS
-  const mostrarVendidas = configuracao?.mostrar_unidades_vendidas ?? true
   const agruparPor = configuracao?.agrupar_por
 
   const unidadesFiltradas = unidades.filter(u => {
-    if (!mostrarVendidas && u.status === 'vendida') return false
-    // Indisponíveis/vendidas aparecem (só metragem); bloqueadas ficam ocultas.
-    if (u.status === 'bloqueada') return false
-    return true
+    // Só disponíveis e reservadas; vendidas/bloqueadas/indisponíveis ocultas.
+    return (STATUS_UNIDADE_PUBLICO as unknown as string[]).includes(u.status)
   }).sort((a, b) => {
     // Ordem numérica da unidade (1, 2, 10, 101 — não 1, 10, 101, 2).
     const na = parseInt(String(a.unidade).replace(/\D/g, ''), 10)
