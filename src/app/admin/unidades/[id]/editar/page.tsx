@@ -3,6 +3,19 @@ import { useState, useEffect, use } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
+// A coluna unidades.periodicidade_intercaladas tem CHECK (check_periodicidade)
+// que só aceita 'semestrais' | 'anuais' | 'personalizada' | null. Já o
+// empreendimento guarda o padrão no singular ('semestral'/'anual'). Normaliza
+// para o vocabulário válido da unidade — sem isso, editar o preço injetava
+// 'semestral' e o salvar violava a constraint (só passava com "Personalizada").
+function normalizarPeriodicidade(v: unknown): 'semestrais' | 'anuais' | 'personalizada' | null {
+  const s = String(v ?? '').toLowerCase().trim();
+  if (s === 'semestral' || s === 'semestrais') return 'semestrais';
+  if (s === 'anual' || s === 'anuais') return 'anuais';
+  if (s === 'personalizada' || s === 'mensais') return 'personalizada';
+  return null;
+}
+
 export default function EditarUnidadePage({
   params,
 }: {
@@ -20,10 +33,9 @@ export default function EditarUnidadePage({
     supabase.from("unidades").select("*").eq("id", id).single()
       .then(async ({ data }) => {
        if (data) {
-          const validPeriods = ['semestrais', 'anuais', 'personalizada']
-          if (!validPeriods.includes(data.periodicidade_intercaladas)) {
-            data.periodicidade_intercaladas = null
-          }
+          // Normaliza para o vocabulário válido da coluna (converte legados
+          // como 'semestral' -> 'semestrais'; inválidos viram null).
+          data.periodicidade_intercaladas = normalizarPeriodicidade(data.periodicidade_intercaladas)
           setForm(data);
           // Busca configuração do empreendimento
           const { data: emp } = await supabase
@@ -76,7 +88,7 @@ export default function EditarUnidadePage({
         const totalIntercaladas = valor * percIntercaladas / 100;
         updated.valor_intercalada = Math.round(totalIntercaladas / qtdIntercaladas * 100) / 100;
         updated.quantidade_intercaladas = qtdIntercaladas;
-        updated.periodicidade_intercaladas = emp.periodicidade_intercaladas_padrao ?? updated.periodicidade_intercaladas;
+        updated.periodicidade_intercaladas = normalizarPeriodicidade(emp.periodicidade_intercaladas_padrao) ?? updated.periodicidade_intercaladas;
       }
       if (percChaves > 0) {
         updated.valor_chaves = Math.round(valor * percChaves / 100 * 100) / 100;
@@ -115,8 +127,8 @@ export default function EditarUnidadePage({
     const supabase = createClient();
 const dataToSave = {
   ...form,
-  periodicidade_intercaladas: form.quantidade_intercaladas 
-    ? (form.periodicidade_intercaladas === 'mensais' ? 'personalizada' : form.periodicidade_intercaladas)
+  periodicidade_intercaladas: form.quantidade_intercaladas
+    ? (normalizarPeriodicidade(form.periodicidade_intercaladas) ?? 'personalizada')
     : null,
   posicao: form.posicao || null,
   data_reserva: form.data_reserva || null,
