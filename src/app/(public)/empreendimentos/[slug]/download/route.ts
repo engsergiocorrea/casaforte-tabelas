@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import { COLUNAS_UNIDADE_PUBLICA, STATUS_UNIDADE_PUBLICO } from '@/lib/unidades-publicas'
+import { ehDiretoria, podeVer } from '@/lib/diretoria'
 
 // Sempre gera o PDF com os dados atuais (nunca cacheia no servidor).
 export const dynamic = 'force-dynamic'
@@ -21,7 +22,7 @@ export async function GET(
     .eq('ativo_publico', true)
     .single()
 
-  if (!empreendimento) return new NextResponse('Nao encontrado', { status: 404 })
+  if (!empreendimento || !podeVer(empreendimento, await ehDiretoria(supabase))) return new NextResponse('Nao encontrado', { status: 404 })
 
   const { data: unidades } = await supabase
     .from('unidades')

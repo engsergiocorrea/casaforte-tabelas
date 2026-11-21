@@ -52,6 +52,9 @@ export default async function EmpreendimentosPage() {
                     <span style={{padding:'2px 10px',borderRadius:'20px',fontSize:'12px',fontWeight:'500',background:emp.ativo_publico?'#dcfce7':'#f3f4f6',color:emp.ativo_publico?'#15803d':'#6b7280'}}>
                       {emp.ativo_publico ? 'Ativo' : 'Inativo'}
                     </span>
+                    {emp.visibilidade === 'diretoria' && (
+                      <span style={{marginLeft:'6px',padding:'2px 10px',borderRadius:'20px',fontSize:'12px',fontWeight:'500',background:'#111827',color:'white'}}>🔒 Só diretoria</span>
+                    )}
                   </td>
                   <td style={{padding:'12px 16px'}}>
                     <div style={{display:'flex',gap:'8px'}}>

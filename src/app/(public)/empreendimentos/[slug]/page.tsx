@@ -7,6 +7,7 @@ import { TabelaPublica } from "@/components/public/TabelaPublica";
 import { formatDate } from "@/lib/utils";
 import { INDICE_LABELS, EMPREENDIMENTO_STATUS_LABELS, type Unidade } from "@/types";
 import { COLUNAS_UNIDADE_PUBLICA, STATUS_UNIDADE_PUBLICO } from "@/lib/unidades-publicas";
+import { ehDiretoria, podeVer } from "@/lib/diretoria";
 
 // Sempre renderiza no servidor com dados atuais e envia no-store, para o
 // navegador do corretor não exibir uma versão antiga (preços/unidades sempre
@@ -22,12 +23,12 @@ export async function generateMetadata({ params }: Props) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("empreendimentos")
-    .select("nome, descricao_curta, cidade, estado")
+    .select("nome, descricao_curta, cidade, estado, visibilidade")
     .eq("slug", slug)
     .eq("ativo_publico", true)
     .single();
 
-  if (!data) return { title: "Empreendimento não encontrado" };
+  if (!data || !podeVer(data, await ehDiretoria(supabase))) return { title: "Empreendimento não encontrado" };
 
   return {
     title: `${data.nome} | Casa Forte Tabelas de Vendas`,
@@ -48,7 +49,8 @@ export default async function EmpreendimentoPage({ params }: Props) {
     .eq("ativo_publico", true)
     .single();
 
-  if (!empreendimento) notFound();
+  // Tabela "Só diretoria": só abre para quem está logado como diretoria.
+  if (!empreendimento || !podeVer(empreendimento, await ehDiretoria(supabase))) notFound();
 
   const { data: unidades } = await supabase
     .from("unidades")
@@ -87,6 +89,11 @@ export default async function EmpreendimentoPage({ params }: Props) {
         </div>
       </header>
 
+      {empreendimento.visibilidade === "diretoria" && (
+        <div style={{background:'#111827',color:'white',fontSize:'13px',textAlign:'center',padding:'8px 16px'}}>
+          🔒 Tabela <b>só da diretoria</b> — não aparece para corretores. Mesmas funções: PDF e proposta.
+        </div>
+      )}
       <main style={{maxWidth:'80rem',margin:'0 auto',padding:'24px 1.5rem'}}>
         {/* Hero do empreendimento */}
         <div style={{background:'white',borderRadius:'16px',border:'1px solid #e5e7eb',overflow:'hidden',marginBottom:'24px'}}>

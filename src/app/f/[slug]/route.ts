@@ -20,6 +20,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
     .select('folder_url')
     .eq('slug', slug)
     .eq('ativo_publico', true)
+    // Folder compartilhável é só das tabelas públicas.
+    .eq('visibilidade', 'publica')
     .maybeSingle()
 
   // Sem folder: manda para a página pública do empreendimento.

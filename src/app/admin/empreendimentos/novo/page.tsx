@@ -16,7 +16,7 @@ export default function NovoEmpreendimentoPage() {
     descricao_curta: '', status: 'lancamento', tipo: 'apartamentos',
     indice_ate_entrega: 'INCC-M', indice_apos_entrega: '1_mais_igpm',
     parcelas_padrao: 60, percentual_sinal_padrao: 20,
-    percentual_chaves_padrao: 20, ativo_publico: true,
+    percentual_chaves_padrao: 20, ativo_publico: true, visibilidade: 'publica',
     observacoes_publicas: '', data_prevista_entrega: ''
   })
 
@@ -153,6 +153,14 @@ export default function NovoEmpreendimentoPage() {
                   style={{width:'16px',height:'16px',accentColor:'#E8390E'}} />
                 Exibir no site público
               </label>
+            </div>
+            <div>
+              {lbl('Quem vê a tabela')}
+              <select name="visibilidade" value={form.visibilidade} onChange={handleChange}
+                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',background:'white'}}>
+                <option value="publica">Pública (corretores)</option>
+                <option value="diretoria">Só diretoria</option>
+              </select>
             </div>
           </div>
         </div>

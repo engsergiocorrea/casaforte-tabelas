@@ -420,6 +420,15 @@ export default function EditarEmpreendimentoPage({
                 style={{ width: "16px", height: "16px", accentColor: "#E8390E" }} />
               Exibir no site público
             </label>
+            <div>
+              <label style={S.label}>Quem vê a tabela</label>
+              <select name="visibilidade" value={form.visibilidade ?? "publica"} onChange={handleChange}
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", background: "white" }}>
+                <option value="publica">Pública (corretores)</option>
+                <option value="diretoria">Só diretoria</option>
+              </select>
+              <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>“Só diretoria”: não aparece para corretores; abre para quem está logado como diretoria, com as mesmas funções (PDF e proposta).</p>
+            </div>
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { ehDiretoria } from '@/lib/diretoria'
 import { CORRETOR_COOKIE, decodeCorretor } from '@/lib/corretor'
 
 // Recebe a proposta do corretor e grava com service role. Assim a chave pública
@@ -26,6 +27,12 @@ export async function POST(req: NextRequest) {
     }
 
     const admin = createAdminClient()
+    // Tabela "Só diretoria": proposta só de quem está logado como diretoria.
+    const { data: emp } = await admin.from('empreendimentos').select('visibilidade, ativo_publico').eq('id', data.empreendimento_id).maybeSingle()
+    if (!emp || !emp.ativo_publico) return NextResponse.json({ erro: 'Empreendimento indisponível.' }, { status: 404 })
+    if (emp.visibilidade === 'diretoria' && !(await ehDiretoria(await createClient()))) {
+      return NextResponse.json({ erro: 'Esta tabela é restrita à diretoria.' }, { status: 403 })
+    }
     const { data: proposta, error } = await admin.from('propostas').insert([data]).select('id').single()
     if (error) return NextResponse.json({ erro: error.message }, { status: 500 })
 

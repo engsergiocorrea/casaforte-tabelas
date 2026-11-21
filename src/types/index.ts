@@ -96,6 +96,8 @@ export interface Empreendimento {
   // + saldo em financiamento bancário (ex.: Villa Maui, já entregue).
   valor_m2?: number
   ativo_publico: boolean
+  // 'diretoria' = tabela só para a diretoria (invisível a corretores)
+  visibilidade?: 'publica' | 'diretoria'
   data_prevista_entrega?: string
   created_by?: string
   created_at: string

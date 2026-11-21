@@ -9,6 +9,7 @@ import { EMPREENDIMENTO_STATUS_LABELS } from '@/types'
 import { CORRETOR_COOKIE, decodeCorretor } from '@/lib/corretor'
 import CorretorGate from './CorretorGate'
 import AcessoTracker from './AcessoTracker'
+import { ehDiretoria } from '@/lib/diretoria'
 
 // Lê cookie do corretor → renderização dinâmica.
 export const dynamic = 'force-dynamic'
@@ -34,11 +35,14 @@ export default async function HomePage({
     .select('*')
     .order('nome')
 
-  const { data: allEmpreendimentos } = await supabase
+  // Diretoria logada também vê as tabelas "Só diretoria" (com selo).
+  const diretoria = await ehDiretoria(supabase)
+  let consulta = supabase
     .from('empreendimentos')
-    .select('id, nome, slug, cidade, estado, status, tipo, imagem_capa_url, logo_url, descricao_curta, data_prevista_entrega')
+    .select('id, nome, slug, cidade, estado, status, tipo, imagem_capa_url, logo_url, descricao_curta, data_prevista_entrega, visibilidade')
     .eq('ativo_publico', true)
-    .order('created_at', { ascending: false })
+  if (!diretoria) consulta = consulta.eq('visibilidade', 'publica')
+  const { data: allEmpreendimentos } = await consulta.order('created_at', { ascending: false })
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -129,6 +133,7 @@ function EmpreendimentoCard({
     logo_url?: string | null
     descricao_curta?: string | null
     data_prevista_entrega?: string | null
+    visibilidade?: string | null
   }
   resumo?: ResumoEmpreendimento
 }) {
@@ -164,10 +169,13 @@ function EmpreendimentoCard({
             </div>
           )}
           {/* Status badge */}
-          <div className="absolute top-3 left-3">
+          <div className="absolute top-3 left-3 flex gap-1.5">
             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${statusClass}`}>
               {statusLabel}
             </span>
+            {empreendimento.visibilidade === 'diretoria' && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-900 text-white">🔒 Só diretoria</span>
+            )}
           </div>
         </div>
 
