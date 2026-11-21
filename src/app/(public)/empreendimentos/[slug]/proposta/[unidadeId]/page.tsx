@@ -1,9 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 import { lerCorretorDoNavegador } from '@/lib/corretor'
-import { COLUNAS_UNIDADE_PUBLICA } from '@/lib/unidades-publicas'
 import { comPlano, descreverPlano, planosDaUnidade } from '@/lib/planos'
 import UploadDocumentosProposta from './UploadDocumentosProposta'
 import { SplashScreen } from '@/components/SplashScreen'
@@ -70,12 +68,11 @@ export default function PropostaPage() {
 
   useEffect(() => {
     if (!slug || !unidadeId) return
-    const supabase = createClient()
-    Promise.all([
-      supabase.from('empreendimentos').select('*').eq('slug', slug).single(),
-      supabase.from('unidades').select(COLUNAS_UNIDADE_PUBLICA).eq('id', unidadeId).single(),
-    ]).then(([{ data: emp }, uniRes]) => {
-      const uniBase = uniRes.data as any
+    // Dados pelo servidor (mesma regra de acesso da tabela: pública, diretoria ou convite).
+    fetch(`/api/tabela/proposta-dados?slug=${encodeURIComponent(slug)}&unidade=${encodeURIComponent(unidadeId)}`, { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : { empreendimento: null, unidade: null }))
+      .then(({ empreendimento: emp, unidade: uniRes }) => {
+      const uniBase = uniRes as any
       const pedido = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('plano') : null
       const nomes = uniBase ? planosDaUnidade(uniBase).map(p => p.nome) : []
       const escolhido = nomes.length ? (pedido && nomes.includes(pedido) ? pedido : nomes[0]) : null

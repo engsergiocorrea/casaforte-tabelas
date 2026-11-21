@@ -2,12 +2,12 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
 import { TabelaPublica } from "@/components/public/TabelaPublica";
 import { formatDate } from "@/lib/utils";
 import { INDICE_LABELS, EMPREENDIMENTO_STATUS_LABELS, type Unidade } from "@/types";
 import { COLUNAS_UNIDADE_PUBLICA, STATUS_UNIDADE_PUBLICO } from "@/lib/unidades-publicas";
-import { ehDiretoria, podeVer } from "@/lib/diretoria";
+import { acessoTabela, carregarEmpreendimento } from "@/lib/acesso-tabela";
 
 // Sempre renderiza no servidor com dados atuais e envia no-store, para o
 // navegador do corretor não exibir uma versão antiga (preços/unidades sempre
@@ -20,15 +20,8 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("empreendimentos")
-    .select("nome, descricao_curta, cidade, estado, visibilidade")
-    .eq("slug", slug)
-    .eq("ativo_publico", true)
-    .single();
-
-  if (!data || !podeVer(data, await ehDiretoria(supabase))) return { title: "Empreendimento não encontrado" };
+  const data = await carregarEmpreendimento(slug, "id, nome, descricao_curta, cidade, estado, visibilidade");
+  if (!data || !(await acessoTabela(data))) return { title: "Empreendimento não encontrado" };
 
   return {
     title: `${data.nome} | Casa Forte Tabelas de Vendas`,
@@ -40,17 +33,12 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function EmpreendimentoPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
-
-  const { data: empreendimento } = await supabase
-    .from("empreendimentos")
-    .select("*")
-    .eq("slug", slug)
-    .eq("ativo_publico", true)
-    .single();
-
-  // Tabela "Só diretoria": só abre para quem está logado como diretoria.
-  if (!empreendimento || !podeVer(empreendimento, await ehDiretoria(supabase))) notFound();
+  // Tabela "Só diretoria": abre para a diretoria logada ou para quem abriu um
+  // link de convite válido. Os dados são lidos pelo servidor após a checagem.
+  const empreendimento = await carregarEmpreendimento(slug);
+  const acesso = await acessoTabela(empreendimento);
+  if (!empreendimento || !acesso) notFound();
+  const supabase = createAdminClient();
 
   const { data: unidades } = await supabase
     .from("unidades")
@@ -89,9 +77,14 @@ export default async function EmpreendimentoPage({ params }: Props) {
         </div>
       </header>
 
-      {empreendimento.visibilidade === "diretoria" && (
+      {acesso === "diretoria" && (
         <div style={{background:'#111827',color:'white',fontSize:'13px',textAlign:'center',padding:'8px 16px'}}>
-          🔒 Tabela <b>só da diretoria</b> — não aparece para corretores. Mesmas funções: PDF e proposta.
+          🔒 Tabela <b>só da diretoria</b> — não aparece para corretores (só para quem recebe um link de convite).
+        </div>
+      )}
+      {acesso === "convite" && (
+        <div style={{background:'#111827',color:'white',fontSize:'13px',textAlign:'center',padding:'8px 16px'}}>
+          🔑 Tabela exclusiva — acesso por convite da Casa Forte. Não compartilhe este link.
         </div>
       )}
       <main style={{maxWidth:'80rem',margin:'0 auto',padding:'24px 1.5rem'}}>

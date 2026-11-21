@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import { COLUNAS_UNIDADE_PUBLICA, STATUS_UNIDADE_PUBLICO } from '@/lib/unidades-publicas'
-import { ehDiretoria, podeVer } from '@/lib/diretoria'
+import { acessoTabela, carregarEmpreendimento } from '@/lib/acesso-tabela'
 import { comPlano, descreverPlano, nomesDePlanos } from '@/lib/planos'
 
 // Sempre gera o PDF com os dados atuais (nunca cacheia no servidor).
@@ -14,16 +14,9 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params
-  const supabase = await createClient()
-
-  const { data: empreendimento } = await supabase
-    .from('empreendimentos')
-    .select('*')
-    .eq('slug', slug)
-    .eq('ativo_publico', true)
-    .single()
-
-  if (!empreendimento || !podeVer(empreendimento, await ehDiretoria(supabase))) return new NextResponse('Nao encontrado', { status: 404 })
+  const empreendimento = await carregarEmpreendimento(slug)
+  if (!empreendimento || !(await acessoTabela(empreendimento))) return new NextResponse('Nao encontrado', { status: 404 })
+  const supabase = createAdminClient()
 
   const { data: unidades } = await supabase
     .from('unidades')

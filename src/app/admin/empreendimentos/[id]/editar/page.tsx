@@ -1,4 +1,5 @@
 "use client";
+import Convites from "./Convites";
 import { useState, useEffect, use } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
@@ -429,6 +430,7 @@ export default function EditarEmpreendimentoPage({
               </select>
               <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>“Só diretoria”: não aparece para corretores; abre para quem está logado como diretoria, com as mesmas funções (PDF e proposta).</p>
             </div>
+            {form.visibilidade === "diretoria" && <Convites empreendimentoId={id as string} />}
           </div>
         </div>
 

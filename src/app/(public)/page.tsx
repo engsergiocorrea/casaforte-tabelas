@@ -10,6 +10,8 @@ import { CORRETOR_COOKIE, decodeCorretor } from '@/lib/corretor'
 import CorretorGate from './CorretorGate'
 import AcessoTracker from './AcessoTracker'
 import { ehDiretoria } from '@/lib/diretoria'
+import { CONVITES_COOKIE, empreendimentosConvidados, tokensDoCookie } from '@/lib/convites'
+import { createAdminClient } from '@/lib/supabase/server'
 
 // Lê cookie do corretor → renderização dinâmica.
 export const dynamic = 'force-dynamic'
@@ -17,7 +19,7 @@ export const dynamic = 'force-dynamic'
 export default async function HomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>
+  searchParams: Promise<{ next?: string; convite?: string }>
 }) {
   // Gate: sem identificação do corretor, mostra a tela de identificação e NÃO
   // consulta/renderiza os empreendimentos (não vazam nem no HTML).
@@ -42,7 +44,15 @@ export default async function HomePage({
     .select('id, nome, slug, cidade, estado, status, tipo, imagem_capa_url, logo_url, descricao_curta, data_prevista_entrega, visibilidade')
     .eq('ativo_publico', true)
   if (!diretoria) consulta = consulta.eq('visibilidade', 'publica')
-  const { data: allEmpreendimentos } = await consulta.order('created_at', { ascending: false })
+  const { data: publicos } = await consulta.order('created_at', { ascending: false })
+  // Corretor com link de convite também vê aquela(s) tabela(s) exclusiva(s).
+  const convidados = diretoria ? new Set<string>() : await empreendimentosConvidados(tokensDoCookie(cookieStore.get(CONVITES_COOKIE)?.value))
+  const { data: extras } = convidados.size
+    ? await createAdminClient().from('empreendimentos')
+        .select('id, nome, slug, cidade, estado, status, tipo, imagem_capa_url, logo_url, descricao_curta, data_prevista_entrega, visibilidade')
+        .in('id', [...convidados]).eq('ativo_publico', true)
+    : { data: [] as any[] }
+  const allEmpreendimentos = [...(extras ?? []).map((e: any) => ({ ...e, convite: true })), ...(publicos ?? [])]
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -73,6 +83,11 @@ export default async function HomePage({
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {(await searchParams).convite === 'invalido' && (
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Este link de convite expirou ou foi revogado. Fale com a Casa Forte para receber um novo.
+          </div>
+        )}
         {/* Hero */}
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -134,6 +149,7 @@ function EmpreendimentoCard({
     descricao_curta?: string | null
     data_prevista_entrega?: string | null
     visibilidade?: string | null
+    convite?: boolean
   }
   resumo?: ResumoEmpreendimento
 }) {
@@ -174,7 +190,7 @@ function EmpreendimentoCard({
               {statusLabel}
             </span>
             {empreendimento.visibilidade === 'diretoria' && (
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-900 text-white">🔒 Só diretoria</span>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-900 text-white">{empreendimento.convite ? '🔑 Exclusiva' : '🔒 Só diretoria'}</span>
             )}
           </div>
         </div>
