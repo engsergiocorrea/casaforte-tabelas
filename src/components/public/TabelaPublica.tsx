@@ -17,6 +17,7 @@ import {
 } from '@/lib/utils'
 import { STATUS_LABELS } from '@/types'
 import { STATUS_UNIDADE_PUBLICO } from '@/lib/unidades-publicas'
+import { comPlano, descreverPlano, nomesDePlanos } from '@/lib/planos'
 
 interface Props {
   empreendimento: Empreendimento
@@ -31,7 +32,17 @@ const DEFAULT_COLUNAS = [
   'valor_chaves', 'status',
 ]
 
-export function TabelaPublica({ empreendimento, unidades, configuracao }: Props) {
+export function TabelaPublica({ empreendimento, unidades: unidadesBase, configuracao }: Props) {
+  // Planos de pagamento alternativos (ex.: 48x e 60x): o corretor escolhe e
+  // a tabela inteira passa a mostrar os valores daquele plano.
+  const planos = useMemo(() => nomesDePlanos(unidadesBase), [unidadesBase])
+  const [plano, setPlano] = useState<string | null>(planos[0] ?? null)
+  const unidades = useMemo(() => unidadesBase.map(u => comPlano(u, plano)), [unidadesBase, plano])
+  const descricaoPlano = useMemo(() => {
+    if (!plano) return null
+    const u = unidadesBase.find(x => descreverPlano(x, plano))
+    return u ? descreverPlano(u, plano) : null
+  }, [unidadesBase, plano])
   const colunasVisiveis = configuracao?.colunas_visiveis ?? DEFAULT_COLUNAS
   const mostrarValoresReservadas = configuracao?.mostrar_valores_reservadas ?? false
   const agruparPor = configuracao?.agrupar_por
@@ -160,6 +171,20 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
           <div style={{fontSize:'11px',color:'#9ca3af'}}>{unidadesFiltradas.length} de {unidades.length} unidades</div>
         </div>
 
+ {planos.length > 0 && (
+          <div style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:'10px',marginBottom:'12px',padding:'10px 12px',background:'#fff7ed',border:'1px solid #fed7aa',borderRadius:'10px'}}>
+            <span style={{fontSize:'12px',fontWeight:600,color:'#9a3412'}}>Plano de pagamento:</span>
+            <div style={{display:'inline-flex',background:'white',border:'1px solid #fdba74',borderRadius:'8px',padding:'2px'}}>
+              {planos.map(n => (
+                <button key={n} type="button" onClick={() => setPlano(n)}
+                  style={{padding:'5px 14px',fontSize:'13px',fontWeight:700,borderRadius:'6px',border:0,cursor:'pointer',background:plano===n?'#E8390E':'transparent',color:plano===n?'white':'#9a3412'}}>
+                  {n}
+                </button>
+              ))}
+            </div>
+            {descricaoPlano && <span style={{fontSize:'12px',color:'#7c2d12'}}>{descricaoPlano}</span>}
+          </div>
+        )}
         <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
           <input type="text" placeholder="Buscar unidade..." value={busca} onChange={e => setBusca(e.target.value)}
             style={{padding:'5px 10px',fontSize:'12px',border:'1px solid #e5e7eb',borderRadius:'6px',outline:'none',background:'#f9fafb',width:'130px'}} />
@@ -233,7 +258,7 @@ export function TabelaPublica({ empreendimento, unidades, configuracao }: Props)
                     (isVendida && !configuracao?.mostrar_valores_vendidas)
                   const rowBg = isReservada ? '#fffbeb' : isVendida ? '#fef2f2' : isIndisponivel ? '#f9fafb' : 'transparent'
                   const rowOpacity = (isVendida || isIndisponivel) ? 0.72 : 1
-                  const linkProposta = '/empreendimentos/' + slugEmp + '/proposta/' + unidade.id
+                  const linkProposta = '/empreendimentos/' + slugEmp + '/proposta/' + unidade.id + (plano ? '?plano=' + encodeURIComponent(plano) : '')
 
                   return (
                     <tr key={unidade.id} style={{backgroundColor:rowBg, opacity:rowOpacity}}>

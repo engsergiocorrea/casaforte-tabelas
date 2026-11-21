@@ -4,6 +4,7 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 import fontkit from '@pdf-lib/fontkit'
 import { COLUNAS_UNIDADE_PUBLICA, STATUS_UNIDADE_PUBLICO } from '@/lib/unidades-publicas'
 import { ehDiretoria, podeVer } from '@/lib/diretoria'
+import { comPlano, descreverPlano, nomesDePlanos } from '@/lib/planos'
 
 // Sempre gera o PDF com os dados atuais (nunca cacheia no servidor).
 export const dynamic = 'force-dynamic'
@@ -53,6 +54,8 @@ export async function GET(
   const unidadesFiltradas = (unidades ?? [])
     .filter(u => (STATUS_UNIDADE_PUBLICO as unknown as string[]).includes(u.status))
     .sort((a, b) => numUnidade(a) - numUnidade(b)) // ordem numérica (1,2,10,101)
+  // Planos alternativos (ex.: 48x e 60x): o PDF traz uma tabela por plano.
+  const planos = nomesDePlanos(unidadesFiltradas)
 
   const fmt = (v: any) => v ? `R$${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
 
@@ -151,7 +154,7 @@ export async function GET(
   ] : [
     { label: 'Correção até entrega:', value: indiceLabel[empreendimento.indice_ate_entrega] ?? empreendimento.indice_ate_entrega ?? '-' },
     { label: 'Correção após entrega:', value: indiceLabel[empreendimento.indice_apos_entrega] ?? empreendimento.indice_apos_entrega ?? '-' },
-    { label: 'Parcelamento:', value: `até ${empreendimento.parcelas_padrao ?? 60}x mensais` },
+    { label: 'Parcelamento:', value: planos.length ? `planos ${planos.join(' ou ')}` : `até ${empreendimento.parcelas_padrao ?? 60}x mensais` },
     empreendimento.data_prevista_entrega ? { label: 'Entrega prev.:', value: new Date(empreendimento.data_prevista_entrega).toLocaleDateString('pt-BR') } : null,
   ]).filter(Boolean) as { label: string, value: string }[]
   conds.forEach((c, i) => {
@@ -221,10 +224,25 @@ export async function GET(
     return yPos - 17
   }
 
+  const listas = planos.length
+    ? planos.map(n => {
+        const ref = unidadesFiltradas.find(u => descreverPlano(u, n))
+        const desc = ref ? descreverPlano(ref, n) : null
+        return { titulo: `PLANO ${n}${desc ? `  —  ${desc}` : ''}`, unidades: unidadesFiltradas.map(u => comPlano(u, n)) }
+      })
+    : [{ titulo: null as string | null, unidades: unidadesFiltradas }]
+
+  for (const lista of listas) {
+  if (lista.titulo) {
+    if (y < mB + 70) { const np = novaPage(); page = np.p; y = np.y - 8 }
+    page.drawRectangle({ x: mL, y: y - 5, width: contentW, height: 16, color: rgb(1, 0.95, 0.91), borderColor: vermelho, borderWidth: 0.6 })
+    page.drawText(lista.titulo, { x: mL + 6, y: y, size: 8.5, font: fontB, color: vermelho })
+    y -= 20
+  }
   y = drawHeader(y)
 
   let alternate = false
-  for (const u of unidadesFiltradas) {
+  for (const u of lista.unidades) {
     if (y < mB + 28) {
       const np = novaPage()
       page = np.p
@@ -294,6 +312,8 @@ export async function GET(
     page.drawLine({ start: { x: mL, y: y - 2 }, end: { x: W - mR, y: y - 2 }, thickness: 0.2, color: rgb(0.9, 0.9, 0.9) })
     alternate = !alternate
     y -= 13
+  }
+  y -= 12
   }
 
   const pdfBytes = await pdfDoc.save()

@@ -12,6 +12,7 @@ export const COLUNAS_UNIDADE_PUBLICA = [
   'quantidade_parcelas', 'valor_parcela', 'quantidade_intercaladas', 'periodicidade_intercaladas',
   'valor_intercalada', 'valor_total_intercaladas', 'valor_chaves', 'percentual_chaves',
   'status', 'destaque', 'cor_destaque', 'observacoes_publicas', 'created_at', 'updated_at',
+  'planos_pagamento',
 ].join(',')
 
 // Status de unidade que PODEM aparecer no sistema público (tabelas, PDF e

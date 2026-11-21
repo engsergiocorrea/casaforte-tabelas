@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useParams } from 'next/navigation'
 import { lerCorretorDoNavegador } from '@/lib/corretor'
 import { COLUNAS_UNIDADE_PUBLICA } from '@/lib/unidades-publicas'
+import { comPlano, descreverPlano, planosDaUnidade } from '@/lib/planos'
 import UploadDocumentosProposta from './UploadDocumentosProposta'
 import { SplashScreen } from '@/components/SplashScreen'
 
@@ -39,6 +40,8 @@ export default function PropostaPage() {
   const [unidade, setUnidade] = useState<any>(null)
   const [empreendimento, setEmpreendimento] = useState<any>(null)
   const [segueTabela, setSegueTabela] = useState(true)
+  // Plano de pagamento escolhido (unidades com 48x/60x etc.); vem da tabela via ?plano=.
+  const [plano, setPlano] = useState<string | null>(null)
   const [sinalParcelado, setSinalParcelado] = useState(false)
   const [temSegundoComprador, setTemSegundoComprador] = useState(false)
   const [propostaId, setPropostaId] = useState('')
@@ -72,9 +75,14 @@ export default function PropostaPage() {
       supabase.from('empreendimentos').select('*').eq('slug', slug).single(),
       supabase.from('unidades').select(COLUNAS_UNIDADE_PUBLICA).eq('id', unidadeId).single(),
     ]).then(([{ data: emp }, uniRes]) => {
-      const uni = uniRes.data as any
+      const uniBase = uniRes.data as any
+      const pedido = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('plano') : null
+      const nomes = uniBase ? planosDaUnidade(uniBase).map(p => p.nome) : []
+      const escolhido = nomes.length ? (pedido && nomes.includes(pedido) ? pedido : nomes[0]) : null
+      setPlano(escolhido)
+      const uni = uniBase ? comPlano(uniBase, escolhido) : uniBase
       setEmpreendimento(emp)
-      setUnidade(uni)
+      setUnidade(uniBase)
       if (uni) {
         setForm(f => ({
           ...f,
@@ -107,6 +115,25 @@ export default function PropostaPage() {
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target
     setForm(f => ({ ...f, [name]: value }))
+  }
+
+  // Troca de plano: recarrega os valores de tabela daquele plano.
+  function escolherPlano(nome: string) {
+    if (!unidade) return
+    setPlano(nome)
+    const u = comPlano(unidade, nome)
+    setForm(f => ({
+      ...f,
+      valor_proposto: u.valor_imovel ?? '',
+      valor_sinal: u.valor_sinal ?? '',
+      quantidade_parcelas: u.quantidade_parcelas ?? '',
+      valor_parcela: u.valor_parcela ?? '',
+      quantidade_intercaladas: u.quantidade_intercaladas ?? '',
+      periodicidade_intercaladas: u.periodicidade_intercaladas ?? 'semestrais',
+      periodicidade_meses_intercaladas: mesesDaPeriodicidade(u.periodicidade_intercaladas) || '6',
+      valor_intercalada: u.valor_intercalada ?? '',
+      valor_chaves: u.valor_chaves ?? '',
+    }))
   }
 
   function calcSomatorio() {
@@ -149,6 +176,8 @@ export default function PropostaPage() {
       comprador1_nascimento: comprador1_nascimento || null,
       segue_tabela: segueTabela,
       valor_proposto: valorProposto,
+      // Registra o plano escolhido junto das observações de pagamento.
+      observacoes_pagamento: [plano ? `Plano ${plano}${segueTabela ? ' (valores da tabela)' : ''}.` : null, form.observacoes_pagamento || null].filter(Boolean).join(' ') || null,
       valor_sinal: Number(form.valor_sinal) || null,
       quantidade_parcelas: Number(form.quantidade_parcelas) || null,
       valor_parcela: Number(form.valor_parcela) || null,
@@ -398,6 +427,20 @@ export default function PropostaPage() {
 
           {card('💰 Condições de Pagamento',
             <div>
+              {unidade && planosDaUnidade(unidade).length > 0 && (
+                <div style={{ marginBottom: '16px', padding: '12px', background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '10px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#9a3412', marginBottom: '8px' }}>Plano de pagamento</div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {planosDaUnidade(unidade).map(p => (
+                      <button key={p.nome} type="button" onClick={() => escolherPlano(p.nome)}
+                        style={{ padding: '8px 16px', borderRadius: '8px', border: `2px solid ${plano === p.nome ? '#E8390E' : '#fdba74'}`, background: plano === p.nome ? '#E8390E' : 'white', color: plano === p.nome ? 'white' : '#9a3412', fontWeight: 700, cursor: 'pointer', fontSize: '14px' }}>
+                        {p.nome}
+                      </button>
+                    ))}
+                  </div>
+                  {plano && <div style={{ fontSize: '12px', color: '#7c2d12', marginTop: '8px' }}>{descreverPlano(unidade, plano)}</div>}
+                </div>
+              )}
               <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', padding: '10px 16px', borderRadius: '8px', border: `2px solid ${segueTabela ? '#E8390E' : '#DDD9D3'}`, background: segueTabela ? '#fdeee9' : 'white', flex: 1, justifyContent: 'center' }}>
                   <input type="radio" checked={segueTabela} onChange={() => setSegueTabela(true)} style={{ accentColor: '#E8390E' }} />

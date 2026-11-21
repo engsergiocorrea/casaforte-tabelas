@@ -104,7 +104,21 @@ export interface Empreendimento {
   updated_at: string
 }
 
+// Plano de pagamento alternativo de uma unidade (ex.: "48x", "60x").
+export interface PlanoPagamento {
+  nome: string
+  valor_sinal?: number | null
+  percentual_sinal?: number | null
+  quantidade_parcelas?: number | null
+  valor_parcela?: number | null
+  quantidade_intercaladas?: number | null
+  periodicidade_intercaladas?: string | null
+  valor_intercalada?: number | null
+  valor_chaves?: number | null
+}
+
 export interface Unidade {
+  planos_pagamento?: PlanoPagamento[] | null
   id: string
   empreendimento_id: string
   unidade: string
