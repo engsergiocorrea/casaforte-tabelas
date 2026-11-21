@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+// Os dados da proposta vêm de formulário público (corretor): todo texto é
+// escapado antes de entrar no HTML, para não executar código na sessão da diretoria.
+const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+function escapar<T>(v: T): T {
+  if (typeof v === 'string') return v.replace(/[&<>"']/g, (c) => ESC[c]) as T
+  if (Array.isArray(v)) return v.map(escapar) as T
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, escapar(x)])) as T
+  return v
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -8,13 +18,14 @@ export async function GET(
   const { id } = await params
   const supabase = await createClient()
 
-  const { data: p } = await supabase
+  const { data: bruto } = await supabase
     .from('propostas')
     .select('*, empreendimentos(nome,cidade,estado,indice_ate_entrega,indice_apos_entrega,parcelas_padrao,observacoes_publicas), unidades(unidade,pavimento,posicao,area_construida,area_privativa_externa,area_total,quartos,valor_imovel,valor_sinal,percentual_sinal,quantidade_parcelas,valor_parcela,quantidade_intercaladas,periodicidade_intercaladas,valor_intercalada,valor_chaves,percentual_chaves)')
     .eq('id', id)
     .single()
 
-  if (!p) return new NextResponse('Não encontrado', { status: 404 })
+  if (!bruto) return new NextResponse('Não encontrado', { status: 404 })
+  const p = escapar(bruto)
 
   const emp = p.empreendimentos as any
   const uni = p.unidades as any

@@ -225,28 +225,11 @@ export default function PropostaPage() {
     const proposta = { id: info.id as string }
 
     // Dispara WhatsApp sem bloquear o usuário
+    // O servidor lê a proposta do banco e avisa equipe, corretor e comprador.
     fetch('/api/whatsapp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        empreendimento: empreendimento.nome,
-        unidade: unidade.unidade,
-        pavimento: unidade.pavimento,
-        area: unidade.area_construida,
-        quartos: unidade.quartos,
-        propostaId: proposta.id,
-        segue_tabela: segueTabela,
-        ...form,
-        valor_proposto: segueTabela ? unidade.valor_imovel : valorProposto,
-        valor_sinal: Number(form.valor_sinal) || 0,
-        quantidade_parcelas: Number(form.quantidade_parcelas) || 0,
-        valor_parcela: Number(form.valor_parcela) || 0,
-        quantidade_intercaladas: Number(form.quantidade_intercaladas) || 0,
-        valor_intercalada: Number(form.valor_intercalada) || 0,
-        valor_chaves: Number(form.valor_chaves) || 0,
-        corretorTelefone: form.corretor_telefone || null,
-        compradorTelefone: form.comprador1_telefone || null,
-      }),
+      body: JSON.stringify({ propostaId: proposta.id }),
     }).catch(e => console.error('[WhatsApp]', e))
 
     setPropostaId(proposta.id)
