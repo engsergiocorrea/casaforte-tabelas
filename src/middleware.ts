@@ -1,8 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { CORRETOR_COOKIE, decodeCorretor } from '@/lib/corretor'
+import { opcoesCookie } from '@/lib/supabase/sso'
+import { desviarParaLoginUnico } from '@/lib/supabase/sso-middleware'
 
 export async function middleware(request: NextRequest) {
+  const desvio = desviarParaLoginUnico(request, { '/admin/login': '/admin/dashboard' })
+  if (desvio) return desvio
+
   const { pathname } = request.nextUrl
 
   // Gate do corretor: páginas de empreendimento (detalhe, proposta, download)
@@ -24,6 +29,7 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      cookieOptions: opcoesCookie(request.headers.get('x-forwarded-host') ?? request.headers.get('host')),
       cookies: {
         getAll() {
           return request.cookies.getAll()
