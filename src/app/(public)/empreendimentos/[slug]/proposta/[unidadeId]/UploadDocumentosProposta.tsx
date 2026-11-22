@@ -206,7 +206,7 @@ export default function UploadDocumentosProposta({
   return (
     <div style={{ background: 'white', borderRadius: 12, border: '1px solid #E8390E55', padding: 20, marginBottom: 16 }}>
       <h2 style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 4 }}>📄 Preencher com documentos (IA)</h2>
-      <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 14 }}>
+      <p style={{ fontSize: 13, color: '#6E6E73', marginBottom: 14 }}>
         Envie RG/CNH, CPF, comprovante e/ou certidão de casamento. Os documentos são lidos por inteligência artificial
         para pré-preencher a proposta e ficam armazenados de forma privada. A leitura pode ser processada por serviço no
         exterior. Veja a{' '}
@@ -225,7 +225,7 @@ export default function UploadDocumentosProposta({
         onDragLeave={() => setArrastando(false)}
         onDrop={handleDrop}
         style={{
-          border: `2px dashed ${arrastando ? '#E8390E' : comFoco ? '#E8390E' : '#DDD9D3'}`,
+          border: `2px dashed ${arrastando ? '#E8390E' : comFoco ? '#E8390E' : 'rgba(0,0,0,.1)'}`,
           background: arrastando ? '#fdeee9' : '#fafafa',
           borderRadius: 10,
           padding: '18px 16px',
@@ -233,10 +233,10 @@ export default function UploadDocumentosProposta({
           transition: 'border-color .15s, background .15s',
         }}
       >
-        <div style={{ fontSize: 14, fontWeight: 600, color: '#374151' }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#3A3A3C' }}>
           {COLAGEM_ATIVA && desktop ? 'Cole, arraste ou selecione os documentos' : 'Arraste ou selecione os documentos'}
         </div>
-        <div style={{ fontSize: 12.5, color: '#6b7280', marginTop: 4 }}>
+        <div style={{ fontSize: 12.5, color: '#6E6E73', marginTop: 4 }}>
           {COLAGEM_ATIVA && desktop
             ? 'Copie uma imagem do WhatsApp e pressione ⌘ + V (Mac) ou Ctrl + V (Windows) com esta área selecionada.'
             : 'Tire uma foto ou selecione uma imagem da galeria.'}
@@ -263,7 +263,7 @@ export default function UploadDocumentosProposta({
             </>
           )}
         </div>
-        <div style={{ fontSize: 11.5, color: '#9ca3af', marginTop: 10 }}>
+        <div style={{ fontSize: 11.5, color: '#8E8E93', marginTop: 10 }}>
           PDF, JPG, PNG ou WEBP · até {MAX_DOCUMENT_FILES} arquivos · máx. {Math.round(MAX_DOCUMENT_FILE_SIZE_BYTES / 1048576)} MB cada
         </div>
       </div>
@@ -272,15 +272,15 @@ export default function UploadDocumentosProposta({
       {docs.length > 0 && (
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
           {docs.map((d) => (
-            <li key={d.localId} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid #e5e7eb', borderRadius: 10, padding: 8, background: d.status === 'error' ? '#fef2f2' : '#fff' }}>
+            <li key={d.localId} style={{ display: 'flex', alignItems: 'center', gap: 10, border: '1px solid rgba(0,0,0,.08)', borderRadius: 10, padding: 8, background: d.status === 'error' ? '#fef2f2' : '#fff' }}>
               {d.previewUrl
-                ? <img src={d.previewUrl} alt="" style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 7, border: '1px solid #e5e7eb', flexShrink: 0 }} />
-                : <span aria-hidden style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f3f4f6', borderRadius: 7, fontSize: 22, flexShrink: 0 }}>📄</span>}
+                ? <img src={d.previewUrl} alt="" style={{ width: 52, height: 52, objectFit: 'cover', borderRadius: 7, border: '1px solid rgba(0,0,0,.08)', flexShrink: 0 }} />
+                : <span aria-hidden style={{ width: 52, height: 52, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F2F2F7', borderRadius: 7, fontSize: 22, flexShrink: 0 }}>📄</span>}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, color: '#111', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {d.source === 'paste' ? 'Imagem colada' : d.file.name}
                 </div>
-                <div style={{ fontSize: 11.5, color: '#6b7280' }}>
+                <div style={{ fontSize: 11.5, color: '#6E6E73' }}>
                   {SOURCE_LABEL[d.source]} · {formatBytes(d.file.size)}
                   {d.status === 'uploading' && ' · enviando…'}
                   {d.status === 'uploaded' && ' · enviado'}
@@ -297,9 +297,9 @@ export default function UploadDocumentosProposta({
 
       {erro && <div role="alert" style={{ marginTop: 12, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 12px', color: '#b91c1c', fontSize: 13 }}>⚠️ {erro}</div>}
       {ok && <div role="status" style={{ marginTop: 12, background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 12px', color: '#15803d', fontSize: 13 }}>{ok}</div>}
-      {anexados > 0 && <div style={{ marginTop: 8, fontSize: 12.5, color: '#6b7280' }}>📎 {anexados} documento(s) anexado(s) — serão enviados junto com a proposta.</div>}
+      {anexados > 0 && <div style={{ marginTop: 8, fontSize: 12.5, color: '#6E6E73' }}>📎 {anexados} documento(s) anexado(s) — serão enviados junto com a proposta.</div>}
 
-      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 14, fontSize: 12.5, color: '#374151', cursor: 'pointer', lineHeight: 1.5 }}>
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 14, fontSize: 12.5, color: '#3A3A3C', cursor: 'pointer', lineHeight: 1.5 }}>
         <input type="checkbox" checked={consentido} onChange={(e) => setConsentido(e.target.checked)} style={{ marginTop: 2, width: 15, height: 15, accentColor: '#E8390E', flexShrink: 0 }} />
         <span>Confirmo que tenho autorização do cliente para enviar e tratar os documentos dele nesta proposta.</span>
       </label>
@@ -321,10 +321,10 @@ const btnSec: React.CSSProperties = {
   alignItems: 'center',
   padding: '7px 14px',
   background: '#fff',
-  border: '1px solid #DDD9D3',
+  border: '1px solid rgba(0,0,0,.1)',
   borderRadius: 8,
   fontSize: 13,
   fontWeight: 500,
-  color: '#374151',
+  color: '#3A3A3C',
   cursor: 'pointer',
 }

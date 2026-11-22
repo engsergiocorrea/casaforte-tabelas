@@ -106,7 +106,7 @@ periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row
         <p
           style={{
             fontSize: "0.875rem",
-            color: "#6b7280",
+            color: "#6E6E73",
             marginTop: "0.25rem",
           }}
         >
@@ -118,7 +118,7 @@ periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row
         style={{
           background: "white",
           borderRadius: "12px",
-          border: "1px solid #DDD9D3",
+          border: "1px solid rgba(0,0,0,.1)",
           padding: "24px",
           marginBottom: "16px",
         }}
@@ -131,7 +131,7 @@ periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row
 
         <div
           style={{
-            border: "2px dashed #DDD9D3",
+            border: "2px dashed rgba(0,0,0,.1)",
             borderRadius: "10px",
             padding: "32px",
             textAlign: "center",
@@ -140,7 +140,7 @@ periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row
         >
           <div style={{ fontSize: "2rem", marginBottom: "8px" }}>📂</div>
           <p
-            style={{ fontSize: "14px", color: "#6b7280", marginBottom: "12px" }}
+            style={{ fontSize: "14px", color: "#6E6E73", marginBottom: "12px" }}
           >
             Selecione o arquivo CSV com as unidades
           </p>
@@ -155,7 +155,7 @@ periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row
 
         {loading && (
           <div
-            style={{ textAlign: "center", padding: "20px", color: "#6b7280" }}
+            style={{ textAlign: "center", padding: "20px", color: "#6E6E73" }}
           >
             <div style={{ fontSize: "1.5rem", marginBottom: "8px" }}>⏳</div>
             Importando unidades... aguarde
@@ -226,7 +226,7 @@ periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row
 
       <div
         style={{
-          background: "#f8fafc",
+          background: "#F5F5F7",
           borderRadius: "12px",
           border: "1px solid #e2e8f0",
           padding: "16px",
@@ -237,7 +237,7 @@ periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row
             fontSize: "13px",
             fontWeight: "600",
             marginBottom: "8px",
-            color: "#374151",
+            color: "#3A3A3C",
           }}
         >
           Colunas esperadas no CSV:
@@ -245,7 +245,7 @@ periodicidade_intercaladas: ['semestrais','anuais','personalizada'].includes(row
         <p
           style={{
             fontSize: "12px",
-            color: "#6b7280",
+            color: "#6E6E73",
             fontFamily: "monospace",
             lineHeight: "1.8",
           }}

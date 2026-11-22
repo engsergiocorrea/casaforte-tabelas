@@ -115,31 +115,31 @@ export default function ReajustePage({ params }: { params: Promise<{ id: string 
   const fmt = (v: any) => v != null ? `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '—'
   const fmtPerc = (v: any) => v != null ? `${Number(v) > 0 ? '+' : ''}${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '—'
 
-  if (loading) return <div style={{ padding: '2rem', color: '#6b7280' }}>Carregando...</div>
+  if (loading) return <div style={{ padding: '2rem', color: '#6E6E73' }}>Carregando...</div>
 
   return (
     <div>
       <div style={{ marginBottom: '1.5rem' }}>
-        <div style={{ fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>
-          <Link href="/admin/empreendimentos" style={{ color: '#6b7280', textDecoration: 'none' }}>Empreendimentos</Link>
+        <div style={{ fontSize: '13px', color: '#6E6E73', marginBottom: '4px' }}>
+          <Link href="/admin/empreendimentos" style={{ color: '#6E6E73', textDecoration: 'none' }}>Empreendimentos</Link>
           {' → '}
-          <Link href={`/admin/empreendimentos/${id}/unidades`} style={{ color: '#6b7280', textDecoration: 'none' }}>{empreendimento?.nome}</Link>
+          <Link href={`/admin/empreendimentos/${id}/unidades`} style={{ color: '#6E6E73', textDecoration: 'none' }}>{empreendimento?.nome}</Link>
           {' → Reajuste'}
         </div>
         <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111' }}>Reajuste de Valores</h1>
-        <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '4px' }}>
+        <p style={{ fontSize: '0.875rem', color: '#6E6E73', marginTop: '4px' }}>
           Reajusta o preço/m² e recalcula automaticamente o valor e o fluxo de pagamento.
         </p>
       </div>
 
       {/* Filtros */}
-      <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid rgba(0,0,0,.1)', padding: '24px', marginBottom: '16px' }}>
         <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#111', marginBottom: '16px' }}>Filtros</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Status</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#3A3A3C', marginBottom: '4px' }}>Status</label>
             <select value={filtros.status} onChange={e => setFiltros(f => ({ ...f, status: e.target.value }))}
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', background: 'white' }}>
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', background: 'white' }}>
               <option value="">Todos</option>
               <option value="disponivel">Disponível</option>
               <option value="reservada">Reservada</option>
@@ -147,47 +147,47 @@ export default function ReajustePage({ params }: { params: Promise<{ id: string 
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Pavimento</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#3A3A3C', marginBottom: '4px' }}>Pavimento</label>
             <select value={filtros.pavimento} onChange={e => setFiltros(f => ({ ...f, pavimento: e.target.value }))}
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', background: 'white' }}>
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', background: 'white' }}>
               <option value="">Todos</option>
               {pavimentos.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Posição</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#3A3A3C', marginBottom: '4px' }}>Posição</label>
             <select value={filtros.posicao} onChange={e => setFiltros(f => ({ ...f, posicao: e.target.value }))}
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', background: 'white' }}>
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', background: 'white' }}>
               <option value="">Todas</option>
               {posicoes.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
         </div>
 
-        <div style={{ padding: '10px 14px', background: '#f0fdf4', borderRadius: '8px', border: '1px solid #bbf7d0', fontSize: '13px', color: '#15803d' }}>
+        <div style={{ padding: '10px 14px', background: '#f0fdf4', borderRadius: '10px', border: '1px solid #bbf7d0', fontSize: '13px', color: '#15803d' }}>
           {unidadesFiltradas().length} unidades selecionadas
         </div>
       </div>
 
       {/* Percentual */}
-      <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid rgba(0,0,0,.1)', padding: '24px', marginBottom: '16px' }}>
         <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#111', marginBottom: '16px' }}>Percentual de reajuste</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '16px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>% de aumento</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#3A3A3C', marginBottom: '4px' }}>% de aumento</label>
             <input type="number" value={percentual} onChange={e => setPercentual(e.target.value)} placeholder="Ex: 3.5"
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none' }} />
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>Motivo (opcional)</label>
+            <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#3A3A3C', marginBottom: '4px' }}>Motivo (opcional)</label>
             <input type="text" value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Ex: Reajuste anual IGP-M"
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none' }} />
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none' }} />
           </div>
         </div>
 
         <div style={{ marginTop: '16px' }}>
           <button onClick={gerarPreview} disabled={!percentual || Number(percentual) === 0}
-            style={{ padding: '10px 24px', background: '#1e293b', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: !percentual ? 0.5 : 1 }}>
+            style={{ padding: '10px 24px', background: '#1e293b', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: !percentual ? 0.5 : 1 }}>
             👁 Ver prévia do reajuste
           </button>
         </div>
@@ -195,13 +195,13 @@ export default function ReajustePage({ params }: { params: Promise<{ id: string 
 
       {/* Preview */}
       {mostrarPreview && preview.length > 0 && (
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
+        <div style={{ background: 'white', borderRadius: '16px', border: '1px solid rgba(0,0,0,.1)', padding: '24px', marginBottom: '16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '15px', fontWeight: '600', color: '#111' }}>
               Prévia — {preview.length} unidades serão reajustadas em {percentual}%
             </h2>
             <button onClick={aplicarReajuste} disabled={aplicando}
-              style={{ padding: '10px 24px', background: '#E8390E', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+              style={{ padding: '10px 24px', background: '#E8390E', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
               {aplicando ? 'Aplicando...' : '✅ Confirmar reajuste'}
             </button>
           </div>
@@ -209,25 +209,25 @@ export default function ReajustePage({ params }: { params: Promise<{ id: string 
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+                <tr style={{ background: '#F5F5F7', borderBottom: '2px solid rgba(0,0,0,.08)' }}>
                   {['Unidade', 'Pavimento', 'Posição', 'Preço/m² atual', 'Novo preço/m²', 'Valor atual', 'Novo valor', 'Diferença'].map(h => (
-                    <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{h}</th>
+                    <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontSize: '11px', fontWeight: '600', color: '#6E6E73', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {preview.map(u => (
-                  <tr key={u.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                  <tr key={u.id} style={{ borderBottom: '1px solid #F2F2F7' }}>
                     <td style={{ padding: '10px 12px', fontWeight: '600', color: '#111' }}>{u.unidade}</td>
-                    <td style={{ padding: '10px 12px', color: '#6b7280' }}>{u.pavimento ?? '—'}</td>
-                    <td style={{ padding: '10px 12px', color: '#6b7280', textTransform: 'capitalize' }}>{u.posicao?.replace('_', ' ') ?? '—'}</td>
-                    <td style={{ padding: '10px 12px', color: '#6b7280' }}>
+                    <td style={{ padding: '10px 12px', color: '#6E6E73' }}>{u.pavimento ?? '—'}</td>
+                    <td style={{ padding: '10px 12px', color: '#6E6E73', textTransform: 'capitalize' }}>{u.posicao?.replace('_', ' ') ?? '—'}</td>
+                    <td style={{ padding: '10px 12px', color: '#6E6E73' }}>
                       {u.preco_m2_construido ? `R$ ${Number(u.preco_m2_construido).toLocaleString('pt-BR')}` : '—'}
                     </td>
                     <td style={{ padding: '10px 12px', color: '#15803d', fontWeight: '600' }}>
                       {u.novo_preco_m2 ? `R$ ${Number(u.novo_preco_m2).toLocaleString('pt-BR')}` : '—'}
                     </td>
-                    <td style={{ padding: '10px 12px', color: '#6b7280' }}>{fmt(u.valor_imovel)}</td>
+                    <td style={{ padding: '10px 12px', color: '#6E6E73' }}>{fmt(u.valor_imovel)}</td>
                     <td style={{ padding: '10px 12px', fontWeight: '700', color: '#111' }}>{fmt(u.novo_valor)}</td>
                     <td style={{ padding: '10px 12px', fontWeight: '600', color: u.diff && u.diff > 0 ? '#15803d' : '#b91c1c' }}>
                       {u.diff ? `+${fmt(u.diff)}` : '—'}

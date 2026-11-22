@@ -138,23 +138,23 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
     router.push(`/admin/empreendimentos/${form.empreendimento_id}/unidades`);
   }
 
-  if (!form) return <div style={{ padding: "2rem", color: "#6b7280" }}>Carregando...</div>;
+  if (!form) return <div style={{ padding: "2rem", color: "#6E6E73" }}>Carregando...</div>;
 
-  const S = { label: { display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" } as React.CSSProperties };
+  const S = { label: { display: "block", fontSize: "13px", fontWeight: "500", color: "#3A3A3C", marginBottom: "4px" } as React.CSSProperties };
 
   const inp = (name: string, type = "text") => (
     <input name={name} type={type} value={form[name] ?? ""} onChange={handleChange}
-      style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+      style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
   );
 
   const inpReadonly = (value: any) => (
     <input type="text" readOnly value={value ?? ""}
-      style={{ width: "100%", padding: "8px 12px", border: "1px solid #e5e7eb", borderRadius: "8px", fontSize: "14px", outline: "none", background: "#f9fafb", color: "#374151", fontWeight: "600" }} />
+      style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.08)", borderRadius: "8px", fontSize: "14px", outline: "none", background: "#F5F5F7", color: "#3A3A3C", fontWeight: "600" }} />
   );
 
   const sel = (name: string, opts: { value: string; label: string }[]) => (
     <select name={name} value={form[name] ?? ""} onChange={handleChange}
-      style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", background: "white" }}>
+      style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none", background: "white" }}>
       {opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -174,7 +174,7 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
         <h1 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111" }}>Editar Unidade — {form.unidade}</h1>
-        {empreendimento && <p style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "4px" }}>{empreendimento.nome}</p>}
+        {empreendimento && <p style={{ fontSize: "0.875rem", color: "#6E6E73", marginTop: "4px" }}>{empreendimento.nome}</p>}
       </div>
 
       {error && (
@@ -186,7 +186,7 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
       <form onSubmit={handleSubmit}>
 
         {/* Identificação */}
-        <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "white", borderRadius: "12px", border: "1px solid rgba(0,0,0,.1)", padding: "24px", marginBottom: "16px" }}>
           <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Identificação</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "14px" }}>
             <div><label style={S.label}>Unidade</label>{inp("unidade")}</div>
@@ -224,7 +224,7 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
         </div>
 
         {/* Áreas */}
-        <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "white", borderRadius: "12px", border: "1px solid rgba(0,0,0,.1)", padding: "24px", marginBottom: "16px" }}>
           <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Áreas (m²)</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "14px" }}>
             <div><label style={S.label}>Área construída</label>{inp("area_construida", "number")}</div>
@@ -282,11 +282,11 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
         </div>
 
         {/* Valores financeiros */}
-        <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "white", borderRadius: "12px", border: "1px solid rgba(0,0,0,.1)", padding: "24px", marginBottom: "16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
             <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111" }}>Valores financeiros</h2>
             {empreendimento && (
-              <span style={{ fontSize: "11px", color: "#9ca3af", background: "#f3f4f6", padding: "3px 10px", borderRadius: "20px" }}>
+              <span style={{ fontSize: "11px", color: "#8E8E93", background: "#F2F2F7", padding: "3px 10px", borderRadius: "20px" }}>
                 Calculado com base na config. do empreendimento
               </span>
             )}
@@ -340,8 +340,8 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
 
           {/* Resumo do fluxo */}
           {form.valor_imovel && (
-            <div style={{ marginTop: "16px", padding: "14px 16px", background: "#f8fafc", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-              <div style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "8px", fontWeight: "600", textTransform: "uppercase" as const }}>Resumo do fluxo</div>
+            <div style={{ marginTop: "16px", padding: "14px 16px", background: "#F5F5F7", borderRadius: "8px", border: "1px solid rgba(0,0,0,.08)" }}>
+              <div style={{ fontSize: "12px", color: "#8E8E93", marginBottom: "8px", fontWeight: "600", textTransform: "uppercase" as const }}>Resumo do fluxo</div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "8px" }}>
                 {[
                   { l: "Sinal", v: form.valor_sinal },
@@ -350,7 +350,7 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
                   { l: "Chaves", v: form.valor_chaves },
                 ].map(item => (
                   <div key={item.l} style={{ textAlign: "center" as const }}>
-                    <div style={{ fontSize: "11px", color: "#9ca3af", marginBottom: "2px" }}>{item.l}</div>
+                    <div style={{ fontSize: "11px", color: "#8E8E93", marginBottom: "2px" }}>{item.l}</div>
                     <div style={{ fontSize: "13px", fontWeight: "600", color: "#111" }}>{fmtMoeda(item.v)}</div>
                   </div>
                 ))}
@@ -360,7 +360,7 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
         </div>
 
         {/* Informações de venda */}
-        <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "white", borderRadius: "12px", border: "1px solid rgba(0,0,0,.1)", padding: "24px", marginBottom: "16px" }}>
           <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Informações de venda</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
             <div><label style={S.label}>Comprador</label>{inp("comprador_nome")}</div>
@@ -370,15 +370,15 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
             <div style={{ gridColumn: "1/-1" }}>
               <label style={S.label}>Observações públicas</label>
               <textarea name="observacoes_publicas" value={form.observacoes_publicas ?? ""} onChange={handleChange} rows={2}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
             </div>
             <div style={{ gridColumn: "1/-1" }}>
               <label style={S.label}>Observações internas</label>
               <textarea name="observacoes_internas" value={form.observacoes_internas ?? ""} onChange={handleChange} rows={2}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
             </div>
             <div>
-              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "14px", color: "#3A3A3C" }}>
                 <input type="checkbox" name="destaque" checked={form.destaque ?? false} onChange={handleChange}
                   style={{ width: "16px", height: "16px", accentColor: "#E8390E" }} />
                 Destacar unidade na tabela
@@ -389,7 +389,7 @@ const { error: err } = await supabase.from("unidades").update(dataToSave).eq("id
 
         <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
           <button type="button" onClick={() => router.back()}
-            style={{ padding: "10px 20px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", background: "white", cursor: "pointer", color: "#374151" }}>
+            style={{ padding: "10px 20px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", background: "white", cursor: "pointer", color: "#3A3A3C" }}>
             Cancelar
           </button>
           <button type="submit" disabled={saving}

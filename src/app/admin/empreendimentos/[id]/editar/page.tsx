@@ -129,18 +129,18 @@ export default function EditarEmpreendimentoPage({
     window.location.assign("/admin/empreendimentos");
   }
 
-  if (!form) return <div style={{ padding: "2rem", color: "#6b7280" }}>Carregando...</div>;
+  if (!form) return <div style={{ padding: "2rem", color: "#6E6E73" }}>Carregando...</div>;
 
-  const S = { label: { display: "block", fontSize: "13px", fontWeight: "500", color: "#374151", marginBottom: "4px" } as React.CSSProperties };
+  const S = { label: { display: "block", fontSize: "13px", fontWeight: "500", color: "#3A3A3C", marginBottom: "4px" } as React.CSSProperties };
 
   const inp = (name: string, type = "text", placeholder = "") => (
     <input name={name} type={type} placeholder={placeholder} value={form[name] ?? ""} onChange={handleChange}
-      style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+      style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
   );
 
   const sel = (name: string, opts: { value: string; label: string }[]) => (
     <select name={name} value={form[name] ?? ""} onChange={handleChange}
-      style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", background: "white" }}>
+      style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none", background: "white" }}>
       {opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -153,7 +153,7 @@ export default function EditarEmpreendimentoPage({
           <div style={{ height: "8px", background: "#eee", borderRadius: "999px", overflow: "hidden" }}>
             <div style={{ height: "100%", width: `${uploadPct}%`, background: "#E8390E", transition: "width .15s" }} />
           </div>
-          <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>Enviando… {uploadPct}%</div>
+          <div style={{ fontSize: "12px", color: "#6E6E73", marginTop: "4px" }}>Enviando… {uploadPct}%</div>
         </div>
       )}
       {uploadOkField === field && uploadingField !== field && (
@@ -174,17 +174,17 @@ export default function EditarEmpreendimentoPage({
       <label style={S.label}>{label}</label>
       {form[field] && (
         <div style={{ marginBottom: "8px" }}>
-          <img src={form[field]} alt={label} style={{ width: "100%", maxHeight: "180px", objectFit: "cover", borderRadius: "8px", border: "1px solid #DDD9D3" }} />
+          <img src={form[field]} alt={label} style={{ width: "100%", maxHeight: "180px", objectFit: "cover", borderRadius: "8px", border: "1px solid rgba(0,0,0,.1)" }} />
         </div>
       )}
       <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-        <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "#f9fafb", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", cursor: "pointer", color: "#374151" }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "#F5F5F7", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "13px", cursor: "pointer", color: "#3A3A3C" }}>
           {uploadingField === field ? `Enviando… ${uploadPct}%` : "📁 Fazer upload"}
           <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, field)} style={{ display: "none" }} disabled={uploading} />
         </label>
-        <span style={{ fontSize: "12px", color: "#9ca3af" }}>ou</span>
+        <span style={{ fontSize: "12px", color: "#8E8E93" }}>ou</span>
         <input name={field} type="url" placeholder="Cole a URL da imagem" value={form[field] ?? ""} onChange={handleChange}
-          style={{ flex: 1, minWidth: "200px", padding: "7px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", outline: "none" }} />
+          style={{ flex: 1, minWidth: "200px", padding: "7px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "13px", outline: "none" }} />
         {form[field] && (
           <button type="button" onClick={() => setForm((f: any) => ({ ...f, [field]: "" }))}
             style={{ padding: "7px 12px", border: "1px solid #fecaca", borderRadius: "8px", fontSize: "13px", color: "#b91c1c", background: "white", cursor: "pointer" }}>
@@ -208,9 +208,9 @@ export default function EditarEmpreendimentoPage({
         </div>
       )}
       {field === "folder_url" && form.folder_url && form.slug && (
-        <div style={{ marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", padding: "8px 10px", background: "#f8fafc", border: "1px solid #e5e7eb", borderRadius: "8px" }}>
-          <span style={{ fontSize: "12px", color: "#6b7280" }}>🔗 Link curto p/ compartilhar:</span>
-          <code style={{ fontSize: "13px", color: "#111", background: "white", border: "1px solid #e5e7eb", padding: "3px 8px", borderRadius: "6px" }}>{linkCurtoFolder()}</code>
+        <div style={{ marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", padding: "8px 10px", background: "#F5F5F7", border: "1px solid rgba(0,0,0,.08)", borderRadius: "8px" }}>
+          <span style={{ fontSize: "12px", color: "#6E6E73" }}>🔗 Link curto p/ compartilhar:</span>
+          <code style={{ fontSize: "13px", color: "#111", background: "white", border: "1px solid rgba(0,0,0,.08)", padding: "3px 8px", borderRadius: "6px" }}>{linkCurtoFolder()}</code>
           <button type="button"
             onClick={() => { navigator.clipboard.writeText(linkCurtoFolder()); setLinkCopiado(true); setTimeout(() => setLinkCopiado(false), 2000); }}
             style={{ padding: "5px 12px", border: "1px solid #E8390E", borderRadius: "6px", fontSize: "13px", fontWeight: 600, color: linkCopiado ? "#15803d" : "#E8390E", background: "white", cursor: "pointer" }}>
@@ -219,13 +219,13 @@ export default function EditarEmpreendimentoPage({
         </div>
       )}
       <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-        <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "#f9fafb", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", cursor: "pointer", color: "#374151" }}>
+        <label style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "7px 14px", background: "#F5F5F7", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "13px", cursor: "pointer", color: "#3A3A3C" }}>
           {uploadingField === field ? `Enviando… ${uploadPct}%` : "📁 Enviar folder (PDF)"}
           <input type="file" accept="application/pdf,image/*" onChange={(e) => handleFileUpload(e, field)} style={{ display: "none" }} disabled={uploading} />
         </label>
-        <span style={{ fontSize: "12px", color: "#9ca3af" }}>ou</span>
+        <span style={{ fontSize: "12px", color: "#8E8E93" }}>ou</span>
         <input name={field} type="url" placeholder="Cole a URL do folder" value={form[field] ?? ""} onChange={handleChange}
-          style={{ flex: 1, minWidth: "200px", padding: "7px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", outline: "none" }} />
+          style={{ flex: 1, minWidth: "200px", padding: "7px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "13px", outline: "none" }} />
         {form[field] && (
           <button type="button" onClick={() => setForm((f: any) => ({ ...f, [field]: "" }))}
             style={{ padding: "7px 12px", border: "1px solid #fecaca", borderRadius: "8px", fontSize: "13px", color: "#b91c1c", background: "white", cursor: "pointer" }}>
@@ -247,11 +247,11 @@ export default function EditarEmpreendimentoPage({
       <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
         <div>
           <h1 style={{ fontSize: "1.5rem", fontWeight: "700", color: "#111" }}>Editar Empreendimento</h1>
-          <p style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>{form.nome}</p>
+          <p style={{ fontSize: "0.875rem", color: "#6E6E73", marginTop: "0.25rem" }}>{form.nome}</p>
         </div>
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
           <a href={`/admin/empreendimentos/${id}/unidades`}
-            style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", background: "white", color: "#374151", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "8px 16px", background: "white", color: "#3A3A3C", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "13px", fontWeight: 600, textDecoration: "none", whiteSpace: "nowrap" }}>
             🏠 Unidades (status em massa)
           </a>
           <a href={`/admin/empreendimentos/${id}/tabela-m2`}
@@ -270,7 +270,7 @@ export default function EditarEmpreendimentoPage({
       <form onSubmit={handleSubmit}>
 
         {/* Informações básicas */}
-        <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "white", borderRadius: "12px", border: "1px solid rgba(0,0,0,.1)", padding: "24px", marginBottom: "16px" }}>
           <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Informações básicas</h2>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             <div style={{ gridColumn: "1/-1" }}><label style={S.label}>Nome *</label>{inp("nome")}</div>
@@ -292,7 +292,7 @@ export default function EditarEmpreendimentoPage({
             <div style={{ gridColumn: "1/-1" }}>
               <label style={S.label}>Descrição curta</label>
               <textarea name="descricao_curta" value={form.descricao_curta ?? ""} onChange={handleChange} rows={2}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
             </div>
             {imageField("imagem_capa_url", "🖼️ Imagem de capa")}
             {imageField("logo_url", "🏷️ Logo do empreendimento")}
@@ -301,21 +301,21 @@ export default function EditarEmpreendimentoPage({
         </div>
 
         {/* Configuração Comercial */}
-        <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "white", borderRadius: "12px", border: "1px solid rgba(0,0,0,.1)", padding: "24px", marginBottom: "16px" }}>
           <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "4px" }}>⚙️ Configuração Comercial</h2>
-          <p style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "16px" }}>Define as regras de cálculo automático para todas as unidades deste empreendimento.</p>
+          <p style={{ fontSize: "12px", color: "#8E8E93", marginBottom: "16px" }}>Define as regras de cálculo automático para todas as unidades deste empreendimento.</p>
 
           {/* Tipo de cálculo */}
-          <div style={{ background: "#f8fafc", borderRadius: "8px", padding: "14px 16px", marginBottom: "16px", border: "1px solid #e5e7eb" }}>
+          <div style={{ background: "#F5F5F7", borderRadius: "8px", padding: "14px 16px", marginBottom: "16px", border: "1px solid rgba(0,0,0,.08)" }}>
             <label style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }}>
               <input type="checkbox" name="considerar_area_externa_no_calculo" checked={form.considerar_area_externa_no_calculo ?? false} onChange={handleChange}
                 style={{ width: "16px", height: "16px", accentColor: "#E8390E" }} />
               <div>
                 <div style={{ fontSize: "14px", fontWeight: "600", color: "#111" }}>Considerar área privativa externa no cálculo</div>
-                <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "2px" }}>
+                <div style={{ fontSize: "12px", color: "#6E6E73", marginTop: "2px" }}>
                   Se marcado: valor = área construída × preço/m² + área externa × preço/m² externo
                 </div>
-                <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                <div style={{ fontSize: "12px", color: "#6E6E73" }}>
                   Se desmarcado: valor = área construída × preço/m²
                 </div>
               </div>
@@ -345,11 +345,11 @@ export default function EditarEmpreendimentoPage({
           {/* Percentuais */}
           <div style={{ marginBottom: "8px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-              <label style={{ fontSize: "13px", fontWeight: "600", color: "#374151" }}>Fluxo de pagamento padrão</label>
+              <label style={{ fontSize: "13px", fontWeight: "600", color: "#3A3A3C" }}>Fluxo de pagamento padrão</label>
               <span style={{
                 fontSize: "12px", fontWeight: "600", padding: "2px 10px", borderRadius: "20px",
-                background: somaPerc === 100 ? "#dcfce7" : somaPerc === 0 ? "#f3f4f6" : "#fee2e2",
-                color: somaPerc === 100 ? "#15803d" : somaPerc === 0 ? "#6b7280" : "#b91c1c"
+                background: somaPerc === 100 ? "#dcfce7" : somaPerc === 0 ? "#F2F2F7" : "#fee2e2",
+                color: somaPerc === 100 ? "#15803d" : somaPerc === 0 ? "#6E6E73" : "#b91c1c"
               }}>
                 {somaPerc === 0 ? "Não configurado" : `Total: ${somaPerc}%${somaPerc === 100 ? " ✓" : " — deve ser 100%"}`}
               </span>
@@ -358,22 +358,22 @@ export default function EditarEmpreendimentoPage({
               <div>
                 <label style={S.label}>% Sinal/Entrada</label>
                 <input name="percentual_sinal_padrao" type="number" min="0" max="100" value={form.percentual_sinal_padrao ?? ""} onChange={handleChange}
-                  style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+                  style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
               </div>
               <div>
                 <label style={S.label}>% Mensais</label>
                 <input name="percentual_mensais_padrao" type="number" min="0" max="100" value={form.percentual_mensais_padrao ?? ""} onChange={handleChange}
-                  style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+                  style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
               </div>
               <div>
                 <label style={S.label}>% Intercaladas</label>
                 <input name="percentual_intercaladas_padrao" type="number" min="0" max="100" value={form.percentual_intercaladas_padrao ?? ""} onChange={handleChange}
-                  style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+                  style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
               </div>
               <div>
                 <label style={S.label}>% Chaves</label>
                 <input name="percentual_chaves_padrao" type="number" min="0" max="100" value={form.percentual_chaves_padrao ?? ""} onChange={handleChange}
-                  style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+                  style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
               </div>
             </div>
           </div>
@@ -383,12 +383,12 @@ export default function EditarEmpreendimentoPage({
             <div>
               <label style={S.label}>Qtd. parcelas mensais</label>
               <input name="quantidade_mensais_padrao" type="number" min="1" value={form.quantidade_mensais_padrao ?? ""} onChange={handleChange}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
             </div>
             <div>
               <label style={S.label}>Qtd. intercaladas</label>
               <input name="quantidade_intercaladas_padrao" type="number" min="1" value={form.quantidade_intercaladas_padrao ?? ""} onChange={handleChange}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none" }} />
             </div>
             <div>
               <label style={S.label}>Periodicidade intercaladas</label>
@@ -403,20 +403,20 @@ export default function EditarEmpreendimentoPage({
         </div>
 
         {/* Observações */}
-        <div style={{ background: "white", borderRadius: "12px", border: "1px solid #DDD9D3", padding: "24px", marginBottom: "16px" }}>
+        <div style={{ background: "white", borderRadius: "12px", border: "1px solid rgba(0,0,0,.1)", padding: "24px", marginBottom: "16px" }}>
           <h2 style={{ fontSize: "15px", fontWeight: "600", color: "#111", marginBottom: "16px" }}>Observações</h2>
           <div style={{ display: "grid", gap: "16px" }}>
             <div>
               <label style={S.label}>Observações públicas</label>
               <textarea name="observacoes_publicas" value={form.observacoes_publicas ?? ""} onChange={handleChange} rows={3}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
             </div>
             <div>
               <label style={S.label}>Observações internas</label>
               <textarea name="observacoes_internas" value={form.observacoes_internas ?? ""} onChange={handleChange} rows={2}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", outline: "none", resize: "vertical" }} />
             </div>
-            <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "14px", color: "#374151" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "14px", color: "#3A3A3C" }}>
               <input type="checkbox" name="ativo_publico" checked={form.ativo_publico ?? false} onChange={handleChange}
                 style={{ width: "16px", height: "16px", accentColor: "#E8390E" }} />
               Exibir no site público
@@ -424,11 +424,11 @@ export default function EditarEmpreendimentoPage({
             <div>
               <label style={S.label}>Quem vê a tabela</label>
               <select name="visibilidade" value={form.visibilidade ?? "publica"} onChange={handleChange}
-                style={{ width: "100%", padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", background: "white" }}>
+                style={{ width: "100%", padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", background: "white" }}>
                 <option value="publica">Pública (corretores)</option>
                 <option value="diretoria">Só diretoria</option>
               </select>
-              <p style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>“Só diretoria”: não aparece para corretores; abre para quem está logado como diretoria, com as mesmas funções (PDF e proposta).</p>
+              <p style={{ fontSize: "12px", color: "#6E6E73", marginTop: "4px" }}>“Só diretoria”: não aparece para corretores; abre para quem está logado como diretoria, com as mesmas funções (PDF e proposta).</p>
             </div>
             {form.visibilidade === "diretoria" && <Convites empreendimentoId={id as string} />}
           </div>
@@ -436,7 +436,7 @@ export default function EditarEmpreendimentoPage({
 
         <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
           <button type="button" onClick={() => router.back()}
-            style={{ padding: "10px 20px", border: "1px solid #DDD9D3", borderRadius: "8px", fontSize: "14px", background: "white", cursor: "pointer", color: "#374151" }}>
+            style={{ padding: "10px 20px", border: "1px solid rgba(0,0,0,.1)", borderRadius: "8px", fontSize: "14px", background: "white", cursor: "pointer", color: "#3A3A3C" }}>
             Cancelar
           </button>
           <button type="submit" disabled={saving}

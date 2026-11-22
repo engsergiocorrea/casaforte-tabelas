@@ -120,7 +120,7 @@ export function DashboardCharts({ vendasPorMes, empreendimentos, unidades }: Pro
               iconType="circle"
               iconSize={8}
               formatter={(value) => (
-                <span style={{ fontSize: 11, color: '#6b7280' }}>{value}</span>
+                <span style={{ fontSize: 11, color: '#6E6E73' }}>{value}</span>
               )}
             />
             <Tooltip
@@ -149,7 +149,7 @@ export function DashboardCharts({ vendasPorMes, empreendimentos, unidades }: Pro
             <YAxis
               type="category"
               dataKey="nome"
-              tick={{ fontSize: 11, fill: '#374151' }}
+              tick={{ fontSize: 11, fill: '#3A3A3C' }}
               axisLine={false}
               tickLine={false}
               width={130}

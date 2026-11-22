@@ -84,29 +84,29 @@ export default function NovaVendaPage() {
     router.push('/admin/vendas')
   }
 
-  const S = { label: { display:'block', fontSize:'13px', fontWeight:'500', color:'#374151', marginBottom:'4px' } as React.CSSProperties }
+  const S = { label: { display:'block', fontSize:'13px', fontWeight:'500', color:'#3A3A3C', marginBottom:'4px' } as React.CSSProperties }
   const inp = (name: string, type='text', placeholder='') => (
     <input name={name} type={type} placeholder={placeholder} value={(form as any)[name]} onChange={handleChange}
-      style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
+      style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none'}} />
   )
 
   return (
     <div>
       <div style={{marginBottom:'1.5rem'}}>
         <h1 style={{fontSize:'1.5rem',fontWeight:'700',color:'#111'}}>Registrar Venda</h1>
-        <p style={{fontSize:'0.875rem',color:'#6b7280',marginTop:'0.25rem'}}>A unidade será marcada como vendida automaticamente</p>
+        <p style={{fontSize:'0.875rem',color:'#6E6E73',marginTop:'0.25rem'}}>A unidade será marcada como vendida automaticamente</p>
       </div>
 
-      {error && <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius:'8px',padding:'12px',marginBottom:'16px',color:'#b91c1c',fontSize:'14px'}}>{error}</div>}
+      {error && <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius: '10px',padding:'12px',marginBottom:'16px',color:'#b91c1c',fontSize:'14px'}}>{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
+        <div style={{background:'white',borderRadius: '16px',border:'1px solid rgba(0,0,0,.1)',padding:'24px',marginBottom:'16px'}}>
           <h2 style={{fontSize:'15px',fontWeight:'600',color:'#111',marginBottom:'16px'}}>Unidade</h2>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div>
               <label style={S.label}>Empreendimento *</label>
               <select value={form.empreendimento_id} onChange={handleEmpChange} required
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',background:'white'}}>
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none',background:'white'}}>
                 <option value="">Selecione...</option>
                 {empreendimentos.map(e => <option key={e.id} value={e.id}>{e.nome}</option>)}
               </select>
@@ -114,7 +114,7 @@ export default function NovaVendaPage() {
             <div>
               <label style={S.label}>Unidade *</label>
               <select name="unidade_id" value={form.unidade_id} onChange={handleUnidadeChange} required
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',background:'white'}}>
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none',background:'white'}}>
                 <option value="">Selecione o empreendimento primeiro</option>
                 {unidades.map(u => <option key={u.id} value={u.id}>{u.unidade} — R$ {Number(u.valor_imovel).toLocaleString('pt-BR')}</option>)}
               </select>
@@ -122,7 +122,7 @@ export default function NovaVendaPage() {
           </div>
         </div>
 
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
+        <div style={{background:'white',borderRadius: '16px',border:'1px solid rgba(0,0,0,.1)',padding:'24px',marginBottom:'16px'}}>
           <h2 style={{fontSize:'15px',fontWeight:'600',color:'#111',marginBottom:'16px'}}>Comprador e Corretor</h2>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div><label style={S.label}>Nome do comprador *</label>{inp('comprador_nome','text','Nome completo')}</div>
@@ -133,7 +133,7 @@ export default function NovaVendaPage() {
             <div>
               <label style={S.label}>Status do contrato</label>
               <select name="status_contrato" value={form.status_contrato} onChange={handleChange}
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',background:'white'}}>
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none',background:'white'}}>
                 <option value="aguardando_contrato">Aguardando contrato</option>
                 <option value="contrato_enviado">Contrato enviado</option>
                 <option value="contrato_assinado">Contrato assinado</option>
@@ -142,7 +142,7 @@ export default function NovaVendaPage() {
           </div>
         </div>
 
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
+        <div style={{background:'white',borderRadius: '16px',border:'1px solid rgba(0,0,0,.1)',padding:'24px',marginBottom:'16px'}}>
           <h2 style={{fontSize:'15px',fontWeight:'600',color:'#111',marginBottom:'16px'}}>Valores</h2>
           <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px'}}>
             <div><label style={S.label}>Valor da venda (R$) *</label>{inp('valor_venda','number')}</div>
@@ -154,19 +154,19 @@ export default function NovaVendaPage() {
           </div>
         </div>
 
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
+        <div style={{background:'white',borderRadius: '16px',border:'1px solid rgba(0,0,0,.1)',padding:'24px',marginBottom:'16px'}}>
           <label style={S.label}>Observações</label>
           <textarea name="observacoes" value={form.observacoes} onChange={handleChange} rows={3}
-            style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',resize:'vertical'}} />
+            style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none',resize:'vertical'}} />
         </div>
 
         <div style={{display:'flex',gap:'12px',justifyContent:'flex-end'}}>
           <button type="button" onClick={() => router.back()}
-            style={{padding:'10px 20px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',background:'white',cursor:'pointer',color:'#374151'}}>
+            style={{padding:'10px 20px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',background:'white',cursor:'pointer',color:'#3A3A3C'}}>
             Cancelar
           </button>
           <button type="submit" disabled={saving}
-            style={{padding:'10px 20px',background:'#E8390E',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'500',cursor:'pointer'}}>
+            style={{padding:'10px 20px',background:'#E8390E',color:'white',border:'none',borderRadius: '10px',fontSize:'14px',fontWeight:'500',cursor:'pointer'}}>
             {saving ? 'Salvando...' : 'Registrar venda'}
           </button>
         </div>

@@ -14,16 +14,16 @@ function H({ children }: { children: React.ReactNode }) {
   return <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111', margin: '28px 0 8px' }}>{children}</h2>
 }
 function P({ children }: { children: React.ReactNode }) {
-  return <p style={{ fontSize: 15, color: '#374151', lineHeight: 1.65, margin: '0 0 10px' }}>{children}</p>
+  return <p style={{ fontSize: 15, color: '#3A3A3C', lineHeight: 1.65, margin: '0 0 10px' }}>{children}</p>
 }
 function Li({ children }: { children: React.ReactNode }) {
-  return <li style={{ fontSize: 15, color: '#374151', lineHeight: 1.6, marginBottom: 6 }}>{children}</li>
+  return <li style={{ fontSize: 15, color: '#3A3A3C', lineHeight: 1.6, marginBottom: 6 }}>{children}</li>
 }
 
 export default function PrivacidadePage() {
   return (
-    <div style={{ minHeight: '100vh', background: '#F5F3F0' }}>
-      <header style={{ background: '#1E1E1E', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
+    <div style={{ minHeight: '100vh', background: '#F5F5F7' }}>
+      <header style={{ background: '#1C1C1E', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
         <img src="https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png" alt="Casa Forte" style={{ height: 30, objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
         <div>
           <div style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>Casa Forte</div>
@@ -34,7 +34,7 @@ export default function PrivacidadePage() {
       <main style={{ padding: '32px 0 64px' }}>
         <div style={wrap}>
           <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111', margin: '0 0 4px' }}>Política de Privacidade</h1>
-          <p style={{ fontSize: 13, color: '#9ca3af', margin: '0 0 20px' }}>Atualizada em {ATUALIZADO}</p>
+          <p style={{ fontSize: 13, color: '#8E8E93', margin: '0 0 20px' }}>Atualizada em {ATUALIZADO}</p>
 
           <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: '#92400e', marginBottom: 8 }}>
             ⚠️ Minuta em revisão jurídica. Os termos abaixo descrevem como tratamos os dados hoje e serão consolidados com nossa assessoria jurídica.
@@ -102,7 +102,7 @@ export default function PrivacidadePage() {
           </P>
 
           <p style={{ marginTop: 28 }}>
-            <Link href="/" style={{ color: '#6b7280', fontSize: 14, textDecoration: 'none' }}>← Voltar</Link>
+            <Link href="/" style={{ color: '#6E6E73', fontSize: 14, textDecoration: 'none' }}>← Voltar</Link>
           </p>
         </div>
       </main>

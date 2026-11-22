@@ -48,16 +48,16 @@ export default function NovoEmpreendimentoPage() {
   }
 
   const lbl = (text: string) => (
-    <label style={{display:'block',fontSize:'13px',fontWeight:'500',color:'#374151',marginBottom:'4px'}}>{text}</label>
+    <label style={{display:'block',fontSize:'13px',fontWeight:'500',color:'#3A3A3C',marginBottom:'4px'}}>{text}</label>
   )
   const inp = (name: string, type = 'text', placeholder = '') => (
     <input name={name} type={type} placeholder={placeholder}
       value={String((form as any)[name])} onChange={handleChange}
-      style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
+      style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none'}} />
   )
   const sel = (name: string, options: {value:string,label:string}[]) => (
     <select name={name} value={String((form as any)[name])} onChange={handleChange}
-      style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',background:'white'}}>
+      style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none',background:'white'}}>
       {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   )
@@ -66,13 +66,13 @@ export default function NovoEmpreendimentoPage() {
     <div>
       <div style={{marginBottom:'1.5rem'}}>
         <h1 style={{fontSize:'1.5rem',fontWeight:'700',color:'#111'}}>Novo Empreendimento</h1>
-        <p style={{fontSize:'0.875rem',color:'#6b7280',marginTop:'0.25rem'}}>Preencha os dados do empreendimento</p>
+        <p style={{fontSize:'0.875rem',color:'#6E6E73',marginTop:'0.25rem'}}>Preencha os dados do empreendimento</p>
       </div>
 
-      {error && <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius:'8px',padding:'12px',marginBottom:'16px',color:'#b91c1c',fontSize:'14px'}}>{error}</div>}
+      {error && <div style={{background:'#fef2f2',border:'1px solid #fecaca',borderRadius: '10px',padding:'12px',marginBottom:'16px',color:'#b91c1c',fontSize:'14px'}}>{error}</div>}
 
       <form onSubmit={handleSubmit}>
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
+        <div style={{background:'white',borderRadius: '16px',border:'1px solid rgba(0,0,0,.1)',padding:'24px',marginBottom:'16px'}}>
           <h2 style={{fontSize:'15px',fontWeight:'600',color:'#111',marginBottom:'16px'}}>Informações básicas</h2>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div style={{gridColumn:'1/-1'}}>
@@ -106,12 +106,12 @@ export default function NovoEmpreendimentoPage() {
             <div style={{gridColumn:'1/-1'}}>
               {lbl('Descrição curta')}
               <textarea name="descricao_curta" value={form.descricao_curta} onChange={handleChange} rows={2}
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',resize:'vertical'}} />
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none',resize:'vertical'}} />
             </div>
           </div>
         </div>
 
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
+        <div style={{background:'white',borderRadius: '16px',border:'1px solid rgba(0,0,0,.1)',padding:'24px',marginBottom:'16px'}}>
           <h2 style={{fontSize:'15px',fontWeight:'600',color:'#111',marginBottom:'16px'}}>Condições comerciais</h2>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
             <div>
@@ -125,17 +125,17 @@ export default function NovoEmpreendimentoPage() {
             <div>
               {lbl('Parcelas padrão')}
               <input name="parcelas_padrao" type="number" value={form.parcelas_padrao} onChange={handleChange}
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none'}} />
             </div>
             <div>
               {lbl('% Sinal padrão')}
               <input name="percentual_sinal_padrao" type="number" value={form.percentual_sinal_padrao} onChange={handleChange}
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none'}} />
             </div>
             <div>
               {lbl('% Chaves padrão')}
               <input name="percentual_chaves_padrao" type="number" value={form.percentual_chaves_padrao} onChange={handleChange}
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none'}} />
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none'}} />
             </div>
             <div>
               {lbl('Data prevista de entrega')}
@@ -144,11 +144,11 @@ export default function NovoEmpreendimentoPage() {
             <div style={{gridColumn:'1/-1'}}>
               {lbl('Observações públicas')}
               <textarea name="observacoes_publicas" value={form.observacoes_publicas} onChange={handleChange} rows={3}
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',outline:'none',resize:'vertical'}}
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',outline:'none',resize:'vertical'}}
                 placeholder="Ex: Até a entrega incide INCC-M. Após a entrega: 1% + IGP-M." />
             </div>
             <div>
-              <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',fontSize:'14px',color:'#374151'}}>
+              <label style={{display:'flex',alignItems:'center',gap:'8px',cursor:'pointer',fontSize:'14px',color:'#3A3A3C'}}>
                 <input type="checkbox" name="ativo_publico" checked={form.ativo_publico} onChange={handleChange}
                   style={{width:'16px',height:'16px',accentColor:'#E8390E'}} />
                 Exibir no site público
@@ -157,7 +157,7 @@ export default function NovoEmpreendimentoPage() {
             <div>
               {lbl('Quem vê a tabela')}
               <select name="visibilidade" value={form.visibilidade} onChange={handleChange}
-                style={{width:'100%',padding:'8px 12px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',background:'white'}}>
+                style={{width:'100%',padding:'8px 12px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',background:'white'}}>
                 <option value="publica">Pública (corretores)</option>
                 <option value="diretoria">Só diretoria</option>
               </select>
@@ -167,11 +167,11 @@ export default function NovoEmpreendimentoPage() {
 
         <div style={{display:'flex',gap:'12px',justifyContent:'flex-end'}}>
           <button type="button" onClick={() => router.back()}
-            style={{padding:'10px 20px',border:'1px solid #DDD9D3',borderRadius:'8px',fontSize:'14px',background:'white',cursor:'pointer',color:'#374151'}}>
+            style={{padding:'10px 20px',border:'1px solid rgba(0,0,0,.1)',borderRadius: '10px',fontSize:'14px',background:'white',cursor:'pointer',color:'#3A3A3C'}}>
             Cancelar
           </button>
           <button type="submit" disabled={loading}
-            style={{padding:'10px 20px',background:'#E8390E',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'500',cursor:'pointer'}}>
+            style={{padding:'10px 20px',background:'#E8390E',color:'white',border:'none',borderRadius: '10px',fontSize:'14px',fontWeight:'500',cursor:'pointer'}}>
             {loading ? 'Salvando...' : 'Salvar empreendimento'}
           </button>
         </div>

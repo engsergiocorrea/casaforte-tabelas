@@ -143,7 +143,7 @@ posicao: form.posicao || null,
       display: "block",
       fontSize: "13px",
       fontWeight: "500",
-      color: "#374151",
+      color: "#3A3A3C",
       marginBottom: "4px",
     } as React.CSSProperties,
   };
@@ -157,7 +157,7 @@ posicao: form.posicao || null,
       style={{
         width: "100%",
         padding: "8px 12px",
-        border: "1px solid #DDD9D3",
+        border: "1px solid rgba(0,0,0,.1)",
         borderRadius: "8px",
         fontSize: "14px",
         outline: "none",
@@ -172,7 +172,7 @@ posicao: form.posicao || null,
       style={{
         width: "100%",
         padding: "8px 12px",
-        border: "1px solid #DDD9D3",
+        border: "1px solid rgba(0,0,0,.1)",
         borderRadius: "8px",
         fontSize: "14px",
         outline: "none",
@@ -196,7 +196,7 @@ posicao: form.posicao || null,
         <p
           style={{
             fontSize: "0.875rem",
-            color: "#6b7280",
+            color: "#6E6E73",
             marginTop: "0.25rem",
           }}
         >
@@ -225,7 +225,7 @@ posicao: form.posicao || null,
           style={{
             background: "white",
             borderRadius: "12px",
-            border: "1px solid #DDD9D3",
+            border: "1px solid rgba(0,0,0,.1)",
             padding: "24px",
             marginBottom: "16px",
           }}
@@ -309,7 +309,7 @@ posicao: form.posicao || null,
           style={{
             background: "white",
             borderRadius: "12px",
-            border: "1px solid #DDD9D3",
+            border: "1px solid rgba(0,0,0,.1)",
             padding: "24px",
             marginBottom: "16px",
           }}
@@ -354,7 +354,7 @@ posicao: form.posicao || null,
           style={{
             background: "white",
             borderRadius: "12px",
-            border: "1px solid #DDD9D3",
+            border: "1px solid rgba(0,0,0,.1)",
             padding: "24px",
             marginBottom: "16px",
           }}
@@ -370,7 +370,7 @@ posicao: form.posicao || null,
             Valores financeiros
           </h2>
           <p
-            style={{ fontSize: "12px", color: "#9ca3af", marginBottom: "16px" }}
+            style={{ fontSize: "12px", color: "#8E8E93", marginBottom: "16px" }}
           >
             Sinal e parcela são calculados automaticamente ao preencher o valor
             do imóvel
@@ -433,7 +433,7 @@ posicao: form.posicao || null,
           style={{
             background: "white",
             borderRadius: "12px",
-            border: "1px solid #DDD9D3",
+            border: "1px solid rgba(0,0,0,.1)",
             padding: "24px",
             marginBottom: "16px",
           }}
@@ -457,7 +457,7 @@ posicao: form.posicao || null,
             style={{
               width: "100%",
               padding: "8px 12px",
-              border: "1px solid #DDD9D3",
+              border: "1px solid rgba(0,0,0,.1)",
               borderRadius: "8px",
               fontSize: "14px",
               outline: "none",
@@ -472,7 +472,7 @@ posicao: form.posicao || null,
                 gap: "8px",
                 cursor: "pointer",
                 fontSize: "14px",
-                color: "#374151",
+                color: "#3A3A3C",
               }}
             >
               <input
@@ -499,12 +499,12 @@ posicao: form.posicao || null,
             onClick={() => router.back()}
             style={{
               padding: "10px 20px",
-              border: "1px solid #DDD9D3",
+              border: "1px solid rgba(0,0,0,.1)",
               borderRadius: "8px",
               fontSize: "14px",
               background: "white",
               cursor: "pointer",
-              color: "#374151",
+              color: "#3A3A3C",
             }}
           >
             Cancelar

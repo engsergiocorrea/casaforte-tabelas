@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 // (obras.casaforteinc.com.br). O Tabelas foca em empreendimentos, unidades,
 // tabelas de preço, reajustes, bloqueios, propostas e relatórios comerciais.
 const NAV = [
-  { href: '/admin/dashboard', label: 'Dashboard', icon: '📊' },
+  { href: '/admin/dashboard', label: 'Início', icon: '📊' },
   { href: '/admin/empreendimentos', label: 'Empreendimentos', icon: '🏗️' },
   { href: '/admin/unidades', label: 'Unidades', icon: '🏠' },
   { href: '/admin/vendas', label: 'Vendas', icon: '💼' },
@@ -23,7 +23,7 @@ function Sidebar({ onSignOut, open, onNav }: { onSignOut: () => void; open: bool
     <div className={`tb-admin-side${open ? ' open' : ''}`}>
       <div style={{padding:'16px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
         <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
-          <img src="/apple-icon.png" alt="Casa Forte" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius:'8px'}} />
+          <img src="/apple-icon.png" alt="Casa Forte" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius: '10px'}} />
           <div>
             <div style={{color:'white',fontSize:'13px',fontWeight:'600'}}>Casa Forte</div>
             <div style={{color:'rgba(255,255,255,0.4)',fontSize:'11px'}}>Tabelas de Vendas</div>
@@ -34,7 +34,7 @@ function Sidebar({ onSignOut, open, onNav }: { onSignOut: () => void; open: bool
         {NAV.map(item => {
           const active = pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href))
           return (
-            <Link key={item.href} href={item.href} onClick={onNav} style={{display:'flex',alignItems:'center',gap:'10px',padding:'8px 12px',borderRadius:'8px',marginBottom:'2px',fontSize:'13px',color:active?'white':'rgba(255,255,255,0.6)',background:active?'#E8390E':'transparent',textDecoration:'none',transition:'all 0.15s'}}>
+            <Link key={item.href} href={item.href} onClick={onNav} style={{display:'flex',alignItems:'center',gap:'10px',padding:'8px 12px',borderRadius: '10px',marginBottom:'2px',fontSize:'13px',color:active?'white':'rgba(255,255,255,0.6)',background:active?'#E8390E':'transparent',textDecoration:'none',transition:'all 0.15s'}}>
               <span style={{fontSize:'16px'}}>{item.icon}</span>
               {item.label}
             </Link>
@@ -42,10 +42,10 @@ function Sidebar({ onSignOut, open, onNav }: { onSignOut: () => void; open: bool
         })}
       </nav>
       <div style={{padding:'12px 8px',borderTop:'1px solid rgba(255,255,255,0.08)',display:'flex',flexDirection:'column',gap:'4px'}}>
-        <Link href="/" target="_blank" style={{display:'flex',alignItems:'center',gap:'8px',padding:'7px 12px',borderRadius:'8px',fontSize:'12px',color:'rgba(255,255,255,0.4)',textDecoration:'none'}}>
+        <Link href="/" target="_blank" style={{display:'flex',alignItems:'center',gap:'8px',padding:'7px 12px',borderRadius: '10px',fontSize:'12px',color:'rgba(255,255,255,0.4)',textDecoration:'none'}}>
           🔗 Ver site público
         </Link>
-        <button onClick={onSignOut} style={{display:'flex',alignItems:'center',gap:'8px',padding:'7px 12px',borderRadius:'8px',fontSize:'12px',color:'rgba(255,255,255,0.4)',background:'none',border:'none',cursor:'pointer',width:'100%',textAlign:'left'}}>
+        <button onClick={onSignOut} style={{display:'flex',alignItems:'center',gap:'8px',padding:'7px 12px',borderRadius: '10px',fontSize:'12px',color:'rgba(255,255,255,0.4)',background:'none',border:'none',cursor:'pointer',width:'100%',textAlign:'left'}}>
           🚪 Sair
         </button>
       </div>
@@ -82,8 +82,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (authenticated === null) {
     return (
-      <div style={{minHeight:'100vh',background:'#F5F3F0',display:'flex',alignItems:'center',justifyContent:'center'}}>
-        <div style={{color:'#6b7280',fontSize:'14px'}}>Carregando...</div>
+      <div style={{minHeight:'100vh',background:'#F5F5F7',display:'flex',alignItems:'center',justifyContent:'center'}}>
+        <div style={{color:'#6E6E73',fontSize:'14px'}}>Carregando...</div>
       </div>
     )
   }

@@ -240,7 +240,7 @@ export default function PropostaPage() {
   const inp = (name: string, type = 'text', placeholder = '', required = false) => (
     <input name={name} type={type} placeholder={placeholder} required={required}
       value={(form as any)[name] ?? ''} onChange={handleChange}
-      style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', background: 'white', boxSizing: 'border-box' }} />
+      style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', background: 'white', boxSizing: 'border-box' }} />
   )
   // CEP → autofill do endereço (ViaCEP, espelha os Correios). Preenche rua,
   // bairro e cidade/UF; o usuário completa o número.
@@ -258,18 +258,18 @@ export default function PropostaPage() {
   const cepInp = (prefixo: 'comprador1' | 'conjuge' | 'comprador2') => (
     <input name={`${prefixo}_cep`} type="text" placeholder="00000-000"
       value={(form as any)[`${prefixo}_cep`] ?? ''} onChange={handleChange} onBlur={() => buscarCep(prefixo)}
-      style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', background: 'white', boxSizing: 'border-box' }} />
+      style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', background: 'white', boxSizing: 'border-box' }} />
   )
   const sel = (name: string, opts: { value: string, label: string }[]) => (
     <select name={name} value={(form as any)[name] ?? ''} onChange={handleChange}
-      style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', background: 'white', boxSizing: 'border-box' }}>
+      style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', background: 'white', boxSizing: 'border-box' }}>
       {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   )
-  const lbl = (text: string) => <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#374151', marginBottom: '4px' }}>{text}</label>
+  const lbl = (text: string) => <label style={{ display: 'block', fontSize: '13px', fontWeight: '500', color: '#3A3A3C', marginBottom: '4px' }}>{text}</label>
   const fmt = (v: any) => v ? `R$ ${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '-'
   const card = (title: string, children: React.ReactNode) => (
-    <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '24px', marginBottom: '16px' }}>
+    <div style={{ background: 'white', borderRadius: '16px', border: '1px solid rgba(0,0,0,.1)', padding: '24px', marginBottom: '16px' }}>
       <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#111', marginBottom: '16px' }}>{title}</h2>
       {children}
     </div>
@@ -280,11 +280,11 @@ export default function PropostaPage() {
   if (loading) return <SplashScreen />
 
   if (success) return (
-    <div style={{ minHeight: '100vh', background: '#F5F3F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+    <div style={{ minHeight: '100vh', background: '#F5F5F7', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
       <div style={{ background: 'white', borderRadius: '16px', padding: '3rem', textAlign: 'center', maxWidth: '480px' }}>
         <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✅</div>
         <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111', marginBottom: '0.5rem' }}>Proposta registrada!</h1>
-        <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>
+        <p style={{ color: '#6E6E73', marginBottom: '1.5rem' }}>
           Proposta enviada com sucesso. A equipe Casa Forte foi notificada automaticamente via WhatsApp! 📲
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
@@ -293,7 +293,7 @@ export default function PropostaPage() {
             📄 Ver / Imprimir PDF da proposta
           </a>
         </div>
-        <a href={`/empreendimentos/${slug}`} style={{ display: 'inline-block', fontSize: '13px', color: '#9ca3af', textDecoration: 'none' }}>
+        <a href={`/empreendimentos/${slug}`} style={{ display: 'inline-block', fontSize: '13px', color: '#8E8E93', textDecoration: 'none' }}>
           ← Voltar ao empreendimento
         </a>
       </div>
@@ -301,8 +301,8 @@ export default function PropostaPage() {
   )
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F5F3F0' }}>
-      <header style={{ background: '#1E1E1E', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div style={{ minHeight: '100vh', background: '#F5F5F7' }}>
+      <header style={{ background: '#1C1C1E', padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
         <img src="https://idjzhzqvfhtfycvmfoen.supabase.co/storage/v1/object/public/empreendimentos/logosemfundo%20casa%20forte.png" alt="Casa Forte" style={{ height: '32px', objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
         <div>
           <div style={{ color: 'white', fontSize: '13px', fontWeight: '600' }}>Casa Forte</div>
@@ -311,17 +311,17 @@ export default function PropostaPage() {
       </header>
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '2rem 1rem' }}>
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #DDD9D3', padding: '20px', marginBottom: '20px' }}>
+        <div style={{ background: 'white', borderRadius: '16px', border: '1px solid rgba(0,0,0,.1)', padding: '20px', marginBottom: '20px' }}>
           <h1 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#111', marginBottom: '4px' }}>Proposta — {empreendimento?.nome}</h1>
-          <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '12px' }}>Unidade {unidade?.unidade} · {unidade?.pavimento}</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', padding: '12px', background: '#f8fafc', borderRadius: '8px' }}>
-            <div><div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>Área</div><div style={{ fontWeight: '600' }}>{unidade?.area_construida}m²</div></div>
-            <div><div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>Quartos</div><div style={{ fontWeight: '600' }}>{unidade?.quartos}</div></div>
-            <div><div style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px' }}>Valor tabela</div><div style={{ fontWeight: '600', color: '#E8390E' }}>{fmt(unidade?.valor_imovel)}</div></div>
+          <p style={{ color: '#6E6E73', fontSize: '14px', marginBottom: '12px' }}>Unidade {unidade?.unidade} · {unidade?.pavimento}</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px', padding: '12px', background: '#F5F5F7', borderRadius: '10px' }}>
+            <div><div style={{ fontSize: '11px', color: '#8E8E93', marginBottom: '2px' }}>Área</div><div style={{ fontWeight: '600' }}>{unidade?.area_construida}m²</div></div>
+            <div><div style={{ fontSize: '11px', color: '#8E8E93', marginBottom: '2px' }}>Quartos</div><div style={{ fontWeight: '600' }}>{unidade?.quartos}</div></div>
+            <div><div style={{ fontSize: '11px', color: '#8E8E93', marginBottom: '2px' }}>Valor tabela</div><div style={{ fontWeight: '600', color: '#E8390E' }}>{fmt(unidade?.valor_imovel)}</div></div>
           </div>
         </div>
 
-        {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '12px', marginBottom: '16px', color: '#b91c1c', fontSize: '14px' }}>{error}</div>}
+        {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', padding: '12px', marginBottom: '16px', color: '#b91c1c', fontSize: '14px' }}>{error}</div>}
 
         <form onSubmit={handleSubmit}>
           <UploadDocumentosProposta
@@ -349,8 +349,8 @@ export default function PropostaPage() {
                 <div style={full}>{lbl('Endereço (rua, nº, bairro, cidade/UF)')}{inp('comprador1_endereco', 'text', 'preenchido pelo CEP; complete o número')}</div>
               </div>
               {(form.comprador1_estado_civil === 'casado' || form.comprador1_estado_civil === 'uniao_estavel') && (
-                <div style={{ marginTop: '20px', padding: '16px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                  <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '14px' }}>💍 Dados do Cônjuge</h3>
+                <div style={{ marginTop: '20px', padding: '16px', background: '#F5F5F7', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#3A3A3C', marginBottom: '14px' }}>💍 Dados do Cônjuge</h3>
                   <div style={g2}>
                     <div style={full}>{lbl('Nome completo')}{inp('conjuge_nome')}</div>
                     <div>{lbl('CPF')}{inp('conjuge_cpf')}</div>
@@ -367,13 +367,13 @@ export default function PropostaPage() {
                 </div>
               )}
               <div style={{ marginTop: '16px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#374151' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', color: '#3A3A3C' }}>
                   <input type="checkbox" checked={temSegundoComprador} onChange={e => setTemSegundoComprador(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: '#E8390E' }} />
                   Adicionar segundo comprador
                 </label>
               </div>
               {temSegundoComprador && (
-                <div style={{ marginTop: '16px', padding: '16px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                <div style={{ marginTop: '16px', padding: '16px', background: '#F5F5F7', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                   <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '14px' }}>👤 Segundo Comprador</h3>
                   <div style={g2}>
                     <div style={full}>{lbl('Nome completo')}{inp('comprador2_nome')}</div>
@@ -413,7 +413,7 @@ export default function PropostaPage() {
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {planosDaUnidade(unidade).map(p => (
                       <button key={p.nome} type="button" onClick={() => escolherPlano(p.nome)}
-                        style={{ padding: '8px 16px', borderRadius: '8px', border: `2px solid ${plano === p.nome ? '#E8390E' : '#fdba74'}`, background: plano === p.nome ? '#E8390E' : 'white', color: plano === p.nome ? 'white' : '#9a3412', fontWeight: 700, cursor: 'pointer', fontSize: '14px' }}>
+                        style={{ padding: '8px 16px', borderRadius: '10px', border: `2px solid ${plano === p.nome ? '#E8390E' : '#fdba74'}`, background: plano === p.nome ? '#E8390E' : 'white', color: plano === p.nome ? 'white' : '#9a3412', fontWeight: 700, cursor: 'pointer', fontSize: '14px' }}>
                         {p.nome}
                       </button>
                     ))}
@@ -422,11 +422,11 @@ export default function PropostaPage() {
                 </div>
               )}
               <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', padding: '10px 16px', borderRadius: '8px', border: `2px solid ${segueTabela ? '#E8390E' : '#DDD9D3'}`, background: segueTabela ? '#fdeee9' : 'white', flex: 1, justifyContent: 'center' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', padding: '10px 16px', borderRadius: '10px', border: `2px solid ${segueTabela ? '#E8390E' : 'rgba(0,0,0,.1)'}`, background: segueTabela ? '#fdeee9' : 'white', flex: 1, justifyContent: 'center' }}>
                   <input type="radio" checked={segueTabela} onChange={() => setSegueTabela(true)} style={{ accentColor: '#E8390E' }} />
                   Seguir valores da tabela
                 </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', padding: '10px 16px', borderRadius: '8px', border: `2px solid ${!segueTabela ? '#E8390E' : '#DDD9D3'}`, background: !segueTabela ? '#fdeee9' : 'white', flex: 1, justifyContent: 'center' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', padding: '10px 16px', borderRadius: '10px', border: `2px solid ${!segueTabela ? '#E8390E' : 'rgba(0,0,0,.1)'}`, background: !segueTabela ? '#fdeee9' : 'white', flex: 1, justifyContent: 'center' }}>
                   <input type="radio" checked={!segueTabela} onChange={() => setSegueTabela(false)} style={{ accentColor: '#E8390E' }} />
                   Propor condições diferentes
                 </label>
@@ -435,11 +435,11 @@ export default function PropostaPage() {
                 <div style={full}>
                   {lbl('Valor total proposto (R$) *')}
                   <input name="valor_proposto" type="number" required value={form.valor_proposto} onChange={handleChange}
-                    style={{ width: '100%', padding: '8px 12px', border: '2px solid #E8390E', borderRadius: '8px', fontSize: '16px', fontWeight: '600', outline: 'none', color: '#E8390E', boxSizing: 'border-box' }} />
+                    style={{ width: '100%', padding: '8px 12px', border: '2px solid #E8390E', borderRadius: '10px', fontSize: '16px', fontWeight: '600', outline: 'none', color: '#E8390E', boxSizing: 'border-box' }} />
                 </div>
                 <div>{lbl('Valor do sinal (R$)')}{inp('valor_sinal', 'number')}</div>
                 <div style={full}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#374151' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '500', color: '#3A3A3C' }}>
                     <input type="checkbox" checked={sinalParcelado} onChange={e => setSinalParcelado(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: '#E8390E' }} />
                     Sinal parcelado?
                   </label>
@@ -454,7 +454,7 @@ export default function PropostaPage() {
                 <div>{lbl('Valor por intercalada (R$)')}{inp('valor_intercalada', 'number')}</div>
                 <div>{lbl('Valor das chaves (R$)')}{inp('valor_chaves', 'number')}</div>
               </div>
-              <div style={{ marginTop: '16px', padding: '14px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+              <div style={{ marginTop: '16px', padding: '14px', background: '#F5F5F7', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '14px', fontWeight: '500' }}>Somatório:</span>
                   <span style={{ fontSize: '18px', fontWeight: '700', color: Math.abs(calcSomatorio() - Number(form.valor_proposto)) < 1 ? '#15803d' : '#b91c1c' }}>
@@ -471,23 +471,23 @@ export default function PropostaPage() {
               <div style={{ marginTop: '14px' }}>
                 {lbl('Observações sobre o pagamento')}
                 <textarea name="observacoes_pagamento" value={form.observacoes_pagamento} onChange={handleChange} rows={3}
-                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
               </div>
             </div>
           )}
 
           {card('📝 Observações gerais',
             <textarea name="observacoes" value={form.observacoes} onChange={handleChange} rows={3}
-              style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: '8px', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
+              style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '10px', fontSize: '14px', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }} />
           )}
 
           <button type="submit" disabled={saving} style={{ width: '100%', padding: '14px', background: '#E8390E', color: 'white', border: 'none', borderRadius: '10px', fontSize: '16px', fontWeight: '600', cursor: 'pointer' }}>
             {saving ? 'Enviando...' : '📤 Enviar proposta'}
           </button>
-          <p style={{ textAlign: 'center', fontSize: '12px', color: '#9ca3af', marginTop: '12px', lineHeight: 1.5 }}>
+          <p style={{ textAlign: 'center', fontSize: '12px', color: '#8E8E93', marginTop: '12px', lineHeight: 1.5 }}>
             Ao enviar, a equipe Casa Forte será notificada via WhatsApp. Os dados informados são tratados para
             elaboração da proposta/contrato, conforme a{' '}
-            <a href="/privacidade" target="_blank" rel="noreferrer" style={{ color: '#9ca3af', textDecoration: 'underline' }}>Política de Privacidade</a>.
+            <a href="/privacidade" target="_blank" rel="noreferrer" style={{ color: '#8E8E93', textDecoration: 'underline' }}>Política de Privacidade</a>.
           </p>
         </form>
       </div>

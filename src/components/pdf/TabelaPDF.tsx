@@ -26,16 +26,16 @@ const STATUS_COLORS_PDF = {
   disponivel: '#16a34a',
   reservada: '#d97706',
   vendida: '#dc2626',
-  bloqueada: '#6b7280',
-  indisponivel: '#9ca3af',
+  bloqueada: '#6E6E73',
+  indisponivel: '#8E8E93',
 }
 
 const STATUS_BG_COLORS_PDF = {
   disponivel: '#f0fdf4',
   reservada: '#fffbeb',
   vendida: '#fef2f2',
-  bloqueada: '#f9fafb',
-  indisponivel: '#f9fafb',
+  bloqueada: '#F5F5F7',
+  indisponivel: '#F5F5F7',
 }
 
 const styles = StyleSheet.create({
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   marca: {
     fontSize: 7,
-    color: '#6b7280',
+    color: '#6E6E73',
     marginBottom: 3,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -83,12 +83,12 @@ const styles = StyleSheet.create({
   },
   dataLabel: {
     fontSize: 6,
-    color: '#9ca3af',
+    color: '#8E8E93',
     marginBottom: 1,
   },
   dataValue: {
     fontSize: 8,
-    color: '#374151',
+    color: '#3A3A3C',
     fontWeight: 600,
   },
   // Info bar
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     marginBottom: 14,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F5F5F7',
     padding: 8,
     borderRadius: 4,
     borderWidth: 1,
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 6,
-    color: '#9ca3af',
+    color: '#8E8E93',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 2,
@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     fontSize: 7.5,
-    color: '#374151',
+    color: '#3A3A3C',
   },
   tableCellBold: {
     fontSize: 7.5,
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 6,
-    color: '#9ca3af',
+    color: '#8E8E93',
   },
   // Resumo
   resumoBar: {
@@ -346,7 +346,7 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
             <Text style={[styles.resumoNum, { color: '#dc2626' }]}>{resumo.vendidas}</Text>
             <Text style={[styles.resumoLabel, { color: '#b91c1c' }]}>Vendidas</Text>
           </View>
-          <View style={[styles.resumoItem, { backgroundColor: '#f8fafc' }]}>
+          <View style={[styles.resumoItem, { backgroundColor: '#F5F5F7' }]}>
             <Text style={[styles.resumoNum, { color: '#1e3a5f' }]}>{resumo.total}</Text>
             <Text style={[styles.resumoLabel, { color: '#64748b' }]}>Total</Text>
           </View>
@@ -418,8 +418,8 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
 
             {/* Linhas */}
             {items.map((u, idx) => {
-              const statusColor = STATUS_COLORS_PDF[u.status] ?? '#9ca3af'
-              const rowBg = idx % 2 === 0 ? '#ffffff' : '#f8fafc'
+              const statusColor = STATUS_COLORS_PDF[u.status] ?? '#8E8E93'
+              const rowBg = idx % 2 === 0 ? '#ffffff' : '#F5F5F7'
               // Não disponíveis: só metragem, sem valores.
               const ocultarValores =
                 u.status === 'indisponivel' ||
@@ -503,7 +503,7 @@ export function TabelaPDF({ empreendimento, unidades, configuracao }: TabelaPDFP
                         styles.statusBadge,
                         {
                           color: statusColor,
-                          backgroundColor: STATUS_BG_COLORS_PDF[u.status] ?? '#f9fafb',
+                          backgroundColor: STATUS_BG_COLORS_PDF[u.status] ?? '#F5F5F7',
                         }
                       ]}>
                         {STATUS_LABELS[u.status]}

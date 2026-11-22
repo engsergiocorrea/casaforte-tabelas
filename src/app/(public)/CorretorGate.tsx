@@ -7,7 +7,7 @@ import {
 } from '@/lib/corretor'
 
 const LARANJA = '#E8390E'
-const BORDA = '#DDD9D3'
+const BORDA = 'rgba(0,0,0,.1)'
 
 // Tela de identificação exibida ANTES de mostrar os empreendimentos.
 // Ao confirmar: grava o cookie do corretor, registra o acesso e libera a
@@ -92,7 +92,7 @@ export default function CorretorGate({ next }: { next?: string }) {
         {/* Faixa superior com a marca */}
         <div
           style={{
-            background: '#1E1E1E',
+            background: '#1C1C1E',
             padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
@@ -111,8 +111,8 @@ export default function CorretorGate({ next }: { next?: string }) {
         </div>
 
         <div style={{ padding: '24px 22px 20px' }}>
-          <h1 style={{ fontSize: 18, fontWeight: 700, color: '#1E1E1E', margin: 0 }}>Acesso às tabelas</h1>
-          <p style={{ fontSize: 13, color: '#6b7280', margin: '6px 0 18px', lineHeight: 1.4 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 700, color: '#1C1C1E', margin: 0 }}>Acesso às tabelas</h1>
+          <p style={{ fontSize: 13, color: '#6E6E73', margin: '6px 0 18px', lineHeight: 1.4 }}>
             Identifique-se para ver os empreendimentos e valores.
           </p>
 
@@ -134,7 +134,7 @@ export default function CorretorGate({ next }: { next?: string }) {
 
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: 13 }}>
-              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#374151', marginBottom: 5 }}>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#3A3A3C', marginBottom: 5 }}>
                 Corretor ou imobiliária *
               </label>
               <input
@@ -148,7 +148,7 @@ export default function CorretorGate({ next }: { next?: string }) {
               />
             </div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#374151', marginBottom: 5 }}>
+              <label style={{ display: 'block', fontSize: 12.5, fontWeight: 600, color: '#3A3A3C', marginBottom: 5 }}>
                 CRECI *
               </label>
               <input
@@ -181,10 +181,10 @@ export default function CorretorGate({ next }: { next?: string }) {
             </button>
           </form>
 
-          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 11, color: '#9ca3af', lineHeight: 1.5 }}>
+          <p style={{ marginTop: 16, textAlign: 'center', fontSize: 11, color: '#8E8E93', lineHeight: 1.5 }}>
             Registramos seu nome, CRECI e acesso (data, hora e IP) para acompanhamento comercial e segurança.
             Veja a{' '}
-            <a href="/privacidade" target="_blank" rel="noreferrer" style={{ color: '#9ca3af', textDecoration: 'underline' }}>Política de Privacidade</a>.
+            <a href="/privacidade" target="_blank" rel="noreferrer" style={{ color: '#8E8E93', textDecoration: 'underline' }}>Política de Privacidade</a>.
           </p>
         </div>
       </div>

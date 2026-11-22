@@ -17,8 +17,8 @@ const statusColors: Record<string, { bg: string; color: string }> = {
   disponivel: { bg: "#dcfce7", color: "#15803d" },
   reservada: { bg: "#fef3c7", color: "#92400e" },
   vendida: { bg: "#fee2e2", color: "#b91c1c" },
-  bloqueada: { bg: "#f3f4f6", color: "#6b7280" },
-  indisponivel: { bg: "#f3f4f6", color: "#9ca3af" },
+  bloqueada: { bg: "#F2F2F7", color: "#6E6E73" },
+  indisponivel: { bg: "#F2F2F7", color: "#8E8E93" },
 };
 const brl = (v: number | null, min = 2) =>
   v ? `R$ ${Number(v).toLocaleString("pt-BR", { minimumFractionDigits: min })}` : "—";
@@ -60,7 +60,7 @@ export function UnidadesTable({ unidades, empreendimentoId }: { unidades: U[]; e
     }
   }
 
-  const th: React.CSSProperties = { padding: "10px 12px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#6b7280", textTransform: "uppercase", whiteSpace: "nowrap" };
+  const th: React.CSSProperties = { padding: "10px 12px", textAlign: "left", fontSize: "11px", fontWeight: 600, color: "#6E6E73", textTransform: "uppercase", whiteSpace: "nowrap" };
   const td: React.CSSProperties = { padding: "10px 12px", whiteSpace: "nowrap" };
 
   return (
@@ -88,11 +88,11 @@ export function UnidadesTable({ unidades, empreendimentoId }: { unidades: U[]; e
       {erro && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: 12, marginBottom: 12, color: "#b91c1c", fontSize: 14 }}>{erro}</div>}
       {msg && <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, padding: 12, marginBottom: 12, color: "#15803d", fontSize: 14 }}>{msg}</div>}
 
-      <div style={{ background: "white", borderRadius: 12, border: "1px solid #DDD9D3", overflow: "hidden" }}>
+      <div style={{ background: "white", borderRadius: 12, border: "1px solid rgba(0,0,0,.1)", overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 900 }}>
             <thead>
-              <tr style={{ background: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
+              <tr style={{ background: "#F5F5F7", borderBottom: "1px solid rgba(0,0,0,.08)" }}>
                 <th style={{ ...th, width: 40, textAlign: "center" }}>
                   <input type="checkbox" checked={todasMarcadas} onChange={toggleTodas} aria-label="Selecionar todas" style={{ cursor: "pointer" }} />
                 </th>
@@ -106,17 +106,17 @@ export function UnidadesTable({ unidades, empreendimentoId }: { unidades: U[]; e
                 const sc = statusColors[u.status] ?? statusColors.indisponivel;
                 const marcada = sel.has(u.id);
                 return (
-                  <tr key={u.id} style={{ borderBottom: "1px solid #f3f4f6", background: marcada ? "#fff7ed" : "transparent" }}>
+                  <tr key={u.id} style={{ borderBottom: "1px solid #F2F2F7", background: marcada ? "#fff7ed" : "transparent" }}>
                     <td style={{ ...td, textAlign: "center" }}>
                       <input type="checkbox" checked={marcada} onChange={() => toggle(u.id)} aria-label={`Selecionar ${u.unidade}`} style={{ cursor: "pointer" }} />
                     </td>
                     <td style={{ ...td, fontWeight: 600, color: "#111" }}>{u.unidade}</td>
-                    <td style={{ ...td, color: "#6b7280" }}>{u.pavimento ?? "—"}</td>
-                    <td style={{ ...td, color: "#6b7280" }}>{u.area_construida ? `${u.area_construida}m²` : "—"}</td>
-                    <td style={{ ...td, color: "#6b7280", textAlign: "center" }}>{u.quartos ?? "—"}</td>
+                    <td style={{ ...td, color: "#6E6E73" }}>{u.pavimento ?? "—"}</td>
+                    <td style={{ ...td, color: "#6E6E73" }}>{u.area_construida ? `${u.area_construida}m²` : "—"}</td>
+                    <td style={{ ...td, color: "#6E6E73", textAlign: "center" }}>{u.quartos ?? "—"}</td>
                     <td style={{ ...td, fontWeight: 500, color: "#111" }}>{brl(u.valor_imovel)}</td>
-                    <td style={{ ...td, color: "#6b7280" }}>{brl(u.valor_sinal)}</td>
-                    <td style={{ ...td, color: "#6b7280" }}>
+                    <td style={{ ...td, color: "#6E6E73" }}>{brl(u.valor_sinal)}</td>
+                    <td style={{ ...td, color: "#6E6E73" }}>
                       {u.quantidade_parcelas && u.valor_parcela ? `${u.quantidade_parcelas}x ${brl(u.valor_parcela)}` : "—"}
                     </td>
                     <td style={td}>
@@ -126,7 +126,7 @@ export function UnidadesTable({ unidades, empreendimentoId }: { unidades: U[]; e
                     </td>
                     <td style={td}>
                       <Link href={`/admin/unidades/${u.id}/editar`}
-                        style={{ padding: "3px 10px", border: "1px solid #e5e7eb", borderRadius: 6, fontSize: 12, color: "#374151", textDecoration: "none" }}>
+                        style={{ padding: "3px 10px", border: "1px solid rgba(0,0,0,.08)", borderRadius: 6, fontSize: 12, color: "#3A3A3C", textDecoration: "none" }}>
                         Editar
                       </Link>
                     </td>

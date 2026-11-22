@@ -73,7 +73,7 @@ export default function EditarVendaPage({
 
   if (!form)
     return (
-      <div style={{ padding: "2rem", color: "#6b7280" }}>Carregando...</div>
+      <div style={{ padding: "2rem", color: "#6E6E73" }}>Carregando...</div>
     );
 
   const S = {
@@ -81,7 +81,7 @@ export default function EditarVendaPage({
       display: "block",
       fontSize: "13px",
       fontWeight: "500",
-      color: "#374151",
+      color: "#3A3A3C",
       marginBottom: "4px",
     } as React.CSSProperties,
   };
@@ -94,7 +94,7 @@ export default function EditarVendaPage({
       style={{
         width: "100%",
         padding: "8px 12px",
-        border: "1px solid #DDD9D3",
+        border: "1px solid rgba(0,0,0,.1)",
         borderRadius: "8px",
         fontSize: "14px",
         outline: "none",
@@ -111,7 +111,7 @@ export default function EditarVendaPage({
         <p
           style={{
             fontSize: "0.875rem",
-            color: "#6b7280",
+            color: "#6E6E73",
             marginTop: "0.25rem",
           }}
         >
@@ -141,7 +141,7 @@ export default function EditarVendaPage({
           style={{
             background: "white",
             borderRadius: "12px",
-            border: "1px solid #DDD9D3",
+            border: "1px solid rgba(0,0,0,.1)",
             padding: "24px",
             marginBottom: "16px",
           }}
@@ -192,7 +192,7 @@ export default function EditarVendaPage({
                 style={{
                   width: "100%",
                   padding: "8px 12px",
-                  border: "1px solid #DDD9D3",
+                  border: "1px solid rgba(0,0,0,.1)",
                   borderRadius: "8px",
                   fontSize: "14px",
                   outline: "none",
@@ -212,7 +212,7 @@ export default function EditarVendaPage({
           style={{
             background: "white",
             borderRadius: "12px",
-            border: "1px solid #DDD9D3",
+            border: "1px solid rgba(0,0,0,.1)",
             padding: "24px",
             marginBottom: "16px",
           }}
@@ -265,7 +265,7 @@ export default function EditarVendaPage({
           style={{
             background: "white",
             borderRadius: "12px",
-            border: "1px solid #DDD9D3",
+            border: "1px solid rgba(0,0,0,.1)",
             padding: "24px",
             marginBottom: "16px",
           }}
@@ -279,7 +279,7 @@ export default function EditarVendaPage({
             style={{
               width: "100%",
               padding: "8px 12px",
-              border: "1px solid #DDD9D3",
+              border: "1px solid rgba(0,0,0,.1)",
               borderRadius: "8px",
               fontSize: "14px",
               outline: "none",
@@ -296,12 +296,12 @@ export default function EditarVendaPage({
             onClick={() => router.back()}
             style={{
               padding: "10px 20px",
-              border: "1px solid #DDD9D3",
+              border: "1px solid rgba(0,0,0,.1)",
               borderRadius: "8px",
               fontSize: "14px",
               background: "white",
               cursor: "pointer",
-              color: "#374151",
+              color: "#3A3A3C",
             }}
           >
             Cancelar

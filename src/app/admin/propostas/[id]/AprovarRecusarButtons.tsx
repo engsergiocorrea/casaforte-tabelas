@@ -16,14 +16,14 @@ export default function AprovarRecusarButtons({ propostaId }: { propostaId: stri
   }
 
   return (
-    <div style={{ background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-      <span style={{ fontSize: '13px', color: '#6b7280', flex: 1 }}>⏳ Proposta aguardando análise — escolha uma ação:</span>
+    <div style={{ background: '#F5F5F7', borderRadius: '16px', border: '1px solid #e2e8f0', padding: '16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <span style={{ fontSize: '13px', color: '#6E6E73', flex: 1 }}>⏳ Proposta aguardando análise — escolha uma ação:</span>
       <button onClick={() => atualizar('aprovada')} disabled={loading}
-        style={{ padding: '8px 20px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+        style={{ padding: '8px 20px', background: '#16a34a', color: 'white', border: 'none', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
         ✅ Aprovar proposta
       </button>
       <button onClick={() => atualizar('recusada')} disabled={loading}
-        style={{ padding: '8px 20px', background: 'white', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
+        style={{ padding: '8px 20px', background: 'white', color: '#b91c1c', border: '1px solid #fecaca', borderRadius: '10px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>
         ❌ Recusar proposta
       </button>
     </div>

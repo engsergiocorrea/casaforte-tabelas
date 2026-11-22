@@ -71,17 +71,17 @@ export default function TabelaM2Page({ params }: { params: Promise<{ id: string 
     }
   }
 
-  if (loading) return <div style={{ padding: "2rem", color: "#6b7280" }}>Carregando...</div>;
+  if (loading) return <div style={{ padding: "2rem", color: "#6E6E73" }}>Carregando...</div>;
 
-  const th: React.CSSProperties = { padding: "8px 10px", textAlign: "left", fontSize: "11px", fontWeight: 700, color: "#6b7280", textTransform: "uppercase", background: "#f9fafb", borderBottom: "1px solid #e5e7eb", whiteSpace: "nowrap" };
-  const td: React.CSSProperties = { padding: "8px 10px", borderBottom: "1px solid #f3f4f6", fontSize: "13px", whiteSpace: "nowrap" };
+  const th: React.CSSProperties = { padding: "8px 10px", textAlign: "left", fontSize: "11px", fontWeight: 700, color: "#6E6E73", textTransform: "uppercase", background: "#F5F5F7", borderBottom: "1px solid rgba(0,0,0,.08)", whiteSpace: "nowrap" };
+  const td: React.CSSProperties = { padding: "8px 10px", borderBottom: "1px solid #F2F2F7", fontSize: "13px", whiteSpace: "nowrap" };
 
   return (
     <div>
       <div style={{ marginBottom: "1rem" }}>
-        <button onClick={() => router.back()} style={{ background: "none", border: "none", color: "#6b7280", fontSize: "13px", cursor: "pointer", padding: 0 }}>← Voltar</button>
+        <button onClick={() => router.back()} style={{ background: "none", border: "none", color: "#6E6E73", fontSize: "13px", cursor: "pointer", padding: 0 }}>← Voltar</button>
         <h1 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#111", marginTop: "6px" }}>Tabela por m² — {nome}</h1>
-        <p style={{ fontSize: "0.875rem", color: "#6b7280", marginTop: "0.25rem" }}>
+        <p style={{ fontSize: "0.875rem", color: "#6E6E73", marginTop: "0.25rem" }}>
           Edite <strong>somente o valor do m² e as áreas</strong>. O valor do imóvel, a entrada (20%) e o saldo (financiamento) são calculados automaticamente.
         </p>
       </div>
@@ -89,14 +89,14 @@ export default function TabelaM2Page({ params }: { params: Promise<{ id: string 
       {erro && <div style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: 12, marginBottom: 12, color: "#b91c1c", fontSize: 14 }}>{erro}</div>}
       {msg && <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 8, padding: 12, marginBottom: 12, color: "#15803d", fontSize: 14 }}>{msg}</div>}
 
-      <div style={{ background: "white", border: "1px solid #DDD9D3", borderRadius: 12, padding: 16, marginBottom: 16, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-        <label style={{ fontSize: 14, fontWeight: 600, color: "#374151" }}>Valor do m² (R$)</label>
+      <div style={{ background: "white", border: "1px solid rgba(0,0,0,.1)", borderRadius: 12, padding: 16, marginBottom: 16, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <label style={{ fontSize: 14, fontWeight: 600, color: "#3A3A3C" }}>Valor do m² (R$)</label>
         <input type="number" value={valorM2} onChange={(e) => setValorM2(e.target.value)} placeholder="Ex: 12000"
-          style={{ padding: "8px 12px", border: "1px solid #DDD9D3", borderRadius: 8, fontSize: 14, width: 160, outline: "none" }} />
-        <span style={{ fontSize: 12, color: "#9ca3af" }}>Aplicado a todas as unidades abaixo.</span>
+          style={{ padding: "8px 12px", border: "1px solid rgba(0,0,0,.1)", borderRadius: 8, fontSize: 14, width: 160, outline: "none" }} />
+        <span style={{ fontSize: 12, color: "#8E8E93" }}>Aplicado a todas as unidades abaixo.</span>
       </div>
 
-      <div style={{ background: "white", border: "1px solid #DDD9D3", borderRadius: 12, overflow: "hidden" }}>
+      <div style={{ background: "white", border: "1px solid rgba(0,0,0,.1)", borderRadius: 12, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
@@ -115,19 +115,19 @@ export default function TabelaM2Page({ params }: { params: Promise<{ id: string 
                 return (
                   <tr key={u.id}>
                     <td style={{ ...td, fontWeight: 600, color: "#111" }}>{u.unidade}</td>
-                    <td style={{ ...td, color: "#6b7280" }}>{u.pavimento ?? "—"}</td>
+                    <td style={{ ...td, color: "#6E6E73" }}>{u.pavimento ?? "—"}</td>
                     <td style={td}>
                       <input type="number" value={u.area_construida} onChange={(e) => setArea(u.id, e.target.value)} placeholder="0"
-                        style={{ padding: "6px 10px", border: "1px solid #DDD9D3", borderRadius: 6, fontSize: 13, width: 110, outline: "none" }} />
+                        style={{ padding: "6px 10px", border: "1px solid rgba(0,0,0,.1)", borderRadius: 6, fontSize: 13, width: 110, outline: "none" }} />
                     </td>
                     <td style={{ ...td, textAlign: "right", fontWeight: 600, color: "#111" }}>{fmt(c.valor)}</td>
-                    <td style={{ ...td, textAlign: "right", color: "#6b7280" }}>{fmt(c.entrada)}</td>
-                    <td style={{ ...td, textAlign: "right", color: "#6b7280" }}>{fmt(c.saldo)}</td>
+                    <td style={{ ...td, textAlign: "right", color: "#6E6E73" }}>{fmt(c.entrada)}</td>
+                    <td style={{ ...td, textAlign: "right", color: "#6E6E73" }}>{fmt(c.saldo)}</td>
                   </tr>
                 );
               })}
               {unidades.length === 0 && (
-                <tr><td colSpan={6} style={{ ...td, textAlign: "center", color: "#9ca3af", padding: 32 }}>Nenhuma unidade cadastrada.</td></tr>
+                <tr><td colSpan={6} style={{ ...td, textAlign: "center", color: "#8E8E93", padding: 32 }}>Nenhuma unidade cadastrada.</td></tr>
               )}
             </tbody>
           </table>

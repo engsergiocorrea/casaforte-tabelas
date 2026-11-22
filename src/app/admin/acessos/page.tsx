@@ -71,15 +71,15 @@ export default async function AcessosPage({
       minute: '2-digit',
     })
 
-  const card: React.CSSProperties = { background: 'white', borderRadius: 12, border: '1px solid #DDD9D3', padding: 20, marginBottom: 16 }
-  const th: React.CSSProperties = { padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase' }
-  const td: React.CSSProperties = { padding: '10px 14px', fontSize: 13, color: '#111', borderBottom: '1px solid #f3f4f6' }
+  const card: React.CSSProperties = { background: 'white', borderRadius: 12, border: '1px solid rgba(0,0,0,.1)', padding: 20, marginBottom: 16 }
+  const th: React.CSSProperties = { padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#6E6E73', textTransform: 'uppercase' }
+  const td: React.CSSProperties = { padding: '10px 14px', fontSize: 13, color: '#111', borderBottom: '1px solid #F2F2F7' }
 
   return (
     <div>
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#111' }}>Acessos ao site de tabelas</h1>
-        <p style={{ fontSize: 14, color: '#6b7280', marginTop: 4 }}>
+        <p style={{ fontSize: 14, color: '#6E6E73', marginTop: 4 }}>
           Corretores que acessaram as tabelas públicas, por dia.
         </p>
       </div>
@@ -87,20 +87,20 @@ export default async function AcessosPage({
       {/* Filtros */}
       <form method="get" style={{ ...card, display: 'flex', gap: 12, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#374151', marginBottom: 4 }}>Dia</label>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#3A3A3C', marginBottom: 4 }}>Dia</label>
           <input type="date" name="dia" defaultValue={dia}
-            style={{ padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: 8, fontSize: 14, outline: 'none' }} />
+            style={{ padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: 8, fontSize: 14, outline: 'none' }} />
         </div>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#374151', marginBottom: 4 }}>Corretor</label>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: '#3A3A3C', marginBottom: 4 }}>Corretor</label>
           <input type="text" name="corretor" defaultValue={corretorFiltro} placeholder="Nome do corretor/imobiliária"
-            style={{ width: '100%', padding: '8px 12px', border: '1px solid #DDD9D3', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+            style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0,0,0,.1)', borderRadius: 8, fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
         </div>
         <button type="submit" style={{ padding: '9px 20px', background: '#E8390E', color: 'white', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
           Filtrar
         </button>
         {(corretorFiltro || dia !== hojeSaoPaulo()) && (
-          <Link href="/admin/acessos" style={{ padding: '9px 14px', fontSize: 13, color: '#6b7280', textDecoration: 'none' }}>Limpar</Link>
+          <Link href="/admin/acessos" style={{ padding: '9px 14px', fontSize: 13, color: '#6E6E73', textDecoration: 'none' }}>Limpar</Link>
         )}
       </form>
 
@@ -113,11 +113,11 @@ export default async function AcessosPage({
           {/* Resumo */}
           <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
             <div style={{ ...card, flex: 1, minWidth: 180, marginBottom: 0 }}>
-              <div style={{ fontSize: 12, color: '#9ca3af', textTransform: 'uppercase' }}>Acessos no dia</div>
+              <div style={{ fontSize: 12, color: '#8E8E93', textTransform: 'uppercase' }}>Acessos no dia</div>
               <div style={{ fontSize: 28, fontWeight: 700, color: '#E8390E' }}>{acessos.length}</div>
             </div>
             <div style={{ ...card, flex: 1, minWidth: 180, marginBottom: 0 }}>
-              <div style={{ fontSize: 12, color: '#9ca3af', textTransform: 'uppercase' }}>Corretores distintos</div>
+              <div style={{ fontSize: 12, color: '#8E8E93', textTransform: 'uppercase' }}>Corretores distintos</div>
               <div style={{ fontSize: 28, fontWeight: 700, color: '#111' }}>{resumo.length}</div>
             </div>
           </div>
@@ -125,16 +125,16 @@ export default async function AcessosPage({
           {/* Por corretor */}
           {resumo.length > 0 && (
             <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-              <div style={{ padding: '14px 16px', fontSize: 14, fontWeight: 700, color: '#111', borderBottom: '1px solid #f3f4f6' }}>Por corretor</div>
+              <div style={{ padding: '14px 16px', fontSize: 14, fontWeight: 700, color: '#111', borderBottom: '1px solid #F2F2F7' }}>Por corretor</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead><tr style={{ background: '#f9fafb' }}>
+                <thead><tr style={{ background: '#F5F5F7' }}>
                   <th style={th}>Corretor</th><th style={th}>CRECI</th><th style={{ ...th, textAlign: 'right' }}>Acessos</th>
                 </tr></thead>
                 <tbody>
                   {resumo.map((r, i) => (
                     <tr key={i}>
                       <td style={td}>{r.nome}</td>
-                      <td style={{ ...td, color: '#6b7280' }}>{r.creci || '—'}</td>
+                      <td style={{ ...td, color: '#6E6E73' }}>{r.creci || '—'}</td>
                       <td style={{ ...td, textAlign: 'right', fontWeight: 600 }}>{r.total}</td>
                     </tr>
                   ))}
@@ -145,22 +145,22 @@ export default async function AcessosPage({
 
           {/* Detalhe (com IP) */}
           <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-            <div style={{ padding: '14px 16px', fontSize: 14, fontWeight: 700, color: '#111', borderBottom: '1px solid #f3f4f6' }}>Detalhe dos acessos</div>
+            <div style={{ padding: '14px 16px', fontSize: 14, fontWeight: 700, color: '#111', borderBottom: '1px solid #F2F2F7' }}>Detalhe dos acessos</div>
             {acessos.length === 0 ? (
-              <div style={{ padding: 32, textAlign: 'center', color: '#9ca3af', fontSize: 14 }}>Nenhum acesso registrado neste dia.</div>
+              <div style={{ padding: 32, textAlign: 'center', color: '#8E8E93', fontSize: 14 }}>Nenhum acesso registrado neste dia.</div>
             ) : (
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
-                  <thead><tr style={{ background: '#f9fafb' }}>
+                  <thead><tr style={{ background: '#F5F5F7' }}>
                     <th style={th}>Data/Hora</th><th style={th}>Corretor</th><th style={th}>CRECI</th><th style={th}>IP</th>
                   </tr></thead>
                   <tbody>
                     {acessos.map((a) => (
                       <tr key={a.id}>
-                        <td style={{ ...td, color: '#6b7280', whiteSpace: 'nowrap' }}>{fmtHora(a.created_at)}</td>
+                        <td style={{ ...td, color: '#6E6E73', whiteSpace: 'nowrap' }}>{fmtHora(a.created_at)}</td>
                         <td style={{ ...td, fontWeight: 500 }}>{a.corretor_nome}</td>
-                        <td style={{ ...td, color: '#6b7280' }}>{a.creci || '—'}</td>
-                        <td style={{ ...td, color: '#6b7280', fontFamily: 'monospace', fontSize: 12 }}>{a.ip || '—'}</td>
+                        <td style={{ ...td, color: '#6E6E73' }}>{a.creci || '—'}</td>
+                        <td style={{ ...td, color: '#6E6E73', fontFamily: 'monospace', fontSize: 12 }}>{a.ip || '—'}</td>
                       </tr>
                     ))}
                   </tbody>

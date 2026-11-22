@@ -37,20 +37,20 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
     pendente:  {bg:'#fef3c7',color:'#92400e',label:'⏳ Pendente'},
     aprovada:  {bg:'#dcfce7',color:'#15803d',label:'✅ Aprovada'},
     recusada:  {bg:'#fee2e2',color:'#b91c1c',label:'❌ Recusada'},
-    cancelada: {bg:'#f3f4f6',color:'#6b7280',label:'🚫 Cancelada'},
+    cancelada: {bg:'#F2F2F7',color:'#6E6E73',label:'🚫 Cancelada'},
   }
   const sc = statusConfig[p.status_proposta ?? 'pendente'] ?? statusConfig.pendente
 
   const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
-    <div style={{background:'white',borderRadius:'12px',border:'1px solid #DDD9D3',padding:'24px',marginBottom:'16px'}}>
+    <div style={{background:'white',borderRadius: '16px',border:'1px solid rgba(0,0,0,.1)',padding:'24px',marginBottom:'16px'}}>
       <h2 style={{fontSize:'15px',fontWeight:'700',color:'#111',marginBottom:'16px'}}>{title}</h2>
       {children}
     </div>
   )
 
   const Row = ({ label, value }: { label: string, value: any }) => (
-    <div style={{display:'flex',gap:'8px',padding:'8px 0',borderBottom:'1px solid #f3f4f6'}}>
-      <span style={{fontSize:'13px',color:'#6b7280',width:'200px',flexShrink:0}}>{label}</span>
+    <div style={{display:'flex',gap:'8px',padding:'8px 0',borderBottom:'1px solid #F2F2F7'}}>
+      <span style={{fontSize:'13px',color:'#6E6E73',width:'200px',flexShrink:0}}>{label}</span>
       <span style={{fontSize:'13px',color:'#111',fontWeight:'500'}}>{value || '—'}</span>
     </div>
   )
@@ -64,11 +64,11 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
     <div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1.5rem'}}>
         <div>
-          <div style={{fontSize:'13px',color:'#6b7280',marginBottom:'4px'}}>
-            <Link href="/admin/propostas" style={{color:'#6b7280',textDecoration:'none'}}>Propostas</Link> → {p.comprador1_nome}
+          <div style={{fontSize:'13px',color:'#6E6E73',marginBottom:'4px'}}>
+            <Link href="/admin/propostas" style={{color:'#6E6E73',textDecoration:'none'}}>Propostas</Link> → {p.comprador1_nome}
           </div>
           <h1 style={{fontSize:'1.5rem',fontWeight:'700',color:'#111'}}>Proposta — {emp?.nome}</h1>
-          <p style={{fontSize:'0.875rem',color:'#6b7280',marginTop:'0.25rem'}}>
+          <p style={{fontSize:'0.875rem',color:'#6E6E73',marginTop:'0.25rem'}}>
             Unidade {uni?.unidade} · {uni?.pavimento} · Recebida em {new Date(p.created_at).toLocaleDateString('pt-BR')}
           </p>
         </div>
@@ -77,7 +77,7 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
             {sc.label}
           </span>
           <a href={`/admin/propostas/${id}/pdf`} target="_blank"
-            style={{padding:'8px 16px',background:'#374151',color:'white',borderRadius:'8px',fontSize:'14px',fontWeight:'500',textDecoration:'none'}}>
+            style={{padding:'8px 16px',background:'#3A3A3C',color:'white',borderRadius: '10px',fontSize:'14px',fontWeight:'500',textDecoration:'none'}}>
             📄 PDF
           </a>
         </div>
@@ -93,11 +93,11 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
             {docLinks.map((d, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, border: '1px solid #eee', borderRadius: 8, padding: '8px 12px' }}>
                 <span style={{ fontSize: 13, color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {d.mime === 'application/pdf' ? '📄' : '🖼️'} {d.nome}{d.tamanho ? <span style={{ color: '#9ca3af' }}> · {fmtTam(d.tamanho)}</span> : null}
+                  {d.mime === 'application/pdf' ? '📄' : '🖼️'} {d.nome}{d.tamanho ? <span style={{ color: '#8E8E93' }}> · {fmtTam(d.tamanho)}</span> : null}
                 </span>
                 {d.url
                   ? <a href={d.url} target="_blank" rel="noreferrer" style={{ padding: '5px 12px', background: '#E8390E', color: 'white', borderRadius: 8, fontSize: 12, fontWeight: 600, textDecoration: 'none', flexShrink: 0 }}>Baixar</a>
-                  : <span style={{ fontSize: 12, color: '#9ca3af', flexShrink: 0 }}>indisponível</span>}
+                  : <span style={{ fontSize: 12, color: '#8E8E93', flexShrink: 0 }}>indisponível</span>}
               </div>
             ))}
           </div>
@@ -106,11 +106,11 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
 
       {/* Unidade */}
       <Section title="🏠 Unidade">
-        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',padding:'12px',background:'#f8fafc',borderRadius:'8px'}}>
-          <div><div style={{fontSize:'11px',color:'#9ca3af',marginBottom:'2px'}}>Unidade</div><div style={{fontWeight:'700',fontSize:'16px'}}>{uni?.unidade}</div></div>
-          <div><div style={{fontSize:'11px',color:'#9ca3af',marginBottom:'2px'}}>Pavimento</div><div style={{fontWeight:'600'}}>{uni?.pavimento}</div></div>
-          <div><div style={{fontSize:'11px',color:'#9ca3af',marginBottom:'2px'}}>Área</div><div style={{fontWeight:'600'}}>{uni?.area_construida}m²</div></div>
-          <div><div style={{fontSize:'11px',color:'#9ca3af',marginBottom:'2px'}}>Valor tabela</div><div style={{fontWeight:'600',color:'#E8390E'}}>{fmt(uni?.valor_imovel)}</div></div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'12px',padding:'12px',background:'#F5F5F7',borderRadius: '10px'}}>
+          <div><div style={{fontSize:'11px',color:'#8E8E93',marginBottom:'2px'}}>Unidade</div><div style={{fontWeight:'700',fontSize:'16px'}}>{uni?.unidade}</div></div>
+          <div><div style={{fontSize:'11px',color:'#8E8E93',marginBottom:'2px'}}>Pavimento</div><div style={{fontWeight:'600'}}>{uni?.pavimento}</div></div>
+          <div><div style={{fontSize:'11px',color:'#8E8E93',marginBottom:'2px'}}>Área</div><div style={{fontWeight:'600'}}>{uni?.area_construida}m²</div></div>
+          <div><div style={{fontSize:'11px',color:'#8E8E93',marginBottom:'2px'}}>Valor tabela</div><div style={{fontWeight:'600',color:'#E8390E'}}>{fmt(uni?.valor_imovel)}</div></div>
         </div>
       </Section>
 
@@ -161,7 +161,7 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
       </Section>
 
       <Section title="💰 Condições de Pagamento">
-        <div style={{padding:'10px 12px',background:p.segue_tabela?'#f0fdf4':'#fffbeb',borderRadius:'8px',marginBottom:'14px',border:`1px solid ${p.segue_tabela?'#bbf7d0':'#fde68a'}`,fontWeight:'600',fontSize:'13px',color:p.segue_tabela?'#15803d':'#92400e'}}>
+        <div style={{padding:'10px 12px',background:p.segue_tabela?'#f0fdf4':'#fffbeb',borderRadius: '10px',marginBottom:'14px',border:`1px solid ${p.segue_tabela?'#bbf7d0':'#fde68a'}`,fontWeight:'600',fontSize:'13px',color:p.segue_tabela?'#15803d':'#92400e'}}>
           {p.segue_tabela ? '✅ Segue os valores da tabela' : '⚠️ Propõe condições diferentes da tabela'}
         </div>
         <Row label="Valor proposto" value={<span style={{color:'#E8390E',fontWeight:'700',fontSize:'16px'}}>{fmt(p.valor_proposto)}</span>} />
@@ -169,12 +169,12 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
         <Row label="Parcelas mensais" value={p.quantidade_parcelas ? `${p.quantidade_parcelas}x de ${fmt(p.valor_parcela)}` : '—'} />
         <Row label="Intercaladas" value={p.quantidade_intercaladas ? `${p.quantidade_intercaladas}x de ${fmt(p.valor_intercalada)} (${p.periodicidade_intercaladas})` : '—'} />
         <Row label="Chaves" value={fmt(p.valor_chaves)} />
-        <div style={{marginTop:'12px',padding:'12px',background:'#f8fafc',borderRadius:'8px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{marginTop:'12px',padding:'12px',background:'#F5F5F7',borderRadius: '10px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <span style={{fontSize:'14px',fontWeight:'500'}}>Somatório:</span>
           <span style={{fontSize:'18px',fontWeight:'700',color:'#15803d'}}>{fmt(somatorio)}</span>
         </div>
         {p.observacoes_pagamento && (
-          <div style={{marginTop:'10px',padding:'10px',background:'#fffbeb',borderRadius:'8px',fontSize:'13px',color:'#92400e'}}>
+          <div style={{marginTop:'10px',padding:'10px',background:'#fffbeb',borderRadius: '10px',fontSize:'13px',color:'#92400e'}}>
             <strong>Obs.:</strong> {p.observacoes_pagamento}
           </div>
         )}
@@ -182,7 +182,7 @@ export default async function PropostaDetalhesPage({ params }: { params: Promise
 
       {p.observacoes && (
         <Section title="📝 Observações Gerais">
-          <p style={{fontSize:'14px',color:'#374151'}}>{p.observacoes}</p>
+          <p style={{fontSize:'14px',color:'#3A3A3C'}}>{p.observacoes}</p>
         </Section>
       )}
     </div>
