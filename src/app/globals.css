@@ -489,3 +489,26 @@ a { color: inherit; text-decoration: none; }
   .no-print { display: none !important; }
   body { background: white; }
 }
+
+/* Admin do Tabelas: menu lateral fixo no computador, gaveta no celular. */
+.tb-admin-shell { display: flex; height: 100vh; overflow: hidden; background: #F5F3F0; }
+.tb-admin-side { width: 220px; background: #2A2A2A; display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; }
+.tb-admin-main { flex: 1; min-width: 0; overflow-y: auto; }
+.tb-admin-content { max-width: 80rem; margin: 0 auto; padding: 2rem 1.5rem; }
+.tb-admin-topbar, .tb-admin-overlay { display: none; }
+@media (max-width: 768px) {
+  .tb-admin-shell { height: auto; min-height: 100dvh; overflow: visible; display: block; }
+  .tb-admin-main { overflow: visible; }
+  .tb-admin-side {
+    position: fixed; top: 0; left: 0; height: 100dvh; z-index: 60;
+    transform: translateX(-100%); transition: transform .25s ease;
+    box-shadow: 4px 0 24px rgba(0,0,0,.35);
+  }
+  .tb-admin-side.open { transform: translateX(0); }
+  .tb-admin-overlay.show { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 50; }
+  .tb-admin-topbar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: #2A2A2A; position: sticky; top: 0; z-index: 40; }
+  .tb-admin-content { padding: 1rem 1rem 2.5rem; }
+  /* Tabelas largas rolam de lado em vez de espremer a tela. */
+  .tb-admin-content table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tb-ham { background: none; border: none; color: #fff; font-size: 22px; line-height: 1; cursor: pointer; padding: 4px 6px; }
+}

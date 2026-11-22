@@ -17,10 +17,10 @@ const NAV = [
   { href: '/admin/acessos', label: 'Acessos', icon: '👣' },
 ]
 
-function Sidebar({ onSignOut }: { onSignOut: () => void }) {
+function Sidebar({ onSignOut, open, onNav }: { onSignOut: () => void; open: boolean; onNav: () => void }) {
   const pathname = usePathname()
   return (
-    <div style={{width:'220px',background:'#2A2A2A',display:'flex',flexDirection:'column',flexShrink:0,height:'100vh'}}>
+    <div className={`tb-admin-side${open ? ' open' : ''}`}>
       <div style={{padding:'16px',borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
         <div style={{display:'flex',alignItems:'center',gap:'10px'}}>
           <img src="/apple-icon.png" alt="Casa Forte" style={{width:'36px',height:'36px',objectFit:'contain',borderRadius:'8px'}} />
@@ -34,7 +34,7 @@ function Sidebar({ onSignOut }: { onSignOut: () => void }) {
         {NAV.map(item => {
           const active = pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href))
           return (
-            <Link key={item.href} href={item.href} style={{display:'flex',alignItems:'center',gap:'10px',padding:'8px 12px',borderRadius:'8px',marginBottom:'2px',fontSize:'13px',color:active?'white':'rgba(255,255,255,0.6)',background:active?'#E8390E':'transparent',textDecoration:'none',transition:'all 0.15s'}}>
+            <Link key={item.href} href={item.href} onClick={onNav} style={{display:'flex',alignItems:'center',gap:'10px',padding:'8px 12px',borderRadius:'8px',marginBottom:'2px',fontSize:'13px',color:active?'white':'rgba(255,255,255,0.6)',background:active?'#E8390E':'transparent',textDecoration:'none',transition:'all 0.15s'}}>
               <span style={{fontSize:'16px'}}>{item.icon}</span>
               {item.label}
             </Link>
@@ -57,6 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const router = useRouter()
   const [authenticated, setAuthenticated] = useState<boolean | null>(null)
+  const [menuAberto, setMenuAberto] = useState(false)
 
   useEffect(() => {
     const supabase = createClient()
@@ -90,12 +91,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!authenticated) return null
 
   return (
-    <div style={{display:'flex',height:'100vh',overflow:'hidden',background:'#F5F3F0'}}>
-      <Sidebar onSignOut={handleSignOut} />
-      <main style={{flex:1,overflowY:'auto'}}>
-        <div style={{maxWidth:'80rem',margin:'0 auto',padding:'2rem 1.5rem'}}>
-          {children}
+    <div className="tb-admin-shell">
+      <div className={`tb-admin-overlay${menuAberto ? ' show' : ''}`} onClick={() => setMenuAberto(false)} />
+      <Sidebar onSignOut={handleSignOut} open={menuAberto} onNav={() => setMenuAberto(false)} />
+      <main className="tb-admin-main">
+        <div className="tb-admin-topbar">
+          <button className="tb-ham" onClick={() => setMenuAberto(true)} aria-label="Abrir menu">☰</button>
+          <img src="/apple-icon.png" alt="Casa Forte" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 6 }} />
+          <span style={{ color: '#fff', fontSize: 14, fontWeight: 600 }}>Casa Forte · Tabelas</span>
         </div>
+        <div className="tb-admin-content">{children}</div>
       </main>
     </div>
   )
