@@ -10,6 +10,12 @@ const nextConfig = {
     ],
   },
   serverExternalPackages: ["@react-pdf/renderer"],
+  // Usuários ficam no Portal (cadastro central de pessoas).
+  async redirects() {
+    return [
+      { source: "/admin/usuarios/:path*", destination: "https://sistemas.casaforteinc.com.br/pessoas", permanent: false },
+    ];
+  },
 };
 
 module.exports = nextConfig;
