@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { WhatsAppConvite } from '@/components/WhatsAppConvite'
 import { Splash } from '@/components/Splash'
-import { RouteSplash } from '@/components/RouteSplash'
+import { CarregandoEntrePaginas } from '@/components/cf-carregando/entre-paginas'
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +22,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body>
         <Splash />
-        <RouteSplash />
+        <CarregandoEntrePaginas />
         {children}
         <WhatsAppConvite />
       </body>
