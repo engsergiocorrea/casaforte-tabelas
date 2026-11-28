@@ -81,6 +81,13 @@ export async function POST(req: NextRequest) {
       mensagem,
       pdfBase64,
       nomeArquivo: `proposta-casaforte-${uni.unidade ?? 'unidade'}.pdf`,
+      resumo: {
+        empreendimento: emp.nome ?? '-',
+        unidade: uni.unidade ?? '-',
+        comprador: p.comprador1_nome ?? '-',
+        corretor: p.corretor_nome || 'Não informado',
+        valor: p.segue_tabela || !valorProposto ? 'segue tabela' : `R$ ${valorProposto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      },
     })
 
     return NextResponse.json({ ok: true, pdfGerado: !!pdfBase64, pdfErro })

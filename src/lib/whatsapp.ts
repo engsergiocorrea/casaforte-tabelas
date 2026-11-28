@@ -1,3 +1,5 @@
+import { canalWhatsApp, enviarPelaCentral } from './central-whatsapp'
+
 async function enviarMensagem(numero: string, mensagem: string) {
   const url = `${process.env.EVOLUTION_API_URL}/message/sendText/${process.env.EVOLUTION_INSTANCE}`
 
@@ -44,6 +46,8 @@ export async function enviarWhatsApp(dados: {
   mensagem: string
   pdfBase64?: string
   nomeArquivo?: string
+  /** Campos do modelo "proposta_nova" (Meta, fora da janela de 24h). */
+  resumo?: { empreendimento: string; unidade: string; comprador: string; corretor: string; valor: string }
 }) {
   const internos = [
     process.env.WHATSAPP_RUANA!,
@@ -61,6 +65,18 @@ export async function enviarWhatsApp(dados: {
   if (dados.compradorTelefone) {
     const tel = dados.compradorTelefone.replace(/\D/g, '')
     if (tel.length >= 10) internos.push(tel.startsWith('55') ? tel : `55${tel}`)
+  }
+
+  if ((await canalWhatsApp()) === 'meta') {
+    const destinos = [...new Set(internos.filter(Boolean).map((n) => n.replace(/\D/g, '')).filter((n) => n.length >= 10))]
+    await Promise.allSettled(destinos.map((n) => enviarPelaCentral({
+      para: n,
+      texto: dados.mensagem,
+      documento: dados.pdfBase64 && dados.nomeArquivo ? { base64: dados.pdfBase64, nome: dados.nomeArquivo, mime: 'application/pdf' } : undefined,
+      modelo: dados.resumo ? { nome: 'proposta_nova', campos: dados.resumo } : undefined,
+      origem: 'tabelas:proposta',
+    })))
+    return
   }
 
   // Envia texto para todos
